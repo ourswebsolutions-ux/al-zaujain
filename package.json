@@ -1,0 +1,46 @@
+{
+  "name": "al-zaujain-marriage-bureau",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20.9"
+  },
+  "scripts": {
+    "postinstall": "prisma generate",
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "setup": "node scripts/setup.mjs",
+    "seed:admin": "node scripts/seed-admin.mjs",
+    "seed:demo": "node scripts/seed-demo.mjs",
+    "clear:demo": "node scripts/seed-demo.mjs --clear",
+    "test": "node --test --test-concurrency=1 \"tests/*.test.mjs\"",
+    "test:e2e": "node tests/e2e/run.mjs",
+    "test:mobile-api": "node tests/e2e/mobile-api.mjs",
+    "app:publish": "node mobile-app/scripts/publish-apk.mjs",
+    "test:mobile-app": "node tests/e2e/mobile-app-web.mjs"
+  },
+  "dependencies": {
+    "@prisma/adapter-mariadb": "7.10.1",
+    "@prisma/client": "7.10.1",
+    "framer-motion": "^14.9.1",
+    "html-to-image": "^1.11.13",
+    "jspdf": "^4.2.1",
+    "next": "^16.4.5",
+    "nodemailer": "^10.3.1",
+    "qrcode": "^1.5.4",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-icons": "^5.7.0",
+    "sharp": "^0.35.5",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.4",
+    "playwright": "^1.64.1",
+    "postcss": "^8.5.32",
+    "prisma": "7.10.1",
+    "tailwindcss": "^4.3.4"
+  }
+}

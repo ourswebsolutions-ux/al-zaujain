@@ -1,0 +1,55 @@
+/* Tailwind entry point: design tokens only. All styling lives in Tailwind classes. */
+@import 'tailwindcss';
+
+/* Urdu mode keeps the same layout; only type metrics differ. */
+@custom-variant ur (&:where(.lang-ur, .lang-ur *));
+
+@theme {
+  --color-navy: #062b4e;
+  --color-dark: #03223f;
+  --color-ink: #092a49;
+  --color-gold: #c99432;
+  --color-gold-soft: #e4b653;
+  --color-champagne: #f4d889;
+  --color-cream: #f7f2e8;
+  --color-paper: #fcfbf8;
+  --color-mist: #f6f5f0;
+  --color-line: #ddd1b8;
+  --color-muted: #66717d;
+  --color-bronze: #976c20;
+  --color-verified: #1d9bf0;
+  --color-whatsapp: #148744;
+
+  /* The root element chooses these, so Urdu swaps every font at once. */
+  --font-sans: var(--ui-font), sans-serif;
+  --font-nunito: var(--ui-nunito), sans-serif;
+  --font-quicksand: var(--ui-quicksand), sans-serif;
+  --font-display: var(--display-font), serif;
+  --font-urdu: var(--font-nastaliq), serif;
+
+  --ease-luxe: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* The reference design's own breakpoints. */
+  --breakpoint-g: 601px;
+  --breakpoint-m: 651px;
+  --breakpoint-t: 901px;
+  --breakpoint-b: 992px;
+  --breakpoint-p: 1101px;
+  --breakpoint-n: 1251px;
+
+  --animate-preloader: preloader 0.3s ease 1s forwards;
+  --animate-marquee: marquee 48s linear infinite;
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes preloader {
+    to {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+}

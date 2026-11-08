@@ -1,0 +1,664 @@
+// Al Zaujain Marriage Bureau: MySQL / MariaDB schema.
+// Column names stay snake_case so they match the form field names in lib/profile-schema.js.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum Role {
+  user
+  consultant
+  admin
+}
+
+enum AccountStatus {
+  active
+  suspended
+}
+
+enum MatchFrequency {
+  daily
+  weekly
+  off
+}
+
+enum ProfileStatus {
+  pending
+  approved
+  rejected
+  hidden
+}
+
+// Who may see a profile's restricted details. Members choose nothing here: only an administrator changes it.
+enum ProfileType {
+  public
+  paid
+  premium
+}
+
+enum ProfileSource {
+  user
+  admin
+}
+
+enum VerificationStatus {
+  not_submitted
+  pending
+  verified
+  rejected
+}
+
+enum Gender {
+  female
+  male
+}
+
+enum TokenPurpose {
+  reset_password
+}
+
+enum ProposalStatus {
+  suggested
+  shared
+  accepted
+  declined
+}
+
+enum PaymentStatus {
+  pending
+  approved
+  rejected
+}
+
+enum EmailStatus {
+  sent
+  failed
+  skipped
+}
+
+model User {
+  id                 Int            @id @default(autoincrement())
+  email              String         @unique @db.VarChar(191)
+  password_hash      String         @db.VarChar(255)
+  name               String         @db.VarChar(100)
+  phone              String?        @db.VarChar(30)
+  role               Role           @default(user)
+  status             AccountStatus  @default(active)
+  chat_disabled      Boolean        @default(false)
+  show_in_views      Boolean        @default(true)
+  match_emails       Boolean        @default(true)
+  match_frequency    MatchFrequency @default(weekly)
+  match_last_sent_at DateTime?
+  last_login_at      DateTime?
+  created_at         DateTime       @default(now())
+
+  sessions            Session[]
+  tokens              Token[]
+  profiles            Profile[]
+  consultant          Consultant?
+  conversations_low   Conversation[]      @relation("low")
+  conversations_high  Conversation[]      @relation("high")
+  messages            Message[]
+  blocks_made         UserBlock[]         @relation("blocker")
+  blocks_received     UserBlock[]         @relation("blocked")
+  match_notifications MatchNotification[]
+  activity            ActivityLog[]
+  cnic_reviews        CnicDocument[]
+  saved_profiles      SavedProfile[]
+  profile_views       ProfileView[]
+  notifications       Notification[]
+  payment_requests    PaymentRequest[]    @relation("payer")
+  payments_reviewed   PaymentRequest[]    @relation("reviewer")
+  member_access       MemberAccess?       @relation("member")
+  access_granted      MemberAccess[]      @relation("granter")
+
+  @@index([role, status])
+  @@map("users")
+}
+
+model Session {
+  token_hash String   @id @db.Char(64)
+  user_id    Int
+  expires_at DateTime
+  created_at DateTime @default(now())
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([expires_at])
+  @@map("sessions")
+}
+
+model Token {
+  token_hash String       @id @db.Char(64)
+  user_id    Int
+  purpose    TokenPurpose
+  expires_at DateTime
+  used_at    DateTime?
+  user       User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, purpose])
+  @@map("tokens")
+}
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  slug        String    @unique @db.VarChar(100)
+  name        String    @db.VarChar(100)
+  name_ur     String?   @db.VarChar(100)
+  description String?   @db.VarChar(500)
+  sort        Int       @default(0)
+  active      Boolean   @default(true)
+  countries   Country[]
+
+  @@map("categories")
+}
+
+model Country {
+  id          Int       @id @default(autoincrement())
+  category_id Int?
+  name        String    @unique @db.VarChar(100)
+  slug        String    @unique @db.VarChar(100)
+  sort        Int       @default(100)
+  active      Boolean   @default(true)
+  category    Category? @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  cities      City[]
+  profiles    Profile[]
+
+  @@index([category_id])
+  @@map("countries")
+}
+
+model City {
+  id         Int     @id @default(autoincrement())
+  country_id Int
+  name       String  @db.VarChar(100)
+  slug       String  @db.VarChar(100)
+  featured   Boolean @default(false)
+  active     Boolean @default(true)
+  country    Country @relation(fields: [country_id], references: [id], onDelete: Cascade)
+
+  @@unique([country_id, slug])
+  @@index([slug])
+  @@map("cities")
+}
+
+// The caste / biradari list offered in searches and forms. Members may still type one that is not listed.
+model Caste {
+  id      Int     @id @default(autoincrement())
+  name    String  @unique @db.VarChar(60)
+  name_ur String? @db.VarChar(60)
+  popular Boolean @default(false)
+  active  Boolean @default(true)
+  sort    Int     @default(100)
+
+  @@index([active, popular])
+  @@map("castes")
+}
+
+model Profile {
+  id                  Int                @id @default(autoincrement())
+  user_id             Int?
+  consultant_id       Int?
+  manage_token_hash   String?            @unique @db.Char(64)
+  status              ProfileStatus      @default(pending)
+  rejection_reason    String?            @db.VarChar(500)
+  verification_status VerificationStatus @default(not_submitted)
+  verification_note   String?            @db.VarChar(500)
+  access_type         ProfileType        @default(paid)
+  source              ProfileSource      @default(user)
+  // Pasted biodata text the importer could not place, kept for the team. Never shown publicly.
+  extra_info          String?            @db.Text
+  import_hash         String?            @db.Char(64)
+  featured            Boolean            @default(false)
+  featured_sort       Int                @default(100)
+  photo_public        Boolean            @default(true)
+  is_demo             Boolean            @default(false)
+  views               Int                @default(0)
+  created_at          DateTime           @default(now())
+  updated_at          DateTime           @updatedAt
+  approved_at         DateTime?
+
+  // Public fields only, so a search can never probe a surname or phone number.
+  search_text String @db.Text
+
+  // Personal
+  headline_ur        String?  @db.VarChar(200)
+  full_name          String   @db.VarChar(100)
+  display_name       String   @db.VarChar(60)
+  gender             Gender
+  date_of_birth      DateTime @db.Date
+  height_cm          Int?
+  marital_status     String   @db.VarChar(60)
+  children_details   String?  @db.VarChar(60)
+  mother_tongue      String?  @db.VarChar(40)
+  caste              String?  @db.VarChar(60)
+  nationality        String?  @db.VarChar(60)
+  origin_country     String?  @db.VarChar(100)
+  origin_city        String?  @db.VarChar(80)
+  profile_created_by String?  @db.VarChar(40)
+
+  // Education
+  education_level      String? @db.VarChar(60)
+  degree               String? @db.VarChar(100)
+  institution          String? @db.VarChar(120)
+  other_qualifications String? @db.Text
+
+  // Professional
+  occupation        String? @db.VarChar(100)
+  job_title         String? @db.VarChar(100)
+  business_details  String? @db.Text
+  monthly_income    String? @db.VarChar(40)
+  employment_status String? @db.VarChar(40)
+
+  // Religious
+  religion            String? @db.VarChar(40)
+  sect                String? @db.VarChar(40)
+  religious_practices String? @db.VarChar(40)
+  religious_details   String? @db.Text
+
+  // Family
+  father_status     String? @db.VarChar(20)
+  mother_status     String? @db.VarChar(20)
+  father_occupation String? @db.VarChar(100)
+  mother_occupation String? @db.VarChar(100)
+  brothers          Int?
+  sisters           Int?
+  family_status     String? @db.VarChar(40)
+  family_background String? @db.Text
+  family_location   String? @db.VarChar(120)
+
+  // Residence
+  country_id          Int?
+  state               String? @db.VarChar(80)
+  city                String? @db.VarChar(80)
+  residence_area      String? @db.VarChar(20)
+  home_ownership      String? @db.VarChar(30)
+  current_residence   String? @db.VarChar(200)
+  permanent_residence String? @db.VarChar(200)
+  // Where the family would like the couple to settle after marriage. Public.
+  marriage_location   String? @db.VarChar(120)
+
+  // Partner preferences
+  pref_age_min        Int?
+  pref_age_max        Int?
+  pref_height_min     Int?
+  pref_education      String? @db.VarChar(100)
+  pref_profession     String? @db.VarChar(100)
+  pref_caste          String? @db.VarChar(60)
+  pref_country        String? @db.VarChar(100)
+  pref_city           String? @db.VarChar(80)
+  pref_marital_status String? @db.VarChar(60)
+
+  // Partner requirements, kept apart from the candidate's own details. Urdu or English, any length.
+  partner_demand String? @db.Text
+
+  // Additional
+  description      String? @db.Text
+  contact_phone    String? @db.VarChar(20)
+  contact_whatsapp String? @db.VarChar(20)
+  contact_email    String? @db.VarChar(160)
+
+  user                User?               @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  consultant          Consultant?         @relation(fields: [consultant_id], references: [id], onDelete: SetNull)
+  country             Country?            @relation(fields: [country_id], references: [id], onDelete: SetNull)
+  photos              ProfilePhoto[]
+  cnic_document       CnicDocument?
+  proposals_a         MatchProposal[]     @relation("a")
+  proposals_b         MatchProposal[]     @relation("b")
+  match_notifications MatchNotification[]
+  saved_by            SavedProfile[]
+  view_records        ProfileView[]
+
+  @@index([status, gender, approved_at])
+  @@index([status, country_id])
+  @@index([status, verification_status])
+  @@index([status, featured, featured_sort])
+  @@index([city])
+  @@index([caste])
+  @@index([nationality])
+  @@index([height_cm])
+  @@index([date_of_birth])
+  @@index([user_id])
+  @@index([status, access_type])
+  @@index([import_hash])
+  @@index([consultant_id])
+  @@index([verification_status])
+  @@index([contact_email])
+  @@fulltext([search_text])
+  @@map("profiles")
+}
+
+model ProfilePhoto {
+  id         Int     @id @default(autoincrement())
+  profile_id Int
+  file       String  @unique @db.VarChar(80)
+  thumb      String  @unique @db.VarChar(80)
+  is_primary Boolean @default(false)
+  sort       Int     @default(0)
+  profile    Profile @relation(fields: [profile_id], references: [id], onDelete: Cascade)
+
+  @@index([profile_id, is_primary, sort])
+  @@map("profile_photos")
+}
+
+model CnicDocument {
+  id          Int       @id @default(autoincrement())
+  profile_id  Int       @unique
+  front_file  String    @db.VarChar(80)
+  back_file   String?   @db.VarChar(80)
+  reviewed_by Int?
+  reviewed_at DateTime?
+  created_at  DateTime  @default(now())
+  profile     Profile   @relation(fields: [profile_id], references: [id], onDelete: Cascade)
+  reviewer    User?     @relation(fields: [reviewed_by], references: [id], onDelete: SetNull)
+
+  @@map("cnic_documents")
+}
+
+model Consultant {
+  id               Int      @id @default(autoincrement())
+  user_id          Int      @unique
+  slug             String   @unique @db.VarChar(120)
+  display_name     String   @db.VarChar(100)
+  photo            String?  @db.VarChar(80)
+  title            String?  @db.VarChar(120)
+  bio              String?  @db.Text
+  phone            String?  @db.VarChar(30)
+  whatsapp         String?  @db.VarChar(20)
+  public_email     String?  @db.VarChar(160)
+  city             String?  @db.VarChar(80)
+  languages        String?  @db.VarChar(160)
+  experience_years Int?
+  is_public        Boolean  @default(true)
+  perm_edit        Boolean  @default(false)
+  perm_review      Boolean  @default(true)
+  perm_contact     Boolean  @default(true)
+  perm_chat        Boolean  @default(true)
+  perm_proposals   Boolean  @default(true)
+  created_at       DateTime @default(now())
+
+  user      User            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  profiles  Profile[]
+  proposals MatchProposal[]
+
+  @@map("consultants")
+}
+
+model MatchProposal {
+  id            Int            @id @default(autoincrement())
+  consultant_id Int
+  profile_a_id  Int
+  profile_b_id  Int
+  note          String?        @db.VarChar(500)
+  status        ProposalStatus @default(suggested)
+  created_at    DateTime       @default(now())
+
+  consultant Consultant @relation(fields: [consultant_id], references: [id], onDelete: Cascade)
+  profile_a  Profile    @relation("a", fields: [profile_a_id], references: [id], onDelete: Cascade)
+  profile_b  Profile    @relation("b", fields: [profile_b_id], references: [id], onDelete: Cascade)
+
+  @@unique([profile_a_id, profile_b_id])
+  @@index([consultant_id])
+  @@map("match_proposals")
+}
+
+model Conversation {
+  id              Int       @id @default(autoincrement())
+  user_low        Int
+  user_high       Int
+  last_message_at DateTime?
+  created_at      DateTime  @default(now())
+
+  low      User      @relation("low", fields: [user_low], references: [id], onDelete: Cascade)
+  high     User      @relation("high", fields: [user_high], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@unique([user_low, user_high])
+  @@index([user_high])
+  @@index([last_message_at])
+  @@map("conversations")
+}
+
+model Message {
+  id              Int       @id @default(autoincrement())
+  conversation_id Int
+  sender_id       Int
+  body            String    @db.Text
+  read_at         DateTime?
+  created_at      DateTime  @default(now())
+
+  conversation Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [sender_id], references: [id], onDelete: Cascade)
+
+  @@index([conversation_id, id])
+  @@index([conversation_id, read_at])
+  @@index([sender_id])
+  @@map("messages")
+}
+
+model UserBlock {
+  blocker_id Int
+  blocked_id Int
+  created_at DateTime @default(now())
+
+  blocker User @relation("blocker", fields: [blocker_id], references: [id], onDelete: Cascade)
+  blocked User @relation("blocked", fields: [blocked_id], references: [id], onDelete: Cascade)
+
+  @@id([blocker_id, blocked_id])
+  @@index([blocked_id])
+  @@map("user_blocks")
+}
+
+model MatchNotification {
+  id                 Int      @id @default(autoincrement())
+  user_id            Int
+  matched_profile_id Int
+  score              Int
+  sent_at            DateTime @default(now())
+
+  user            User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  matched_profile Profile @relation(fields: [matched_profile_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, matched_profile_id])
+  @@index([matched_profile_id])
+  @@map("match_notifications")
+}
+
+model EmailTemplate {
+  key        String   @id @map("template_key") @db.VarChar(60)
+  name       String   @db.VarChar(120)
+  subject    String   @db.VarChar(200)
+  body       String   @db.Text
+  variables  String?  @db.VarChar(200)
+  enabled    Boolean  @default(true)
+  updated_at DateTime @updatedAt
+
+  @@map("email_templates")
+}
+
+model EmailLog {
+  id         Int         @id @default(autoincrement())
+  template   String?     @db.VarChar(60)
+  recipient  String      @db.VarChar(160)
+  subject    String      @db.VarChar(255)
+  status     EmailStatus
+  error      String?     @db.VarChar(300)
+  created_at DateTime    @default(now())
+
+  @@index([created_at])
+  @@map("email_log")
+}
+
+model Setting {
+  key   String  @id @map("setting_key") @db.VarChar(64)
+  value String? @db.Text
+
+  @@map("settings")
+}
+
+model Faq {
+  id        Int     @id @default(autoincrement())
+  question  String  @db.VarChar(255)
+  answer    String  @db.Text
+  answer_ur String? @db.Text
+  sort      Int     @default(0)
+  active    Boolean @default(true)
+
+  @@map("faqs")
+}
+
+model Enquiry {
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(100)
+  phone        String   @db.VarChar(30)
+  profile_for  String?  @db.VarChar(100)
+  city         String?  @db.VarChar(100)
+  message      String?  @db.Text
+  profile_code String?  @db.VarChar(20)
+  handled      Boolean  @default(false)
+  created_at   DateTime @default(now())
+
+  @@index([handled, id])
+  @@map("enquiries")
+}
+
+model ActivityLog {
+  id         Int      @id @default(autoincrement())
+  actor_id   Int?
+  action     String   @db.VarChar(60)
+  target     String?  @db.VarChar(120)
+  detail     String?  @db.VarChar(500)
+  created_at DateTime @default(now())
+  actor      User?    @relation(fields: [actor_id], references: [id], onDelete: SetNull)
+
+  @@index([actor_id])
+  @@map("activity_log")
+}
+
+model RateLimit {
+  key      String @id @map("rl_key") @db.Char(64)
+  hits     Int
+  reset_at BigInt
+
+  @@map("rate_limits")
+}
+
+model SavedProfile {
+  user_id    Int
+  profile_id Int
+  created_at DateTime @default(now())
+
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  profile Profile @relation(fields: [profile_id], references: [id], onDelete: Cascade)
+
+  @@id([user_id, profile_id])
+  @@index([profile_id])
+  @@index([user_id, created_at])
+  @@map("saved_profiles")
+}
+
+// One row per visitor, per profile, per day, so refreshing a page never inflates the count.
+// viewer_key is a keyed hash, never a raw IP address.
+model ProfileView {
+  id         Int      @id @default(autoincrement())
+  profile_id Int
+  viewer_id  Int?
+  viewer_key String   @db.VarChar(64)
+  view_date  DateTime @db.Date
+  created_at DateTime @default(now())
+
+  profile Profile @relation(fields: [profile_id], references: [id], onDelete: Cascade)
+  viewer  User?   @relation(fields: [viewer_id], references: [id], onDelete: SetNull)
+
+  @@unique([profile_id, viewer_key, view_date])
+  @@index([profile_id, created_at])
+  @@index([viewer_id])
+  @@map("profile_views")
+}
+
+model Notification {
+  id         Int       @id @default(autoincrement())
+  user_id    Int
+  type       String    @db.VarChar(30)
+  title      String    @db.VarChar(160)
+  body       String?   @db.VarChar(300)
+  href       String?   @db.VarChar(200)
+  group_key  String?   @db.VarChar(60)
+  read_at    DateTime?
+  created_at DateTime  @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, read_at])
+  @@index([user_id, id])
+  @@index([user_id, group_key])
+  @@map("notifications")
+}
+
+model PaymentMethod {
+  id             Int      @id @default(autoincrement())
+  name           String   @db.VarChar(100)
+  account_holder String   @db.VarChar(120)
+  bank_name      String   @db.VarChar(120)
+  iban           String?  @db.VarChar(40)
+  account_number String?  @db.VarChar(40)
+  instructions   String?  @db.Text
+  qr_image       String?  @db.VarChar(80)
+  active         Boolean  @default(true)
+  sort           Int      @default(0)
+  created_at     DateTime @default(now())
+
+  requests PaymentRequest[]
+
+  @@index([active, sort])
+  @@map("payment_methods")
+}
+
+// A request never unlocks anything by itself: only an administrator's approval does.
+model PaymentRequest {
+  id             Int           @id @default(autoincrement())
+  user_id        Int
+  method_id      Int?
+  method_name    String        @db.VarChar(100)
+  sender_name    String        @db.VarChar(120)
+  transaction_id String        @db.VarChar(80)
+  amount         Decimal       @db.Decimal(12, 2)
+  receipt_file   String        @db.VarChar(80)
+  status         PaymentStatus @default(pending)
+  admin_note     String?       @db.VarChar(500)
+  reviewed_by    Int?
+  reviewed_at    DateTime?
+  created_at     DateTime      @default(now())
+
+  user     User           @relation("payer", fields: [user_id], references: [id], onDelete: Cascade)
+  method   PaymentMethod? @relation(fields: [method_id], references: [id], onDelete: SetNull)
+  reviewer User?          @relation("reviewer", fields: [reviewed_by], references: [id], onDelete: SetNull)
+
+  @@index([status, created_at])
+  @@index([user_id, status])
+  @@index([transaction_id])
+  @@index([method_id])
+  @@index([reviewed_by])
+  @@map("payment_requests")
+}
+
+// One row per member. No expiry date means access does not run out.
+model MemberAccess {
+  user_id    Int       @id
+  active     Boolean   @default(true)
+  expires_at DateTime?
+  granted_by Int?
+  note       String?   @db.VarChar(255)
+  updated_at DateTime  @updatedAt
+
+  user    User  @relation("member", fields: [user_id], references: [id], onDelete: Cascade)
+  granter User? @relation("granter", fields: [granted_by], references: [id], onDelete: SetNull)
+
+  @@index([granted_by])
+  @@index([active, expires_at])
+  @@map("member_access")
+}
