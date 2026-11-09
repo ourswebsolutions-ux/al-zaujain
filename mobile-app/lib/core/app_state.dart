@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'api.dart';
 import 'i18n.dart';
 
-const appVersion = '1.0.2';
+const appVersion = '1.0.3';
 
 /// The website this build opens by default, set when the APK is built (scripts/build-apk.mjs reads
 /// APP_SITE_URL). With it, families never see the address screen. Settings can still change it.
@@ -35,6 +35,12 @@ class AppState extends ChangeNotifier {
   int get unreadMessages => (account?['unreadMessages'] as num?)?.toInt() ?? 0;
   int get unreadNotifications => (account?['unreadNotifications'] as num?)?.toInt() ?? 0;
   bool get paid => account?['paid'] == true;
+
+  /// Premium credits, read from the same account the website uses.
+  int get credits => (account?['credits'] as num?)?.toInt() ?? 0;
+  Set<String> get unlocked => ((account?['unlocked'] as List?) ?? const []).map((code) => '$code').toSet();
+  int get unlockCost => ((config['credits'] as Map?)?['unlockCost'] as num?)?.toInt() ?? 1;
+  List<Json> get packages => (((config['credits'] as Map?)?['packages'] as List?) ?? const []).cast<Map>().map((item) => item.cast<String, dynamic>()).toList();
   Json get site => (config['site'] as Map?)?.cast<String, dynamic>() ?? const {};
   String get lang => t.lang;
 

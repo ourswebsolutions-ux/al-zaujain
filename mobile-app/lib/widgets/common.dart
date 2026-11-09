@@ -302,9 +302,9 @@ class TypeBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (icon, label, background, foreground) = switch (type) {
-      'premium' => (Icons.workspace_premium_rounded, 'Premium', const Color(0xFFE4B653), AppColors.dark),
-      'public' => (Icons.lock_open_rounded, 'Public', const Color(0xFFEAF5EE), const Color(0xFF1F6B3A)),
-      _ => (Icons.lock_rounded, 'Paid', const Color(0xEDFCFBF8), AppColors.navy),
+      'premium' => (Icons.lock_rounded, 'Exclusive', AppColors.navy, AppColors.champagne),
+      'public' => (Icons.lock_open_rounded, 'Free', const Color(0xFFEAF5EE), const Color(0xFF1F6B3A)),
+      _ => (Icons.workspace_premium_rounded, 'Premium', const Color(0xFFE4B653), AppColors.dark),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),

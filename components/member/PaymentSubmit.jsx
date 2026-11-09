@@ -9,7 +9,8 @@ import { useT } from '@/components/i18n/LanguageProvider';
 import { Button } from '@/components/ui/Button';
 import { Field, inputClass, labelClass } from '@/components/ui/Form';
 
-export function PaymentSubmit({ methods, price }) {
+// With `pack`, the payment buys a premium credit package; otherwise it is the full-access payment.
+export function PaymentSubmit({ methods, price, pack = null }) {
   const t = useT();
   const router = useRouter();
   const [methodId, setMethodId] = useState(methods[0]?.id);
@@ -23,6 +24,7 @@ export function PaymentSubmit({ methods, price }) {
     setMessage('');
     const form = new FormData(event.currentTarget);
     form.set('method_id', methodId);
+    if (pack) form.set('package_id', pack.id);
     try {
       const response = await fetch('/api/payments', { method: 'POST', body: form });
       const result = await response.json();
@@ -30,7 +32,7 @@ export function PaymentSubmit({ methods, price }) {
         setMessage(result.message);
         return;
       }
-      router.push('/dashboard/payments');
+      router.push(pack ? '/dashboard/credits?submitted=1' : '/dashboard/payments');
       router.refresh();
     } catch {
       setMessage('We could not reach the server. Please check your connection and try again.');
@@ -43,7 +45,12 @@ export function PaymentSubmit({ methods, price }) {
     <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-start gap-6 max-p:grid-cols-1">
       <div className="grid min-w-0 gap-6">
         <Card title="1. Choose how you will pay">
-          {price && <p className="mb-3 rounded-lg bg-[var(--d-gold-bg,#fcf4e1)] px-3 py-2 text-[13px] font-medium text-[var(--d-gold,#806126)]">{t('Amount to pay: {price}', { price })}</p>}
+          {pack ? (
+            <div className="mb-3 rounded-lg bg-[var(--d-gold-bg,#fcf4e1)] px-3 py-2.5 text-[13px] text-[var(--d-gold,#806126)]">
+              <p className="font-semibold">{pack.name} · {t('{count} profile credits', { count: pack.credits })}</p>
+              <p className="mt-0.5 font-medium">{t('Amount to pay: {price}', { price: `Rs ${Number(pack.price).toLocaleString('en-PK')}` })}</p>
+            </div>
+          ) : price && <p className="mb-3 rounded-lg bg-[var(--d-gold-bg,#fcf4e1)] px-3 py-2 text-[13px] font-medium text-[var(--d-gold,#806126)]">{t('Amount to pay: {price}', { price })}</p>}
           <ul className="grid gap-2">
             {methods.map((item) => (
               <li key={item.id}>
@@ -73,7 +80,7 @@ export function PaymentSubmit({ methods, price }) {
         <form onSubmit={submit} className="grid gap-4">
           <Field label="Sender name" name="sender_name" required maxLength={120} hint="The name on the account you paid from." />
           <Field label="Transaction ID" name="transaction_id" required maxLength={80} dir="ltr" />
-          <Field label="Amount paid" name="amount" required inputMode="decimal" dir="ltr" placeholder="5000" />
+          <Field label="Amount paid" name="amount" required inputMode="decimal" dir="ltr" placeholder={pack ? String(Number(pack.price)) : '5000'} defaultValue={pack ? String(Number(pack.price)) : undefined} />
           <label className={labelClass}>
             {t('Payment screenshot or receipt')}
             <input type="file" name="receipt" required accept="image/jpeg,image/png,image/webp" className={`${inputClass} cursor-pointer file:me-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-cream file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-navy`} />
@@ -81,7 +88,7 @@ export function PaymentSubmit({ methods, price }) {
           </label>
           {message && <p role="alert" className="border-s-[3px] border-[#a33a2c] bg-[var(--d-red-bg,#fbeeec)] p-3 text-xs">{t(message)}</p>}
           <Button type="submit" tone="gold" disabled={busy || !method} className="cursor-pointer">{t(busy ? 'Sending…' : 'Submit payment')}</Button>
-          <p className="text-xs leading-5 text-muted">{t('Our team checks every payment. Your access unlocks once it is approved.')}</p>
+          <p className="text-xs leading-5 text-muted">{t(pack ? 'Our team checks every payment. Your credits are added once it is approved.' : 'Our team checks every payment. Your access unlocks once it is approved.')}</p>
         </form>
       </Card>
     </div>

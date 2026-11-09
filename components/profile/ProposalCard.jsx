@@ -2,67 +2,110 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { FaArrowRight, FaLocationDot } from 'react-icons/fa6';
+import { FaBriefcase, FaCakeCandles, FaCrown, FaGraduationCap, FaLocationDot, FaLock, FaLockOpen, FaRing } from 'react-icons/fa6';
 import { SaveButton } from './SaveButton';
-import { PhotoLock } from '@/components/payments/UnlockProvider';
+import { PhotoLock, useUnlock } from '@/components/payments/UnlockProvider';
 import { useT } from '@/components/i18n/LanguageProvider';
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
-import { TypeBadge } from './TypeBadge';
 
-function Cover({ profile, tag, saved }) {
+// The corner ribbon from the reference design: Free, Premium (unlocks with credits) or Exclusive.
+const RIBBONS = {
+  public: { label: 'Free', className: 'bg-[#1f8a3a] text-white', fold: 'border-t-[#145c27]' },
+  paid: { label: 'Premium', className: 'bg-[linear-gradient(135deg,#f4d889,#c99432)] text-dark', fold: 'border-t-[#8c6420]' },
+  premium: { label: 'Exclusive', className: 'bg-navy text-champagne', fold: 'border-t-dark' },
+};
+
+function Ribbon({ type }) {
   const t = useT();
+  const ribbon = RIBBONS[type] ?? RIBBONS.paid;
   return (
-    <div className="relative grid aspect-square place-items-center overflow-hidden rounded-2xl bg-[var(--d-hover,#e9e1d1)] even:bg-[#e3eaf0]">
-      {profile.photo ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={`/media/photos/${profile.photo}`} alt={t('Portrait of {name}', { name: profile.name })} loading="lazy" className="absolute inset-0 size-full object-cover" />
-      ) : (
-        <Image src="/images/logo.png" alt="" width={120} height={120} className="rounded-full opacity-60" />
-      )}
-      {profile.photo && <PhotoLock type={profile.type} />}
-      {tag && <span className="absolute start-3 top-3 z-10 rounded-[20px] bg-[#fcfbf8ed] px-3 py-[7px] font-sans text-[10px] font-bold leading-[15px] tracking-[.6px] text-navy">{tag}</span>}
-      {saved !== undefined && <SaveButton code={profile.code} saved={saved} />}
-      <TypeBadge type={profile.type} className="absolute bottom-3 start-3 z-10" />
-      <span className="absolute bottom-3 end-3 z-10 rounded-md bg-[#062b4ed9] px-2.5 py-1.5 font-sans text-[10px] font-bold leading-[15px] tracking-[.6px] text-white">{profile.code}</span>
-    </div>
+    <span className="absolute -end-1.5 top-4 z-10">
+      <span className={`block py-1 pe-3 ps-4 text-[10.5px] font-extrabold uppercase tracking-[.6px] shadow-[0_3px_8px_#03223f2e] [clip-path:polygon(9px_0,100%_0,100%_100%,9px_100%,0_50%)] rtl:[clip-path:polygon(0_0,calc(100%-9px)_0,100%_50%,calc(100%-9px)_100%,0_100%)] ${ribbon.className}`}>{t(ribbon.label)}</span>
+      <span aria-hidden="true" className={`absolute end-0 top-full block size-0 border-e-[6px] border-t-[6px] border-e-transparent ${ribbon.fold} rtl:border-e-0 rtl:border-s-[6px] rtl:border-s-transparent`} />
+    </span>
   );
 }
 
-function Meta({ label, value }) {
-  const t = useT();
+function Row({ icon: Icon, children }) {
   return (
-    <div className="my-[13px] flex flex-col gap-[3px]">
-      <dt className="text-[11px] font-semibold uppercase leading-[16.5px] tracking-[.7px] text-muted">{t(label)}</dt>
-      <dd className="truncate text-sm font-semibold leading-[21px]">{t(value) || '—'}</dd>
-    </div>
+    <li className="flex min-w-0 items-center gap-2 text-[13.5px] leading-[22px] text-[#47566a]">
+      <Icon aria-hidden="true" className="w-3.5 shrink-0 text-[#a9b2bd]" />
+      <span className="min-w-0 truncate">{children}</span>
+    </li>
   );
 }
 
-// Shared by the homepage, listings and match sections. Only ever receives public fields.
+/**
+ * The candidate card used on the homepage, in listings and in match sections, following the
+ * supplied profile-ui reference: an oval portrait with a round status button over its edge, a corner
+ * ribbon, the name, three or four facts with icons, and a "Profile Detail" style button.
+ * On phones it lies sideways like the reference; on wider screens it stands upright with a larger portrait.
+ * It only ever receives public card fields.
+ */
 export function ProposalCard({ profile, tag, matchScore, saved }) {
   const t = useT();
+  const { unlockCost, isUnlocked, photoLocked } = useUnlock();
+  const type = profile.type ?? 'paid';
+  const unlocked = type === 'paid' && isUnlocked(profile.code);
+  const locked = type === 'paid' && !unlocked;
+  const href = `/profile/${profile.code}`;
+  const label = tag ?? (matchScore ? t('{score}% match', { score: matchScore }) : null);
+  const status = type === 'premium'
+    ? { icon: FaCrown, className: 'bg-navy text-champagne', title: 'Exclusive proposal, introduced by our consultants' }
+    : locked
+      ? { icon: FaLock, className: 'bg-[linear-gradient(135deg,#f4d889,#c99432)] text-dark', title: 'Premium profile: unlock with credits' }
+      : { icon: FaLockOpen, className: 'bg-[#1f8a3a] text-white', title: unlocked ? 'Unlocked for you' : 'Free profile' };
+
   return (
-    <article className="overflow-hidden rounded-3xl border border-line bg-white p-2.5 font-nunito text-navy shadow-[0_6px_22px_#03223f08] transition-[box-shadow,border-color] duration-[250ms] focus-within:border-gold focus-within:shadow-[0_16px_35px_#03223f18] hover:border-gold hover:shadow-[0_16px_35px_#03223f18]">
-      <Cover profile={profile} tag={tag ? t(tag) : matchScore ? t('{score}% match', { score: matchScore }) : undefined} saved={saved} />
-      <div className="px-3 pb-3 pt-[23px]">
-        <h3 className="mb-2 text-[23px] font-extrabold leading-[27.6px]">
-          {profile.name} <span className="text-[19px] font-semibold leading-[22.8px] text-muted">· {profile.age}</span>
-          {profile.verified && <VerifiedBadge className="ms-1.5 text-lg" />}
-        </h3>
-        <p className="mb-4 truncate text-[13px] leading-[23.4px] text-muted">
-          <FaLocationDot aria-hidden="true" className="me-[5px] inline-block align-[-1px] text-[var(--d-gold,#b18433)]" />
-          {[t(profile.city), t(profile.country)].filter(Boolean).join(', ')}
-        </p>
-        <dl className="my-5 border-t border-[var(--d-line,#eee6d8)] pt-[5px]">
-          <Meta label="Education" value={profile.education} />
-          <Meta label="Profession" value={profile.profession} />
-          <Meta label="Marital status" value={profile.maritalStatus} />
-        </dl>
-        <Link href={`/profile/${profile.code}`} className="group flex items-center justify-between gap-2 rounded-xl bg-cream p-[15px] text-[13px] font-bold leading-[19.5px] text-navy no-underline transition-colors hover:bg-navy hover:text-white">
-          {t('View proposal')}
-          <FaArrowRight aria-hidden="true" className="rtl:-scale-x-100 transition-transform duration-200 group-hover:translate-x-[3px] rtl:group-hover:-translate-x-[3px]" />
+    <article className="group relative h-full rounded-[22px] border border-[#e9e2d4] bg-[linear-gradient(180deg,#ffffff,#fbf8f1)] p-4 font-nunito text-navy shadow-[0_10px_26px_#03223f12] transition-[box-shadow,border-color,transform] duration-[250ms] focus-within:border-gold hover:-translate-y-0.5 hover:border-gold hover:shadow-[0_18px_40px_#03223f1f] sm:flex sm:flex-col sm:p-5">
+      <Ribbon type={type} />
+      <div className="flex gap-4 sm:flex-col sm:items-center sm:gap-4">
+        <Link href={href} aria-label={t('View proposal {code}', { code: profile.code })} className="relative block shrink-0 self-start no-underline sm:self-center">
+          <span className="relative block h-[150px] w-[118px] overflow-hidden rounded-[50%] border-[3px] border-[#b18433] bg-white p-[3px] shadow-[0_8px_20px_#03223f26] sm:h-[220px] sm:w-[172px]">
+            <span className="relative block size-full overflow-hidden rounded-[50%] bg-[#e9e1d1]">
+              {profile.photo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={`/media/photos/${profile.photo}`} alt={t('Portrait of {name}', { name: profile.name })} loading="lazy" className="absolute inset-0 size-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]" />
+              ) : (
+                <span className="absolute inset-0 grid place-items-center"><Image src="/images/logo.png" alt="" width={84} height={84} className="rounded-full opacity-60" /></span>
+              )}
+              {profile.photo && photoLocked && <PhotoLock type={type} code={profile.code} className="absolute inset-0 rounded-[50%]" />}
+            </span>
+          </span>
+          <span title={t(status.title)} className={`absolute bottom-2 start-0 z-10 grid size-10 place-items-center rounded-full border-[3px] border-white text-[15px] shadow-[0_4px_12px_#03223f40] sm:bottom-3 sm:start-1 sm:size-11 ${status.className}`}>
+            <status.icon aria-hidden="true" />
+            <span className="sr-only">{t(status.title)}</span>
+          </span>
         </Link>
+
+        <div className="min-w-0 flex-1 pt-1 sm:w-full sm:pt-0">
+          {label && <span className="mb-1.5 inline-block rounded-full bg-[#fcf4e1] px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-[.5px] text-[#806126]">{label}</span>}
+          <h3 className="flex min-w-0 items-center gap-1.5 pe-12 text-[21px] font-extrabold leading-tight text-[#062b4e] sm:pe-0">
+            <Link href={href} className="min-w-0 truncate text-inherit no-underline">{profile.name}</Link>
+            {profile.verified && <VerifiedBadge className="shrink-0 text-[17px]" />}
+          </h3>
+          <p className="text-[11px] font-bold tracking-[.6px] text-muted">{profile.code}</p>
+          <ul className="mt-2 grid gap-0.5">
+            <Row icon={FaCakeCandles}>{t('{count} Years', { count: profile.age })}{profile.maritalStatus ? ` · ${t(profile.maritalStatus)}` : ''}</Row>
+            <Row icon={FaBriefcase}>{t(profile.profession) || '—'}</Row>
+            {profile.education && <Row icon={FaGraduationCap}>{t(profile.education)}</Row>}
+            <Row icon={FaLocationDot}>{[t(profile.city), t(profile.country)].filter(Boolean).join(', ') || '—'}</Row>
+          </ul>
+        </div>
       </div>
+
+      <div className="mt-4 flex flex-wrap items-center gap-2 sm:mt-auto sm:pt-4">
+        <Link href={href} className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-navy px-4 text-[13px] font-bold text-white no-underline shadow-[0_6px_14px_#062b4e33] transition-colors hover:bg-dark hover:text-white">
+          {t('View Profile')}
+        </Link>
+        {locked && (
+          <Link href={`${href}#unlock`} className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-[linear-gradient(135deg,#f4d889,#c99432)] px-4 text-[13px] font-extrabold text-dark no-underline shadow-[0_6px_14px_#c9943240] transition-transform hover:-translate-y-px">
+            <FaLock aria-hidden="true" className="text-[11px]" /> {unlockCost === 1 ? t('Unlock · 1 credit') : t('Unlock · {cost} credits', { cost: unlockCost })}
+          </Link>
+        )}
+        {saved !== undefined && <SaveButton code={profile.code} saved={saved} variant="round" />}
+      </div>
+      {type === 'premium' && <p className="mt-2 flex items-center gap-1.5 text-[11.5px] font-semibold text-[#806126]"><FaRing aria-hidden="true" /> {t('Introduced personally by our consultants')}</p>}
     </article>
   );
 }

@@ -1050,7 +1050,7 @@ await step('profiles: admin pastes a biodata, reviews it and publishes it as Pub
   assert.equal(await adminPage.inputValue('input[name="city"]'), 'Multan');
   assert.match(await adminPage.inputValue('textarea[name="partner_demand"]'), /لڑکی تعلیم یافتہ/);
   assert.ok(await adminPage.evaluate(() => [...document.querySelectorAll('textarea')].some((node) => node.value.includes('Original reference: AZ-28'))), 'unplaced lines are kept');
-  await adminPage.click('[role="radiogroup"] label:has-text("Public")');
+  await adminPage.click('[role="radiogroup"] label:has-text("Free profile")');
   await adminPage.click('button:has-text("Save profile")');
   await adminPage.waitForURL(/\/admin\/profiles\/AZ-\d+$/);
   importedCode = adminPage.url().split('/').pop();
@@ -1096,7 +1096,7 @@ await step('profiles: admin creates a Premium profile by hand', async () => {
   await typeInto(adminPage.locator('#city'), 'Lahore');
   await typeInto(adminPage.locator('#caste'), 'Rajput');
   await adminPage.fill('input[name="contact_phone"]', '0321 7778889');
-  await adminPage.click('[role="radiogroup"] label:has-text("Premium")');
+  await adminPage.click('[role="radiogroup"] label:has-text("Exclusive")');
   await adminPage.click('button:has-text("Save profile")');
   await adminPage.waitForURL(/\/admin\/profiles\/AZ-\d+$/);
   premiumCode = adminPage.url().split('/').pop();
@@ -1108,7 +1108,7 @@ await step('profiles: admin creates a Premium profile by hand', async () => {
   assert.ok(!html.includes('7778889'), 'premium contact stays private');
   const button = page.locator('a:has-text("Contact for Premium Proposal")');
   assert.match(await button.getAttribute('href'), /^https:\/\/wa\.me\//);
-  await page.waitForSelector('text=Premium');
+  await page.waitForSelector('text=Exclusive');
   await page.context().close();
 });
 
@@ -1120,13 +1120,13 @@ await step('profiles: member submissions are Paid; admin switches Paid → Publi
   await db.profile.update({ where: { id: Number(premiumCode.replace('AZ-', '')) }, data: { access_type: 'paid' } });
   assert.equal(await contactShown(), false, 'paid hides contact from visitors');
   await adminPage.goto(`/admin/profiles/${premiumCode}`, { waitUntil: 'networkidle' });
-  await adminPage.click('[role="radiogroup"] label:has-text("Public")');
+  await adminPage.click('[role="radiogroup"] label:has-text("Free profile")');
   await adminPage.click('button:has-text("Change profile type")');
   await new Promise((resolve) => { setTimeout(resolve, 800); });
   assert.equal((await db.profile.findUnique({ where: { id: Number(premiumCode.replace('AZ-', '')) } })).access_type, 'public');
   assert.equal(await contactShown(), true, 'public opens it at once');
   await adminPage.reload({ waitUntil: 'networkidle' });
-  await adminPage.click('[role="radiogroup"] label:has-text("Premium")');
+  await adminPage.click('[role="radiogroup"] label:has-text("Exclusive")');
   await adminPage.click('button:has-text("Change profile type")');
   await new Promise((resolve) => { setTimeout(resolve, 800); });
   assert.equal(await contactShown(), false, 'premium closes it again');
@@ -1235,22 +1235,19 @@ await step('admin manages castes; a renamed caste follows on profiles and in the
   }
 });
 
-await step('homepage carousel slides on its own, pauses on hover, and the WhatsApp channel link is exact', async () => {
-  const page = await newPage({ reducedMotion: 'no-preference' });
+await step('homepage shows four proposal cards per row on a laptop, and the WhatsApp channel link is exact', async () => {
+  const page = await newPage({ viewport: { width: 1366, height: 900 } });
   await page.goto('/', { waitUntil: 'networkidle' });
-  const track = page.locator('[aria-roledescription="carousel"] ul');
+  const cards = page.locator('#featured-proposals > ul > li');
   await page.evaluate(() => document.querySelector('#featured-proposals').scrollIntoView());
-  const position = () => track.evaluate((node) => new DOMMatrix(getComputedStyle(node).transform).m41);
-  const first = await position();
-  await page.waitForTimeout(1200);
-  assert.ok(Math.abs((await position()) - first) > 10, 'it moves');
-  const box = await page.locator('[aria-roledescription="carousel"]').boundingBox();
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-  await page.waitForTimeout(300);
-  const paused = await position();
-  await page.waitForTimeout(700);
-  assert.ok(Math.abs((await position()) - paused) < 2, 'it pauses on hover');
-  await page.click('button[aria-label="Next proposals"]');
+  await page.waitForTimeout(1500);
+  // Columns are read from the left edges, which the reveal animation never moves.
+  const lefts = await cards.evaluateAll((nodes) => nodes.slice(0, 5).map((node) => Math.round(node.getBoundingClientRect().left)));
+  if (lefts.length >= 5) {
+    assert.equal(new Set(lefts.slice(0, 4)).size, 4, `four columns: ${lefts}`);
+    assert.equal(lefts[4], lefts[0], 'the fifth starts a new row');
+  }
+  await page.waitForSelector('#featured-proposals a:has-text("View all proposals")');
   const channel = page.locator('a[href="https://whatsapp.com/channel/0029VaddRahADTOD4MXm3T25"]');
   assert.equal(await channel.first().getAttribute('target'), '_blank');
   await page.context().close();

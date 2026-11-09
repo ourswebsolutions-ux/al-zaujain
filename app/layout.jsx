@@ -1,6 +1,7 @@
 import { Cormorant_Garamond, Jost, Noto_Naskh_Arabic, Noto_Nastaliq_Urdu, Nunito, Poppins, Quicksand } from 'next/font/google';
 import { Providers } from '@/components/ui/Providers';
 import { currentUser } from '@/lib/auth.js';
+import { unlockCost, unlockedCodes } from '@/lib/credits.js';
 import { getLang } from '@/lib/i18n/server.js';
 import { getRestrictions, viewerIsPaid } from '@/lib/restrictions.js';
 import './globals.css';
@@ -33,11 +34,12 @@ const FONT_SETS = {
 export default async function RootLayout({ children }) {
   const lang = await getLang();
   const user = await currentUser();
-  const [restrictions, paid] = await Promise.all([getRestrictions(), viewerIsPaid(user)]);
+  const member = user?.role === 'user';
+  const [restrictions, paid, cost, unlocked] = await Promise.all([getRestrictions(), viewerIsPaid(user), unlockCost(), member ? unlockedCodes(user.id) : new Set()]);
   return (
     <html lang={lang} dir={lang === 'ur' ? 'rtl' : 'ltr'} className={`scroll-smooth ${poppins.variable} ${nunito.variable} ${quicksand.variable} ${jost.variable} ${cormorant.variable} ${naskh.variable} ${nastaliq.variable} ${FONT_SETS[lang]}`}>
       <body id="top" className="bg-paper font-sans leading-6 text-ink antialiased [&_svg]:w-auto">
-        <Providers lang={lang} photoLocked={restrictions.photo && !paid} signedIn={!!user}>{children}</Providers>
+        <Providers lang={lang} photoLocked={restrictions.photo && !paid} signedIn={!!user} member={member} unlockCost={cost} unlocked={[...unlocked]}>{children}</Providers>
       </body>
     </html>
   );

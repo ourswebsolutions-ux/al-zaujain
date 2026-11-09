@@ -380,6 +380,85 @@ await step('the owner deletes a profile from the app', async () => {
   assert.equal(await db.profile.count({ where: { id: Number(submittedCode.slice(3)) } }), 0);
 });
 
+await step('premium credits: buy a package, admin approves, unlock once, protected data only for the unlocker', async () => {
+  const { approvePayment } = await import('../../lib/payments.js');
+  await saveSettings({ restrict_photo: '1' });
+  const pack = await db.creditPackage.create({ data: { name: 'Starter', credits: 5, price: '1000', featured: true } });
+  const config = await get('config');
+  assert.equal(config.body.credits.unlockCost, 1);
+  assert.deepEqual(config.body.credits.packages.map((item) => [item.name, item.credits, item.price]), [['Starter', 5, 1000]]);
+  assert.equal(config.body.fees.registration[0].fee, 'Rs. 5,000', 'the consultancy fees come separately');
+  const buyer = (await post('auth/register', { name: 'Credit Buyer', email: 'credits@test.local', phone: '0300 1231234', password: 'Credit-pass-123' })).body.token;
+  assert.equal((await get('me', buyer)).body.credits, 0);
+  const methodId = (await db.paymentMethod.findFirst()).id;
+  const form = new FormData();
+  form.append('method_id', String(methodId));
+  form.append('package_id', String(pack.id));
+  form.append('sender_name', 'Credit Buyer');
+  form.append('transaction_id', 'CREDIT-1');
+  form.append('amount', '1000');
+  form.append('receipt', await imageBlob('#eeeeee', 400, 600), 'receipt.jpg');
+  const sent = await call('POST', 'payments', { form, token: buyer });
+  assert.equal(sent.status, 200, JSON.stringify(sent.body));
+  let credits = (await get('credits', buyer)).body;
+  assert.equal(credits.balance, 0, 'nothing is added from the app alone');
+  assert.equal(credits.pending.credits, 5);
+  await approvePayment(sent.body.id, (await db.user.findFirst({ where: { email: 'bilal@test.local' } })).id, 0, null);
+  credits = (await get('credits', buyer)).body;
+  assert.deepEqual([credits.balance, credits.purchased, credits.used], [5, 5, 0]);
+  assert.equal(credits.purchases[0].status, 'approved');
+
+  const paidId = await createProfile(sampleProfile({ full_name: 'Rabia Noor', gender: 'female', contact_phone: '0300 5554443' }), { status: 'approved' });
+  const paidCode = profileCode(paidId);
+  await db.profile.update({ where: { id: paidId }, data: { access_type: 'paid' } });
+  const photoForm = new FormData();
+  photoForm.append('data', JSON.stringify({ ...sampleProfile({ full_name: 'Rabia Noor', gender: 'female', contact_phone: '0300 5554443' }), height_cm: '165', country_id: '1' }));
+  photoForm.append('photos', await imageBlob('#a05030'), 'p.jpg');
+  const admin = await db.user.update({ where: { email: 'bilal@test.local' }, data: { role: 'admin' } });
+  const adminToken = (await post('auth/login', { email: 'bilal@test.local', password: 'New-pass-12345' })).body.token;
+  assert.equal((await call('POST', `profiles/${paidCode}`, { form: photoForm, token: adminToken })).status, 200);
+  await db.profile.update({ where: { id: paidId }, data: { status: 'approved', photo_public: true } });
+  await db.user.update({ where: { id: admin.id }, data: { role: 'user' } });
+
+  const locked = (await get(`profiles/${paidCode}`, buyer)).body;
+  assert.equal(locked.credits.canUnlock, true);
+  assert.equal(locked.credits.balance, 5);
+  assert.deepEqual(locked.biodata.contact, []);
+  assert.equal(locked.biodata.name, 'Rabia');
+  const photoUrl = `${BASE}${locked.photos[0].file}`;
+  const blurred = Buffer.from(await (await fetch(photoUrl, { headers: { Authorization: `Bearer ${buyer}` } })).arrayBuffer());
+  assert.equal((await sharp(blurred).metadata()).width, 480, 'the photo is blurred before unlocking');
+  const viaCookie = await fetch(`${API}/profiles/${paidCode}/unlock`, { method: 'POST', headers: { Cookie: `az_session=${buyer}`, 'Content-Type': 'application/json' }, body: '{}' });
+  assert.equal(viaCookie.status, 401, 'a browser cookie cannot spend credits through the app API');
+
+  const unlocked = await post(`profiles/${paidCode}/unlock`, {}, buyer);
+  assert.equal(unlocked.status, 200, JSON.stringify(unlocked.body));
+  assert.deepEqual([unlocked.body.charged, unlocked.body.balance], [1, 4]);
+  const again = await post(`profiles/${paidCode}/unlock`, {}, buyer);
+  assert.deepEqual([again.body.charged, again.body.balance], [0, 4], 'opening it again costs nothing');
+  const open = (await get(`profiles/${paidCode}`, buyer)).body;
+  assert.equal(open.credits.unlocked, true);
+  assert.equal(open.biodata.name, 'Rabia Noor');
+  assert.ok(open.biodata.contact.some((row) => row.value === '0300 5554443'));
+  const sharp1 = Buffer.from(await (await fetch(photoUrl, { headers: { Authorization: `Bearer ${buyer}` } })).arrayBuffer());
+  assert.ok((await sharp(sharp1).metadata()).width > 480, 'the unlocker gets the real photo');
+  const other = (await post('auth/register', { name: 'Other Member', email: 'other@test.local', phone: '0300 9879879', password: 'Other-pass-1234' })).body.token;
+  const otherView = (await get(`profiles/${paidCode}`, other)).body;
+  assert.deepEqual(otherView.biodata.contact, [], 'unlocking is personal');
+  assert.equal((await sharp(Buffer.from(await (await fetch(photoUrl, { headers: { Authorization: `Bearer ${other}` } })).arrayBuffer())).metadata()).width, 480);
+  assert.equal((await sharp(Buffer.from(await (await fetch(photoUrl)).arrayBuffer())).metadata()).width, 480, 'and anonymous visitors only get the blur');
+  const broke = await post(`profiles/${paidCode}/unlock`, {}, other);
+  assert.equal(broke.status, 402);
+  assert.equal(broke.body.insufficient, true);
+  assert.equal((await post(`profiles/${paidCode}/unlock`, {})).status, 401);
+  const me = (await get('me', buyer)).body;
+  assert.equal(me.credits, 4);
+  assert.deepEqual(me.unlocked, [paidCode], 'the website and the app read the same unlocks');
+  const history = (await get('credits', buyer)).body.transactions.map((row) => `${row.kind}:${row.amount}:${row.balance}`);
+  assert.deepEqual(history, ['unlock:-1:4', 'purchase:5:5']);
+  await saveSettings({ restrict_photo: '0' });
+});
+
 await step('the website pages that now share code still render', async () => {
   for (const url of ['/', '/proposals', '/proposals/pakistan', `/profile/${brideB.code}`, '/privacy', '/terms', '/consultants']) {
     const response = await fetch(`${BASE}${url}`);

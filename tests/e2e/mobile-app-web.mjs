@@ -81,6 +81,7 @@ const sanaUser = await db.user.create({ data: { email: 'sana@test.local', passwo
 await db.profile.update({ where: { id: Number(sana.slice(3)) }, data: { user_id: sanaUser.id } });
 await db.paymentMethod.create({ data: { name: 'Meezan Bank', account_holder: 'Al Zaujain', bank_name: 'Meezan Bank Ltd', iban: 'PK36MEZN0001234567890123', active: true } });
 await saveSettings({ access_price: 'Rs 5,000', announcements: 'New proposals every week\nOverseas rishtay from UK, USA and Gulf' });
+const starter = await db.creditPackage.create({ data: { name: 'Starter', credits: 5, price: '1000', description: 'Try premium profiles.', featured: true } });
 
 const profileDir = fs.mkdtempSync(path.join(os.tmpdir(), 'az-chrome-'));
 const context = await chromium.launchPersistentContext(profileDir, {
@@ -468,6 +469,87 @@ await step('the new member finds the profile under My matrimonial profile', asyn
   await button('My matrimonial profile').click();
   await visible('Ayesha');
   await back();
+});
+
+await step('a member unlocks a Premium profile with credits, once', async () => {
+  const { adjustCredits } = await import('../../lib/credits.js');
+  const bilalUser = await db.user.findUnique({ where: { email: MEMBER.email } });
+  await adjustCredits(bilalUser.id, 3, 'Test credits', bilalUser.id);
+  await db.profile.update({ where: { id: Number(hira.slice(3)) }, data: { access_type: 'paid' } });
+  await page.evaluate(() => localStorage.removeItem('flutter.profile_draft'));
+  await fresh('Account');
+  // The previous steps left another family signed in; switch to the member with credits.
+  if (!(await button('Register now').count())) {
+    await scrollTo(button('Sign out'), 60);
+    await button('Sign out').click();
+    await visible('Register now');
+  }
+  {
+    await button('Sign in').click();
+    const email = page.getByRole('textbox', { name: 'Email' }).first();
+    await email.click();
+    await email.fill(MEMBER.email);
+    await page.keyboard.press('Tab');
+    await page.keyboard.type(MEMBER.password);
+    await page.getByRole('button', { name: 'Sign in' }).last().click();
+    await visible('Welcome back, Bilal', 20000);
+  }
+  await fresh('Proposals');
+  const card = text(hira);
+  await scrollTo(card);
+  await card.click();
+  await scrollTo(button('Unlock profile'), 40);
+  await shot('34-unlock-panel');
+  await button('Unlock profile').click();
+  await visible('Unlocked with your credits', 20000);
+  const user = await db.user.findUnique({ where: { email: MEMBER.email } });
+  assert.equal(user.credits, 2, 'exactly one credit was spent');
+  assert.equal(await db.profileUnlock.count({ where: { user_id: user.id } }), 1);
+  await scrollTo(text('0300 1234567'), 40);
+  await shot('35-unlocked-contact');
+  await back();
+  await card.click();
+  await visible('Unlocked with your credits', 20000);
+  assert.equal((await db.user.findUnique({ where: { email: MEMBER.email } })).credits, 2, 'opening it again is free');
+  await back();
+});
+
+await step('a member buys a credit package from the app; credits wait for approval', async () => {
+  await fresh('Account');
+  await scrollTo(button('Buy Premium Credits'), 40);
+  await button('Buy Premium Credits').click();
+  await visible('Most popular');
+  await shot('36-packages');
+  await button('Choose Starter').click();
+  await visible('Starter');
+  await typeIn('Sender name', 'Bilal Ahmed');
+  await typeIn('Transaction ID', 'CREDIT-APP-1');
+  const chooser = page.waitForEvent('filechooser');
+  await scrollTo(button('Choose from gallery'));
+  await button('Choose from gallery').click();
+  await (await chooser).setFiles(receiptPath);
+  await page.waitForTimeout(1200);
+  await scrollTo(button('Submit payment'));
+  await button('Submit payment').click();
+  await page.waitForTimeout(2500);
+  const request = await db.paymentRequest.findFirst({ where: { transaction_id: 'CREDIT-APP-1' } });
+  assert.equal(request?.package_id, starter.id);
+  assert.equal(request?.credits, 5);
+  assert.equal((await db.user.findUnique({ where: { email: MEMBER.email } })).credits, 2, 'no credits before approval');
+  await fresh('Account');
+  await scrollTo(button('Premium Credits'), 40);
+  await button('Premium Credits').click();
+  await visible('is waiting for review');
+  await shot('37-credits');
+});
+
+await step('the official fee structure opens from the menu', async () => {
+  await fresh('Account');
+  await scrollTo(button('Consultancy fees'), 40);
+  await button('Consultancy fees').click();
+  await visible('Advance registration fees');
+  await visible('Rs. 25,000');
+  await shot('38-fees');
 });
 
 await step('the contact form sends an enquiry to the bureau', async () => {

@@ -4,12 +4,12 @@ import { FaCrown, FaLock, FaLockOpen } from 'react-icons/fa6';
 import { useT } from '@/components/i18n/LanguageProvider';
 
 const STYLES = {
-  premium: { icon: FaCrown, label: 'Premium', className: 'bg-[linear-gradient(135deg,#f4d889,#c99432)] text-dark shadow-[0_4px_14px_#c9943255]' },
-  public: { icon: FaLockOpen, label: 'Public', className: 'bg-[#eaf5ee] text-[#1f6b3a]' },
-  paid: { icon: FaLock, label: 'Paid', className: 'bg-[#fcfbf8ed] text-navy' },
+  premium: { icon: FaLock, label: 'Exclusive', className: 'bg-navy text-champagne' },
+  public: { icon: FaLockOpen, label: 'Free', className: 'bg-[#eaf5ee] text-[#1f6b3a]' },
+  paid: { icon: FaCrown, label: 'Premium', className: 'bg-[linear-gradient(135deg,#f4d889,#c99432)] text-dark shadow-[0_4px_14px_#c9943255]' },
 };
 
-// Shows a profile's access type: Public, Paid or Premium.
+// Shows a profile's access type: Free, Premium (unlocks with credits) or Exclusive (via a consultant).
 export function TypeBadge({ type = 'paid', className = '' }) {
   const t = useT();
   const style = STYLES[type] ?? STYLES.paid;

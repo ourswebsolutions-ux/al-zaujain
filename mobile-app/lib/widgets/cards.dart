@@ -4,6 +4,7 @@ import '../core/api.dart';
 import '../core/app_state.dart';
 import '../core/theme.dart';
 import '../screens/auth_screens.dart';
+import '../screens/credits_screen.dart';
 import '../screens/payments_screen.dart';
 import '../screens/profile_form_screen.dart';
 import '../screens/profile_screen.dart';
@@ -52,7 +53,13 @@ Future<void> showUnlockSheet(BuildContext context) {
                 ]),
               ),
             const SizedBox(height: 16),
-            AppButton('View Payment Options', tone: Tone.gold, expand: true, onPressed: () {
+            AppButton('Buy Premium Credits', tone: Tone.gold, expand: true, onPressed: () {
+              Navigator.pop(sheet);
+              push(context, app.signedIn ? const BuyCreditsScreen() : const LoginScreen(then: BuyCreditsScreen()));
+            }),
+            Padding(padding: const EdgeInsets.only(top: 6), child: Tx(tr('Each credit unlocks one Premium profile, and it stays open for you.'), textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, color: AppColors.muted))),
+            const SizedBox(height: 8),
+            AppButton('View Payment Options', tone: Tone.outline, expand: true, onPressed: () {
               Navigator.pop(sheet);
               push(context, app.signedIn ? const PaymentSubmitScreen() : const LoginScreen(then: PaymentSubmitScreen()));
             }),
@@ -142,141 +149,244 @@ class _SaveHeartState extends State<SaveHeart> {
   }
 }
 
-class _Cover extends StatelessWidget {
-  const _Cover({required this.card, this.tag, this.showSave = false});
-  final Json card;
-  final String? tag;
-  final bool showSave;
+String placeOf(Json card) => [card['city'], card['country']].where((part) => part != null && '$part'.isNotEmpty).map((part) => tr('$part')).join(', ');
+
+/// The corner ribbon from the profile-ui reference: Free, Premium (unlocks with credits) or Exclusive.
+class _Ribbon extends StatelessWidget {
+  const _Ribbon({required this.type});
+  final String type;
 
   @override
   Widget build(BuildContext context) {
+    final (label, background, fold, foreground) = switch (type) {
+      'public' => ('Free', const Color(0xFF1F8A3A), const Color(0xFF145C27), Colors.white),
+      'premium' => ('Exclusive', AppColors.navy, AppColors.dark, AppColors.champagne),
+      _ => ('Premium', AppColors.gold, const Color(0xFF8C6420), AppColors.dark),
+    };
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+    return Column(crossAxisAlignment: CrossAxisAlignment.end, mainAxisSize: MainAxisSize.min, children: [
+      ClipPath(
+        clipper: _RibbonClipper(rtl),
+        child: Container(
+          padding: const EdgeInsetsDirectional.fromSTEB(16, 4, 12, 4),
+          decoration: BoxDecoration(color: background, gradient: type == 'paid' ? const LinearGradient(colors: [Color(0xFFF4D889), Color(0xFFC99432)]) : null),
+          child: Text(tr(label).toUpperCase(), style: TextStyle(color: foreground, fontSize: 10.5, fontWeight: FontWeight.w800, letterSpacing: app.t.isUrdu ? 0 : 0.6)),
+        ),
+      ),
+      CustomPaint(size: const Size(6, 6), painter: _FoldPainter(fold, rtl)),
+    ]);
+  }
+}
+
+class _RibbonClipper extends CustomClipper<Path> {
+  _RibbonClipper(this.rtl);
+  final bool rtl;
+  @override
+  Path getClip(Size size) => rtl
+      ? (Path()..moveTo(0, 0)..lineTo(size.width - 9, 0)..lineTo(size.width, size.height / 2)..lineTo(size.width - 9, size.height)..lineTo(0, size.height)..close())
+      : (Path()..moveTo(9, 0)..lineTo(size.width, 0)..lineTo(size.width, size.height)..lineTo(9, size.height)..lineTo(0, size.height / 2)..close());
+  @override
+  bool shouldReclip(_RibbonClipper oldClipper) => oldClipper.rtl != rtl;
+}
+
+class _FoldPainter extends CustomPainter {
+  _FoldPainter(this.color, this.rtl);
+  final Color color;
+  final bool rtl;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = rtl ? (Path()..moveTo(0, 0)..lineTo(size.width, 0)..lineTo(size.width, size.height)..close()) : (Path()..moveTo(0, 0)..lineTo(size.width, 0)..lineTo(0, size.height)..close());
+    canvas.drawPath(path, Paint()..color = color);
+  }
+
+  @override
+  bool shouldRepaint(_FoldPainter oldDelegate) => oldDelegate.color != color || oldDelegate.rtl != rtl;
+}
+
+/// The oval portrait with a round status button over its edge, as in the reference.
+class _OvalPhoto extends StatelessWidget {
+  const _OvalPhoto({required this.card, required this.width, required this.height});
+  final Json card;
+  final double width;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    final type = '${card['type'] ?? 'paid'}';
+    final unlocked = type == 'paid' && app.unlocked.contains('${card['code']}');
     final photo = card['photo'] as String?;
-    final locked = photo != null && photosLocked && card['type'] != 'public';
-    return AspectRatio(
-      aspectRatio: 1,
-      child: Stack(fit: StackFit.expand, children: [
-        NetImage(photo == null ? null : '/media/photos/$photo', radius: 16),
-        if (locked)
-          GestureDetector(
-            onTap: () => showUnlockSheet(context),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                color: const Color(0x3303223F),
-                alignment: Alignment.center,
-                child: Container(width: 42, height: 42, decoration: const BoxDecoration(color: Color(0x9903223F), shape: BoxShape.circle), child: const Icon(Icons.visibility_off_rounded, color: Colors.white, size: 19)),
+    final blurred = photo != null && photosLocked && type != 'public' && !unlocked;
+    final (IconData icon, Color background, Color foreground, String hint) = type == 'premium'
+        ? (Icons.workspace_premium_rounded, AppColors.navy, AppColors.champagne, 'Exclusive proposal, introduced by our consultants')
+        : type == 'paid' && !unlocked
+            ? (Icons.lock_rounded, AppColors.gold, AppColors.dark, 'Premium profile: unlock with credits')
+            : (Icons.lock_open_rounded, const Color(0xFF1F8A3A), Colors.white, unlocked ? 'Unlocked for you' : 'Free profile');
+    final button = width * 0.3;
+    return SizedBox(
+      width: width,
+      height: height,
+      child: Stack(clipBehavior: Clip.none, children: [
+        Container(
+          width: width,
+          height: height,
+          padding: const EdgeInsets.all(3),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.all(Radius.elliptical(width / 2, height / 2)), border: Border.all(color: const Color(0xFFB18433), width: 3), boxShadow: const [BoxShadow(color: Color(0x2603223F), blurRadius: 20, offset: Offset(0, 8))]),
+          child: ClipOval(
+            child: Stack(fit: StackFit.expand, children: [
+              NetImage(photo == null ? null : '/media/photos/$photo'),
+              if (blurred)
+                GestureDetector(
+                  onTap: () => showUnlockSheet(context),
+                  child: Container(color: const Color(0x3303223F), alignment: Alignment.center, child: Container(width: 38, height: 38, decoration: const BoxDecoration(color: Color(0x9903223F), shape: BoxShape.circle), child: const Icon(Icons.visibility_off_rounded, color: Colors.white, size: 18))),
+                ),
+            ]),
+          ),
+        ),
+        PositionedDirectional(
+          start: 0,
+          bottom: height * 0.04,
+          child: Tooltip(
+            message: tr(hint),
+            child: Container(
+              width: button.clamp(34, 44),
+              height: button.clamp(34, 44),
+              decoration: BoxDecoration(
+                color: background,
+                gradient: type == 'paid' && !unlocked ? const LinearGradient(colors: [Color(0xFFF4D889), Color(0xFFC99432)]) : null,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 3),
+                boxShadow: const [BoxShadow(color: Color(0x4003223F), blurRadius: 10, offset: Offset(0, 4))],
               ),
+              child: Icon(icon, size: 16, color: foreground, semanticLabel: tr(hint)),
             ),
           ),
-        if (tag != null)
-          PositionedDirectional(start: 10, top: 10, child: Container(padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6), decoration: BoxDecoration(color: const Color(0xEDFCFBF8), borderRadius: BorderRadius.circular(20)), child: Text(tag!, style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700)))),
-        if (showSave) PositionedDirectional(end: 8, top: 8, child: SaveHeart(code: '${card['code']}')),
-        PositionedDirectional(start: 10, bottom: 10, child: TypeBadge(card['type'] as String?)),
-        PositionedDirectional(end: 10, bottom: 10, child: Container(padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5), decoration: BoxDecoration(color: const Color(0xD9062B4E), borderRadius: BorderRadius.circular(6)), child: Text('${card['code']}', style: const TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w700)))),
+        ),
       ]),
     );
   }
 }
 
-String placeOf(Json card) => [card['city'], card['country']].where((part) => part != null && '$part'.isNotEmpty).map((part) => tr('$part')).join(', ');
-
-/// The website's proposal card: photo, name and age, place, education, profession and marital status.
-class ProposalCard extends StatelessWidget {
-  const ProposalCard({super.key, required this.card, this.tag});
-  final Json card;
-  final String? tag;
-
+class _Fact extends StatelessWidget {
+  const _Fact(this.icon, this.text);
+  final IconData icon;
+  final String text;
   @override
-  Widget build(BuildContext context) {
-    final score = card['score'];
-    final label = tag ?? (score != null ? tr('{score}% match', {'score': score}) : (card['verified'] == true ? tr('Verified') : null));
-    return Material(
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22), side: const BorderSide(color: AppColors.line)),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => openProposal(context, '${card['code']}'),
-        child: Padding(
-          padding: const EdgeInsets.all(9),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            _Cover(card: card, tag: label, showSave: app.isMember),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 14, 8, 6),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Row(children: [
-                  Flexible(child: Text.rich(TextSpan(children: [
-                    TextSpan(text: '${card['name']} ', style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w800)),
-                    TextSpan(text: '· ${card['age'] ?? ''}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.muted)),
-                  ]), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                  if (card['verified'] == true) const Padding(padding: EdgeInsetsDirectional.only(start: 6), child: VerifiedBadge(size: 18)),
-                ]),
-                const SizedBox(height: 4),
-                Row(children: [
-                  const Icon(Icons.location_on_rounded, size: 14, color: Color(0xFFB18433)),
-                  const SizedBox(width: 4),
-                  Expanded(child: Tx(placeOf(card), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, color: AppColors.muted))),
-                ]),
-                const Padding(padding: EdgeInsets.symmetric(vertical: 10), child: Divider(height: 1)),
-                _meta('Education', card['education']),
-                _meta('Profession', card['profession']),
-                _meta('Marital status', card['maritalStatus']),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.all(13),
-                  decoration: BoxDecoration(color: AppColors.cream, borderRadius: BorderRadius.circular(12)),
-                  child: Row(children: [Expanded(child: Text(tr('View proposal'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700))), const Icon(Icons.arrow_forward_rounded, size: 17)]),
-                ),
-              ]),
-            ),
-          ]),
-        ),
-      ),
-    );
-  }
-
-  Widget _meta(String label, Object? value) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 5),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(tr(label).toUpperCase(), style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: app.t.isUrdu ? 0 : 0.7, color: AppColors.muted)),
-          Tx(value == null || '$value'.isEmpty ? '—' : tr('$value'), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 1.5),
+        child: Row(children: [
+          Icon(icon, size: 14, color: const Color(0xFFA9B2BD)),
+          const SizedBox(width: 7),
+          Expanded(child: Tx(text, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13.5, color: Color(0xFF47566A)))),
         ]),
       );
 }
 
-/// The dashboard's smaller match card, for horizontal rows and two-column grids.
+/// The candidate card, following the supplied profile-ui reference and the website's card: an oval
+/// portrait, a corner ribbon, the name, facts with icons, "View Profile" and, for locked Premium
+/// profiles, "Unlock". Wide and sideways on phones; upright with a larger portrait in narrow grid cells.
+class ProposalCard extends StatelessWidget {
+  const ProposalCard({super.key, required this.card, this.tag, this.compact = false});
+  final Json card;
+  final String? tag;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final code = '${card['code']}';
+    final type = '${card['type'] ?? 'paid'}';
+    final locked = type == 'paid' && !app.unlocked.contains(code);
+    final score = card['score'];
+    final label = tag ?? (score != null ? tr('{score}% match', {'score': score}) : null);
+    final cost = app.unlockCost;
+    return LayoutBuilder(builder: (context, size) {
+      final upright = compact || size.maxWidth < 330;
+      final photoWidth = upright ? (size.maxWidth * 0.62).clamp(96.0, 172.0) : 116.0;
+      final details = Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+        if (label != null)
+          Container(margin: const EdgeInsets.only(bottom: 6), padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3), decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(20)), child: Text(label.toUpperCase(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.goldText))),
+        Row(children: [
+          Flexible(child: Text('${card['name']}', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: compact ? 17 : 21, fontWeight: FontWeight.w800, color: AppColors.navy))),
+          if (card['verified'] == true) const Padding(padding: EdgeInsetsDirectional.only(start: 5), child: VerifiedBadge(size: 17)),
+        ]),
+        Text(code, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.muted, letterSpacing: 0.5)),
+        const SizedBox(height: 6),
+        _Fact(Icons.cake_rounded, '${tr('{count} Years', {'count': card['age'] ?? ''})}${card['maritalStatus'] == null || compact ? '' : ' · ${tr('${card['maritalStatus']}')}'}'),
+        _Fact(Icons.work_rounded, card['profession'] == null ? '—' : tr('${card['profession']}')),
+        if (!compact && card['education'] != null) _Fact(Icons.school_rounded, tr('${card['education']}')),
+        _Fact(Icons.location_on_rounded, placeOf(card).isEmpty ? '—' : placeOf(card)),
+      ]);
+      final buttons = Row(children: [
+        Expanded(
+          child: FilledButton(
+            onPressed: () => openProposal(context, code),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.navy, foregroundColor: Colors.white, minimumSize: const Size(0, 44), padding: const EdgeInsets.symmetric(horizontal: 10), shape: const StadiumBorder()),
+            child: Text(tr('View Profile'), maxLines: 1, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+          ),
+        ),
+        if (locked && !compact) ...[
+          const SizedBox(width: 8),
+          Expanded(
+            child: DecoratedBox(
+              decoration: const ShapeDecoration(shape: StadiumBorder(), gradient: LinearGradient(colors: [Color(0xFFF4D889), Color(0xFFC99432)])),
+              child: TextButton.icon(
+                onPressed: () => openProposal(context, code),
+                style: TextButton.styleFrom(foregroundColor: AppColors.dark, minimumSize: const Size(0, 44), padding: const EdgeInsets.symmetric(horizontal: 8), shape: const StadiumBorder()),
+                icon: const Icon(Icons.lock_rounded, size: 14),
+                label: Text(cost == 1 ? tr('Unlock · 1 credit') : tr('Unlock · {cost} credits', {'cost': cost}), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800)),
+              ),
+            ),
+          ),
+        ],
+        if (app.isMember) ...[const SizedBox(width: 6), SaveHeart(code: code)],
+      ]);
+      return Material(
+        color: Colors.white,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22), side: const BorderSide(color: Color(0xFFE9E2D4))),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => openProposal(context, code),
+          child: Container(
+            decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.white, Color(0xFFFBF8F1)])),
+            child: Stack(children: [
+              Padding(
+                padding: EdgeInsets.all(compact ? 12 : 16),
+                child: upright
+                    ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                        const SizedBox(height: 8),
+                        Center(child: _OvalPhoto(card: card, width: photoWidth, height: photoWidth * 1.27)),
+                        const SizedBox(height: 12),
+                        details,
+                        const SizedBox(height: 12),
+                        buttons,
+                      ])
+                    : Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          _OvalPhoto(card: card, width: photoWidth, height: photoWidth * 1.27),
+                          const SizedBox(width: 14),
+                          Expanded(child: Padding(padding: const EdgeInsetsDirectional.only(top: 22), child: details)),
+                        ]),
+                        const SizedBox(height: 14),
+                        buttons,
+                      ]),
+              ),
+              PositionedDirectional(end: -2, top: 14, child: _Ribbon(type: type)),
+            ]),
+          ),
+        ),
+      );
+    });
+  }
+}
+
+/// The same card in its smaller form, for dashboard rows and two-column grids.
 class MatchCard extends StatelessWidget {
   const MatchCard({super.key, required this.card, this.width});
   final Json card;
   final double? width;
 
   @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: width,
-      child: Material(
-        color: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Color(0xFFE7E9EE))),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () => openProposal(context, '${card['code']}'),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Padding(padding: const EdgeInsets.all(6), child: _Cover(card: card, tag: card['score'] != null ? tr('{score}% match', {'score': card['score']}) : null, showSave: app.isMember)),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 4, 10, 12),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Row(children: [
-                  Flexible(child: Text('${card['name']}, ${card['age'] ?? ''}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600))),
-                  if (card['verified'] == true) const Padding(padding: EdgeInsetsDirectional.only(start: 4), child: VerifiedBadge(size: 14)),
-                ]),
-                Tx(placeOf(card), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: AppColors.muted)),
-                Tx([card['education'], card['profession'] == null ? null : tr('${card['profession']}')].where((part) => part != null && '$part'.isNotEmpty).join(' · '), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: AppColors.muted)),
-              ]),
-            ),
-          ]),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => SizedBox(width: width, child: ProposalCard(card: card, compact: true));
 }
 
 /// Cards in one column on phones and two or three on tablets.
@@ -288,11 +398,12 @@ class CardGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, size) {
-      final columns = compact ? (size.maxWidth > 700 ? 4 : 2) : (size.maxWidth > 900 ? 3 : size.maxWidth > 560 ? 2 : 1);
+      // Phones: one wide card per row, like the reference. Tablets: two or three, larger screens four.
+      final columns = compact ? (size.maxWidth > 700 ? 4 : 2) : (size.maxWidth > 1100 ? 4 : size.maxWidth > 760 ? 3 : size.maxWidth > 520 ? 2 : 1);
       final gap = compact ? 12.0 : 16.0;
       final width = (size.maxWidth - gap * (columns - 1)) / columns;
       return Wrap(spacing: gap, runSpacing: gap, children: [
-        for (final card in cards) SizedBox(width: width, child: compact ? MatchCard(card: card) : ProposalCard(card: card)),
+        for (final card in cards) SizedBox(width: width, child: compact ? MatchCard(card: card) : ProposalCard(card: card, tag: card['tag'] == null ? null : tr('${card['tag']}'))),
       ]);
     });
   }

@@ -95,6 +95,8 @@ model User {
   match_last_sent_at DateTime?
   last_login_at      DateTime?
   created_at         DateTime       @default(now())
+  // Premium profile credits. Only lib/credits.js changes this, always inside a transaction with a ledger row.
+  credits            Int            @default(0)
 
   sessions            Session[]
   tokens              Token[]
@@ -115,6 +117,9 @@ model User {
   payments_reviewed   PaymentRequest[]    @relation("reviewer")
   member_access       MemberAccess?       @relation("member")
   access_granted      MemberAccess[]      @relation("granter")
+  credit_transactions CreditTransaction[] @relation("credit_owner")
+  credit_actions      CreditTransaction[] @relation("credit_actor")
+  profile_unlocks     ProfileUnlock[]
 
   @@index([role, status])
   @@map("users")
@@ -311,6 +316,7 @@ model Profile {
   proposals_b         MatchProposal[]     @relation("b")
   match_notifications MatchNotification[]
   saved_by            SavedProfile[]
+  unlocks             ProfileUnlock[]
   view_records        ProfileView[]
 
   @@index([status, gender, approved_at])
@@ -628,6 +634,10 @@ model PaymentRequest {
   transaction_id String        @db.VarChar(80)
   amount         Decimal       @db.Decimal(12, 2)
   receipt_file   String        @db.VarChar(80)
+  // Set when the payment buys a premium credit package; the credits are added on approval.
+  package_id     Int?
+  package_name   String?       @db.VarChar(100)
+  credits        Int?
   status         PaymentStatus @default(pending)
   admin_note     String?       @db.VarChar(500)
   reviewed_by    Int?
@@ -637,8 +647,10 @@ model PaymentRequest {
   user     User           @relation("payer", fields: [user_id], references: [id], onDelete: Cascade)
   method   PaymentMethod? @relation(fields: [method_id], references: [id], onDelete: SetNull)
   reviewer User?          @relation("reviewer", fields: [reviewed_by], references: [id], onDelete: SetNull)
+  package  CreditPackage? @relation(fields: [package_id], references: [id], onDelete: SetNull)
 
   @@index([status, created_at])
+  @@index([package_id])
   @@index([user_id, status])
   @@index([transaction_id])
   @@index([method_id])
@@ -661,4 +673,66 @@ model MemberAccess {
   @@index([granted_by])
   @@index([active, expires_at])
   @@map("member_access")
+}
+
+// Premium profile packages, created by the administrator: any name, number of credits and price.
+model CreditPackage {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(100)
+  credits     Int
+  price       Decimal  @db.Decimal(12, 2)
+  description String?  @db.VarChar(500)
+  active      Boolean  @default(true)
+  featured    Boolean  @default(false)
+  sort        Int      @default(100)
+  created_at  DateTime @default(now())
+
+  payments PaymentRequest[]
+
+  @@index([active, sort])
+  @@map("credit_packages")
+}
+
+enum CreditKind {
+  purchase
+  unlock
+  adjustment
+  refund
+}
+
+// Every change to a member's credits, with the balance it left. Nothing changes credits without a row here.
+model CreditTransaction {
+  id            Int        @id @default(autoincrement())
+  user_id       Int
+  kind          CreditKind
+  amount        Int
+  balance_after Int
+  reference     String?    @db.VarChar(80)
+  note          String?    @db.VarChar(500)
+  actor_id      Int?
+  created_at    DateTime   @default(now())
+
+  user  User  @relation("credit_owner", fields: [user_id], references: [id], onDelete: Cascade)
+  actor User? @relation("credit_actor", fields: [actor_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id, id])
+  @@index([kind, created_at])
+  @@index([actor_id])
+  @@map("credit_transactions")
+}
+
+// A paid profile a member has opened with credits. One row per member and profile, so it is paid for once.
+model ProfileUnlock {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  profile_id Int
+  credits    Int
+  created_at DateTime @default(now())
+
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  profile Profile @relation(fields: [profile_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, profile_id])
+  @@index([profile_id])
+  @@map("profile_unlocks")
 }

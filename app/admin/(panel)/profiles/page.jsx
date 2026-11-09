@@ -59,7 +59,7 @@ export default async function AdminProfiles({ searchParams }) {
               <option value="">{t('All statuses')}</option><option value="pending">{t('Pending')}</option><option value="approved">{t('Approved')}</option><option value="rejected">{t('Rejected')}</option><option value="hidden">{t('Unpublished')}</option>
             </select>
             <select name="type" defaultValue={type} aria-label={t('Profile type')} className={filterSelect}>
-              <option value="">{t('All types')}</option><option value="public">{t('Public')}</option><option value="paid">{t('Paid')}</option><option value="premium">{t('Premium')}</option>
+              <option value="">{t('All types')}</option><option value="public">{t('Free')}</option><option value="paid">{t('Premium')}</option><option value="premium">{t('Exclusive')}</option>
             </select>
             <select name="country" defaultValue={country} aria-label={t('Country')} className={filterSelect}>
               <option value="">{t('All countries')}</option>

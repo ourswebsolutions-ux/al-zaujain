@@ -10,6 +10,12 @@ import '../widgets/biodata.dart';
 import '../widgets/common.dart';
 import '../widgets/pickers.dart';
 
+/// 25000 → "25,000", as the website writes rupees.
+String money(Object? value) {
+  final number = (value is num ? value : num.tryParse('$value') ?? 0).round().toString();
+  return number.replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',');
+}
+
 Widget paymentStatusPill(String status) => switch (status) {
       'approved' => Pill('Approved', color: Color(0xFF1F8A3A), background: Color(0x1A28A745)),
       'rejected' => Pill('Rejected', color: Color(0xFFC02E3C), background: Color(0x1ADC3545)),
@@ -116,8 +122,10 @@ class _Receipt extends StatelessWidget {
 }
 
 /// Submit Payment: choose a method, pay into the account shown, then send the details and receipt.
+/// With [pack] the payment buys a premium credit package; the credits are added when the bureau approves it.
 class PaymentSubmitScreen extends StatelessWidget {
-  const PaymentSubmitScreen({super.key});
+  const PaymentSubmitScreen({super.key, this.pack});
+  final Json? pack;
 
   @override
   Widget build(BuildContext context) {
@@ -127,11 +135,12 @@ class PaymentSubmitScreen extends StatelessWidget {
         load: () => app.api.get('payments'),
         builder: (context, data, reload) {
           const intro = PageIntro('Submit Payment', text: 'Choose a payment method, send your payment, then tell us about it here.');
-          if (data['state'] == 'active') return const Column(children: [intro, EmptyState(icon: Icons.check_circle_rounded, title: 'Your access is active', text: 'You do not need to pay again.')]);
-          if (data['pending'] == true) return const Column(children: [intro, EmptyState(icon: Icons.schedule_rounded, title: 'Your payment is being reviewed', text: 'Our team will check it shortly. You do not need to pay again.')]);
+          if (pack != null && data['pendingCredits'] == true) return const Column(children: [intro, EmptyState(icon: Icons.schedule_rounded, title: 'Your credit purchase is being reviewed', text: 'Our team will check it shortly. The credits are added as soon as it is approved.')]);
+          if (pack == null && data['state'] == 'active') return const Column(children: [intro, EmptyState(icon: Icons.check_circle_rounded, title: 'Your access is active', text: 'You do not need to pay again.')]);
+          if (pack == null && data['pending'] == true) return const Column(children: [intro, EmptyState(icon: Icons.schedule_rounded, title: 'Your payment is being reviewed', text: 'Our team will check it shortly. You do not need to pay again.')]);
           final methods = rowsOf(data['methods']);
           if (methods.isEmpty) return const Column(children: [intro, EmptyState(icon: Icons.account_balance_wallet_rounded, title: 'Payment options are not available yet', text: 'Please contact our team.')]);
-          return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [intro, _PaymentForm(methods: methods, price: data['price'] as String?)]);
+          return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [intro, _PaymentForm(methods: methods, price: data['price'] as String?, pack: pack)]);
         },
       ),
     );
@@ -139,7 +148,8 @@ class PaymentSubmitScreen extends StatelessWidget {
 }
 
 class _PaymentForm extends StatefulWidget {
-  const _PaymentForm({required this.methods, this.price});
+  const _PaymentForm({required this.methods, this.price, this.pack});
+  final Json? pack;
   final List<Json> methods;
   final String? price;
   @override
@@ -150,7 +160,7 @@ class _PaymentFormState extends State<_PaymentForm> {
   late int methodId = (widget.methods.first['id'] as num).toInt();
   final sender = TextEditingController();
   final transaction = TextEditingController();
-  final amount = TextEditingController();
+  late final amount = TextEditingController(text: widget.pack == null ? '' : '${(widget.pack!['price'] as num).round()}');
   XFile? receipt;
   Uint8List? receiptBytes;
   bool busy = false;
@@ -178,6 +188,7 @@ class _PaymentFormState extends State<_PaymentForm> {
     try {
       await app.api.multipart('payments', [
         MapEntry('method_id', '$methodId'),
+        if (widget.pack != null) MapEntry('package_id', '${widget.pack!['id']}'),
         MapEntry('sender_name', sender.text),
         MapEntry('transaction_id', transaction.text),
         MapEntry('amount', amount.text),
@@ -186,8 +197,8 @@ class _PaymentFormState extends State<_PaymentForm> {
       ]);
       await app.refreshAccount();
       if (mounted) {
-        showMessage(context, 'Payment received. Our team will review it shortly.');
-        Navigator.pop(context);
+        showMessage(context, widget.pack == null ? 'Payment received. Our team will review it shortly.' : 'Your premium credits are added once our team approves it.');
+        Navigator.pop(context, true);
       }
     } on ApiException catch (caught) {
       setState(() => error = caught.message);
@@ -203,7 +214,17 @@ class _PaymentFormState extends State<_PaymentForm> {
       Panel(
         title: '1. Choose how you will pay',
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          if (widget.price != null && widget.price!.isNotEmpty)
+          if (widget.pack != null)
+            Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(8)),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('${widget.pack!['name']} · ${tr('{count} profile credits', {'count': widget.pack!['credits']})}', style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.goldText)),
+                Text(tr('Amount to pay: {price}', {'price': 'Rs ${money(widget.pack!['price'])}'}), style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.goldText)),
+              ]),
+            )
+          else if (widget.price != null && widget.price!.isNotEmpty)
             Container(margin: const EdgeInsets.only(bottom: 10), padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(8)), child: Text(tr('Amount to pay: {price}', {'price': widget.price}), style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.goldText))),
           for (final item in widget.methods)
             Padding(

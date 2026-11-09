@@ -6,9 +6,9 @@ import { useT } from '@/components/i18n/LanguageProvider';
 import { inputClass, labelClass } from '@/components/ui/Form';
 
 const TYPES = [
-  { value: 'public', icon: FaLockOpen, title: 'Public', text: 'Anyone can see everything, including the photo and contact details.' },
-  { value: 'paid', icon: FaLock, title: 'Paid', text: 'Your payment restrictions apply. Members unlock details after payment.' },
-  { value: 'premium', icon: FaCrown, title: 'Premium', text: 'Exclusive. Contact details stay private; families contact you on WhatsApp.' },
+  { value: 'public', icon: FaLockOpen, title: 'Free profile', text: 'Anyone can see everything, including the photo and contact details. No credits are used.' },
+  { value: 'paid', icon: FaLock, title: 'Premium profile', text: 'Basic details are public. The photo and contact details unlock with premium credits (or full access). Choose what stays hidden under Restrictions.' },
+  { value: 'premium', icon: FaCrown, title: 'Exclusive (via consultant)', text: 'Contact details stay private and credits cannot unlock them; families contact you on WhatsApp.' },
 ];
 
 // The administrator-only part of the profile form.

@@ -24,7 +24,7 @@ export default async function HomePage() {
       <Hero settings={settings} cities={await featuredCities()} />
       <AdvancedSearch countries={await activeCountries()} cities={await citiesWithCountry()} castes={await casteOptions()} nationalities={await nationalityOptions()} />
       <Journey />
-      <Featured profiles={await carouselProfiles()} />
+      <Featured profiles={await carouselProfiles(8)} />
       <WhatsAppChannel />
       <Reasons />
       <Registration settings={settings} />

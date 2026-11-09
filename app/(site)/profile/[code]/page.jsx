@@ -11,6 +11,7 @@ import { ProposalCard } from '@/components/profile/ProposalCard';
 import { ButtonLink } from '@/components/ui/Button';
 import { PremiumContact } from '@/components/profile/PremiumContact';
 import { TypeBadge } from '@/components/profile/TypeBadge';
+import { UnlockProfile } from '@/components/profile/UnlockProfile';
 import { Reveal } from '@/components/ui/Reveal';
 import { SectionTag } from '@/components/ui/Text';
 import { clientIp, currentUser } from '@/lib/auth.js';
@@ -36,7 +37,7 @@ function MatchRow({ tag, title, profiles }) {
     <section className="bg-cream px-[6%] py-[60px] font-nunito text-navy">
       <SectionTag>{tag}</SectionTag>
       <h2 className="mb-8 mt-2 text-[34px] font-extrabold leading-tight max-b:text-[26px]">{title}</h2>
-      <div className="grid grid-cols-4 gap-5 max-p:grid-cols-2 max-g:grid-cols-1">
+      <div className="grid grid-cols-4 gap-5 max-[1180px]:grid-cols-3 max-p:grid-cols-2 max-sm:grid-cols-1">
         {profiles.map((profile) => (
           <Reveal key={profile.code} y={38} scale={0.96}><ProposalCard profile={profile} matchScore={profile.score} /></Reveal>
         ))}
@@ -54,7 +55,7 @@ export default async function ProfilePage({ params }) {
   const user = await currentUser();
   const view = await profileView(profile, user, await clientIp());
   if (!view) notFound();
-  const { label, data, locks, contact, options, photos, photoLocked, isOwner, live, canChat, canSave, yourScore, saved, whatsapp, premiumWhatsapp } = view;
+  const { label, data, locks, contact, options, photos, photoLocked, isOwner, live, canChat, canSave, yourScore, saved, whatsapp, premiumWhatsapp, credits } = view;
   const whatsappLocked = locks.whatsapp;
   const exportProps = await publicExportProps(profile, photoLocked ? null : photos[0]?.file, options, contact.rows);
 
@@ -99,6 +100,7 @@ export default async function ProfilePage({ params }) {
                   {locks.premium ? null : whatsappLocked ? <LockedWhatsApp label="Contact Al Zaujain" /> : <ButtonLink external href={whatsapp}><FaWhatsapp aria-hidden="true" /> {t('Contact Al Zaujain')}</ButtonLink>}
                   {canChat && (user ? <ChatButton code={label} /> : <ButtonLink tone="gold" href={`/login?next=/profile/${label}`}><FaComments aria-hidden="true" /> {t('Sign in to chat')}</ButtonLink>)}
                   {canSave && <SaveButton code={label} saved={saved} variant="button" />}
+                  <UnlockProfile code={label} credits={credits} signedIn={!!user} />
                 </div>
               </div>
             </aside>
@@ -121,7 +123,7 @@ export default async function ProfilePage({ params }) {
           <section className="bg-paper px-[6%] py-[60px] font-nunito text-navy">
             <SectionTag>{t('YOU MAY ALSO LIKE')}</SectionTag>
             <h2 className="mb-8 mt-2 text-[34px] font-extrabold leading-tight max-b:text-[26px]">{t('Similar proposals')}</h2>
-            <div className="grid grid-cols-4 gap-5 max-p:grid-cols-2 max-g:grid-cols-1">
+            <div className="grid grid-cols-4 gap-5 max-[1180px]:grid-cols-3 max-p:grid-cols-2 max-sm:grid-cols-1">
               {(await similarProfiles(profile)).map((item) => <ProposalCard key={item.code} profile={item} />)}
             </div>
           </section>

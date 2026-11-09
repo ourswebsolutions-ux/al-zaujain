@@ -69,7 +69,7 @@ export default async function ProposalsPage({ params, searchParams }) {
         <section aria-label={t('Results')} className="min-w-0">
           <p role="status" className="mb-5 text-sm font-semibold">{t(results.total === 1 ? '{count} proposal found' : '{count} proposals found', { count: results.total })}</p>
           {results.profiles.length > 0 ? (
-            <div className="grid grid-cols-3 gap-5 max-[1300px]:grid-cols-2 max-g:grid-cols-1">
+            <div className="grid grid-cols-3 gap-5 max-[1300px]:grid-cols-2 max-sm:grid-cols-1">
               {results.profiles.map((profile) => <ProposalCard key={profile.code} profile={profile} tag={profile.verified ? 'Verified' : undefined} saved={saved?.has(profile.code)} />)}
             </div>
           ) : (

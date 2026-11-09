@@ -8,6 +8,7 @@ import '../widgets/cards.dart';
 import '../widgets/common.dart';
 import 'auth_screens.dart';
 import 'consultants_screen.dart';
+import 'credits_screen.dart';
 import 'home_screen.dart';
 import 'info_screens.dart';
 import 'member_screens.dart';
@@ -103,6 +104,7 @@ class _InfoMenu extends StatelessWidget {
   const _InfoMenu();
   @override
   Widget build(BuildContext context) => _Menu(items: [
+        (Icons.request_quote_rounded, 'Consultancy fees', () => push(context, const FeesScreen()), 0),
         (Icons.translate_rounded, 'Language', () => push(context, const AppSettingsScreen()), 0),
         (Icons.privacy_tip_rounded, 'Privacy policy', () => push(context, const LegalScreen(kind: 'privacy')), 0),
         (Icons.gavel_rounded, 'Terms of use', () => push(context, const LegalScreen(kind: 'terms')), 0),
@@ -221,7 +223,7 @@ class DashboardView extends StatelessWidget {
             const EmptyState(icon: Icons.favorite_border_rounded, title: 'Your matches will appear here', text: 'Once your profile is approved, we will rank suitable proposals for you.')
           else
             SizedBox(
-              height: 290,
+              height: 400,
               child: ListView.separated(scrollDirection: Axis.horizontal, itemCount: matches.length, separatorBuilder: (_, _) => const SizedBox(width: 10), itemBuilder: (context, index) => MatchCard(card: matches[index], width: 190)),
             ),
           const SizedBox(height: 16),
@@ -265,6 +267,8 @@ class DashboardView extends StatelessWidget {
             (Icons.favorite_rounded, 'Recommended matches', () => open(const MatchesScreen()), 0),
             (Icons.visibility_rounded, 'Profile views', () => open(const ViewsScreen()), 0),
             (Icons.notifications_rounded, 'Notifications', () => open(const NotificationsScreen()), app.unreadNotifications),
+            (Icons.toll_rounded, '${tr('Premium Credits')} · ${app.credits}', () => open(const CreditsScreen()), 0),
+            (Icons.shopping_cart_rounded, 'Buy Premium Credits', () => open(const BuyCreditsScreen()), 0),
             (Icons.account_balance_wallet_rounded, 'My Payment Status', () => open(const PaymentsScreen()), 0),
             (Icons.manage_accounts_rounded, 'Account settings', () => open(const AccountSettingsScreen()), 0),
           ]),

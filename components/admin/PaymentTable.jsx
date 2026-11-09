@@ -21,7 +21,7 @@ export async function PaymentTable({ path, statuses, query }) {
   const rows = await db.paymentRequest.findMany({ where, include: { user: { select: { id: true, name: true, email: true } } }, orderBy: [{ status: 'asc' }, { id: 'desc' }], take: SIZE, skip: (page - 1) * SIZE });
   return (
     <Table
-      head={['User', 'Method', 'Transaction ID', 'Amount', 'Status', 'Date', '']}
+      head={['User', 'For', 'Method', 'Transaction ID', 'Amount', 'Status', 'Date', '']}
       empty={rows.length === 0 ? 'No payments found.' : null}
       toolbar={(
         <FilterForm clearHref={path} active={!!(q || status)}>
@@ -39,6 +39,7 @@ export async function PaymentTable({ path, statuses, query }) {
       {rows.map((row) => (
         <tr key={row.id}>
           <td><Identity name={row.user.name} sub={row.user.email} href={`/admin/users/${row.user.id}`} /></td>
+          <td>{row.package_id || row.credits ? <span className="whitespace-nowrap font-medium">{row.package_name} · {t('{count} credits', { count: row.credits })}</span> : <span className="text-muted">{t('Full access')}</span>}</td>
           <td>{row.method_name}</td>
           <td dir="ltr" className="text-start font-mono text-[12.5px]">{row.transaction_id}</td>
           <td className="whitespace-nowrap">{Number(row.amount).toLocaleString('en-PK')}</td>

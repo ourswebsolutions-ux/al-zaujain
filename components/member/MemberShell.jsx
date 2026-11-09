@@ -7,7 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
-import { FaArrowUpRightFromSquare, FaBars, FaBell, FaComments, FaEye, FaGaugeHigh, FaGear, FaHeart, FaHeartCircleCheck, FaIdCard, FaMagnifyingGlass, FaMoneyBillTransfer, FaReceipt, FaUnlock, FaWallet, FaPenToSquare, FaRightFromBracket, FaSliders, FaXmark } from 'react-icons/fa6';
+import { FaArrowUpRightFromSquare, FaBars, FaBell, FaCartShopping, FaCoins, FaComments, FaEye, FaGaugeHigh, FaGear, FaHeart, FaHeartCircleCheck, FaIdCard, FaMagnifyingGlass, FaMoneyBillTransfer, FaPenToSquare, FaReceipt, FaRightFromBracket, FaSliders, FaUnlock, FaWallet, FaXmark } from 'react-icons/fa6';
 import { NotificationList } from './NotificationList';
 import { logout } from '@/app/actions/auth';
 import { readAllNotifications } from '@/app/actions/member';
@@ -26,6 +26,10 @@ const MEMBER_NAV = [
     { href: '/dashboard/saved', label: 'Saved Profiles', icon: FaHeart },
     { href: '/dashboard/views', label: 'Profile Views', icon: FaEye },
     { href: '/messages', label: 'Messages', icon: FaComments, badge: 'messages' },
+  ] },
+  { group: 'Premium credits', items: [
+    { href: '/dashboard/credits', label: 'Premium Credits', icon: FaCoins },
+    { href: '/dashboard/credits/buy', label: 'Buy Premium Credits', icon: FaCartShopping },
   ] },
   { group: 'Payments', items: [
     { href: '/dashboard/payments', label: 'My Payment Status', icon: FaWallet },

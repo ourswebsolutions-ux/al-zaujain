@@ -35,6 +35,7 @@ export default async function PaymentRequestDetail({ params }) {
         <div className="min-w-0">
           <Panel title="Payment details">
             <dl className="divide-y divide-[var(--d-line,#eef0f3)]">
+              <Detail label={t('Payment for')}>{payment.credits ? `${payment.package_name} · ${t('{count} premium credits', { count: payment.credits })}` : t('Full profile access')}</Detail>
               <Detail label={t('Method')}>{payment.method_name}</Detail>
               <Detail label={t('Sender name')}>{payment.sender_name}</Detail>
               <Detail label={t('Transaction ID')}><span dir="ltr" className="font-mono">{payment.transaction_id}</span></Detail>
@@ -49,6 +50,7 @@ export default async function PaymentRequestDetail({ params }) {
               <Detail label={t('Email')}><span dir="ltr">{payment.user.email}</span></Detail>
               <Detail label={t('Phone')}><span dir="ltr">{payment.user.phone ?? '—'}</span></Detail>
               <Detail label={t('Access')}><Badge value={accessState(payment.user.member_access)} /></Detail>
+              <Detail label={t('Premium credits')}><Link href={`/admin/credits?user=${payment.user.id}`} className="text-navy">{payment.user.credits}</Link></Detail>
             </dl>
           </Panel>
           <Panel title={pending ? 'Your decision' : 'Internal note'}>
@@ -57,7 +59,9 @@ export default async function PaymentRequestDetail({ params }) {
               <textarea name="admin_note" rows={3} maxLength={500} defaultValue={payment.admin_note ?? ''} placeholder={t('Internal note, not shown to the user')} aria-label={t('Internal note')} className={`${inputSm} w-full`} />
               {pending ? (
                 <>
-                  <label className="text-[13px] text-muted">{t('Access length in days')} <input name="days" type="number" min="0" max="3650" defaultValue={await defaultAccessDays()} className={`${inputSm} ms-2 w-24`} /></label>
+                  {payment.credits
+                    ? <p className="rounded-md bg-[var(--d-gold-bg,#fcf4e1)] px-3 py-2 text-[13px] font-medium text-[var(--d-gold,#806126)]">{t('Approving adds {count} premium credits to this member, once.', { count: payment.credits })}</p>
+                    : <label className="text-[13px] text-muted">{t('Access length in days')} <input name="days" type="number" min="0" max="3650" defaultValue={await defaultAccessDays()} className={`${inputSm} ms-2 w-24`} /></label>}
                   <div className="flex flex-wrap gap-2">
                     <Submit name="decision" value="approve" className="cursor-pointer">{t('Approve payment')}</Submit>
                     <Submit name="decision" value="reject" tone="danger" className="cursor-pointer">{t('Reject payment')}</Submit>

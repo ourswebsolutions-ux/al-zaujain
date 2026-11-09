@@ -33,6 +33,7 @@ export async function Footer({ settings }) {
           <Link className={linkClass} href="/#how-it-works">{t('How it works')} <FaArrowRight aria-hidden="true" className={`${icon} ms-1`} className="rtl:-scale-x-100" /></Link>
           <Link className={linkClass} href="/proposals">{t('Browse proposals')}</Link>
           <Link className={linkClass} href="/consultants">{t('Marriage consultants')}</Link>
+          <Link className={linkClass} href="/fees">{t('Consultancy fees')}</Link>
           <Link className={linkClass} href="/submit-profile">{t('Submit a profile')}</Link>
           <Link className={linkClass} href="/#registration">{t('Registration information')}</Link>
           <Link className={linkClass} href="/#android-app">{t('Android app')}</Link>

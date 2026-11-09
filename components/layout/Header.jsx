@@ -13,6 +13,7 @@ const NAV = [
   { href: '/#how-it-works', label: 'How it works' },
   { href: '/proposals', label: 'Proposals', menu: true },
   { href: '/consultants', label: 'Consultants' },
+  { href: '/fees', label: 'Fees' },
   { href: '/#why-choose', label: 'Why Al Zaujain' },
   { href: '/#registration', label: 'Registration' },
   { href: '/#android-app', label: 'Android app' },
@@ -20,7 +21,7 @@ const NAV = [
   { href: '/#contact', label: 'Contact us' },
 ];
 
-const navLink = "relative py-2 text-xs font-medium leading-[18px] no-underline transition-colors duration-200 after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:origin-left rtl:after:origin-right after:scale-x-0 after:bg-gold after:transition-transform after:duration-200 after:content-[''] hover:text-[#9b712b] hover:after:scale-x-100 focus-visible:text-[#9b712b] focus-visible:after:scale-x-100";
+const navLink = "relative whitespace-nowrap py-2 text-xs font-medium leading-[18px] no-underline transition-colors duration-200 after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:origin-left rtl:after:origin-right after:scale-x-0 after:bg-gold after:transition-transform after:duration-200 after:content-[''] hover:text-[#9b712b] hover:after:scale-x-100 focus-visible:text-[#9b712b] focus-visible:after:scale-x-100";
 
 export function Header({ phone, phoneIntl, user, unread = 0, categories = [], announcements = [] }) {
   const t = useT();
@@ -37,7 +38,7 @@ export function Header({ phone, phoneIntl, user, unread = 0, categories = [], an
 
       <div className="relative z-20 flex items-center justify-between gap-5 border-b border-[#e9e9e5] bg-white px-[4.5%] py-5 max-m:gap-2.5 max-m:px-[5%] max-m:py-[15px]">
         <Brand />
-        <nav aria-label={t('Main navigation')} className="flex gap-[11px] max-n:hidden">
+        <nav aria-label={t('Main navigation')} className="flex gap-[11px] max-[1440px]:gap-[8px] max-n:hidden">
           {NAV.map((item) => item.menu ? (
             <div key={item.href} className="group relative flex items-center">
               <Link href={item.href} className={navLink}>{t(item.label)}</Link>

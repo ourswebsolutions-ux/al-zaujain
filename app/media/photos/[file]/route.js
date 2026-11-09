@@ -5,6 +5,7 @@ import { getDb } from '@/lib/db.js';
 import { canManageProfile } from '@/lib/access.js';
 import { getProfile } from '@/lib/profiles.js';
 import { sha256 } from '@/lib/security.js';
+import { hasUnlocked } from '@/lib/credits.js';
 import { getRestrictions, viewerIsPaid } from '@/lib/restrictions.js';
 import { blurredPhoto, photosDir } from '@/lib/uploads.js';
 
@@ -25,7 +26,7 @@ export async function GET(request, { params }) {
 
   // The URL never reveals anything: a viewer without access receives different bytes from the same address.
   const { photo: restricted } = await getRestrictions();
-  const unlocked = manager || profile.access_type === 'public' || !restricted || (await viewerIsPaid(user));
+  const unlocked = manager || profile.access_type === 'public' || !restricted || (await viewerIsPaid(user)) || (user?.role === 'user' && (await hasUnlocked(user.id, profile.id)));
   if (!unlocked) return new Response(await blurredPhoto(target), { headers: { 'Content-Type': 'image/webp', 'Cache-Control': 'private, no-store' } });
   return new Response(fs.readFileSync(target), {
     headers: { 'Content-Type': 'image/webp', 'Cache-Control': 'private, no-store' },

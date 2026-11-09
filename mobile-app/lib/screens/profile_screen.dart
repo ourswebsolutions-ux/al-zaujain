@@ -9,6 +9,7 @@ import '../widgets/common.dart';
 import '../widgets/export.dart';
 import 'auth_screens.dart';
 import 'chat_screen.dart';
+import 'credits_screen.dart';
 
 /// One proposal, as on the website's /profile/<code> page. The server decides what this viewer may see.
 class ProfileScreen extends StatelessWidget {
@@ -112,6 +113,7 @@ class _ProfileBodyState extends State<_ProfileBody> {
                   AppButton(app.signedIn ? 'Chat now' : 'Sign in to chat', tone: Tone.gold, icon: Icons.forum_rounded, expand: true, busy: chatting, onPressed: _chat),
                 ],
                 if (data['canSave'] == true) ...[const SizedBox(height: 10), _SaveButton(code: '${profile['code']}')],
+                if (data['credits'] != null) ...[const SizedBox(height: 12), _UnlockPanel(code: '${profile['code']}', credits: (data['credits'] as Map).cast<String, dynamic>(), onUnlocked: widget.reload)],
               ]),
             ),
             Padding(
@@ -176,6 +178,76 @@ class _ProfileBodyState extends State<_ProfileBody> {
       ),
       if (locked) Padding(padding: const EdgeInsets.only(top: 8), child: TextButton.icon(onPressed: () => showUnlockSheet(context), icon: const Icon(Icons.lock_open_rounded, size: 16), label: Text(tr('Unlock Full Profile Photograph')))),
     ]);
+  }
+}
+
+/// Premium profiles: spend credits once and the photo and contact details stay open for this member.
+/// The server checks the balance and charges once; the app only shows the result.
+class _UnlockPanel extends StatefulWidget {
+  const _UnlockPanel({required this.code, required this.credits, required this.onUnlocked});
+  final String code;
+  final Json credits;
+  final Future<void> Function() onUnlocked;
+  @override
+  State<_UnlockPanel> createState() => _UnlockPanelState();
+}
+
+class _UnlockPanelState extends State<_UnlockPanel> {
+  bool busy = false;
+  String? error;
+  bool insufficient = false;
+
+  Future<void> _unlock() async {
+    setState(() { busy = true; error = null; });
+    try {
+      final result = await app.api.post('profiles/${widget.code}/unlock');
+      await app.refreshAccount();
+      if (mounted) showMessage(context, tr('${result['message']}', {'charged': result['charged'], 'balance': result['balance']}));
+      await widget.onUnlocked();
+    } on ApiException catch (caught) {
+      setState(() { error = caught.message; insufficient = caught.body['insufficient'] == true; });
+    } finally {
+      if (mounted) setState(() => busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final credits = widget.credits;
+    final cost = (credits['cost'] as num?)?.toInt() ?? 1;
+    if (credits['unlocked'] == true) {
+      return Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(color: AppColors.greenBg, borderRadius: BorderRadius.circular(12)),
+        child: Row(children: [const Icon(Icons.check_circle_rounded, color: AppColors.green, size: 18), const SizedBox(width: 8), Expanded(child: Tx(tr('Unlocked with your credits. The photo and contact details are open for you.'), style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.green)))]),
+      );
+    }
+    if (credits['canUnlock'] != true) return const SizedBox.shrink();
+    final balance = (credits['balance'] as num?)?.toInt();
+    final short = app.signedIn && balance != null && balance < cost;
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFFFCF4E1), Color(0xFFF8F4EB)]), borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.sandLine)),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Row(children: [const Icon(Icons.workspace_premium_rounded, color: AppColors.gold, size: 18), const SizedBox(width: 6), Text(tr('Premium profile'), style: const TextStyle(fontWeight: FontWeight.w700))]),
+        const SizedBox(height: 4),
+        Tx(cost == 1 ? tr('Unlock the real photo and contact details for 1 credit. Once unlocked, it stays open for you.') : tr('Unlock the real photo and contact details for {cost} credits. Once unlocked, it stays open for you.', {'cost': cost}), style: const TextStyle(fontSize: 12.5, color: AppColors.muted, height: 1.5)),
+        if (balance != null) Padding(padding: const EdgeInsets.only(top: 6), child: Row(children: [const Icon(Icons.toll_rounded, size: 15, color: AppColors.goldText), const SizedBox(width: 5), Text(tr('You have {count} credits', {'count': balance}), style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.goldText))])),
+        const SizedBox(height: 10),
+        if (!app.signedIn)
+          AppButton('Sign in to unlock', tone: Tone.gold, icon: Icons.lock_open_rounded, expand: true, onPressed: () => push(context, LoginScreen(then: ProfileScreen(code: widget.code), replace: true)))
+        else if (short || insufficient) ...[
+          Notice('You do not have enough credits. Buy a package to unlock this profile.'),
+          const SizedBox(height: 8),
+          AppButton('Buy Premium Credits', tone: Tone.gold, icon: Icons.shopping_cart_rounded, expand: true, onPressed: () async {
+            await push(context, const BuyCreditsScreen());
+            await widget.onUnlocked();
+          }),
+        ] else
+          AppButton(busy ? 'Unlocking…' : (cost == 1 ? 'Unlock profile · 1 credit' : tr('Unlock profile · {cost} credits', {'cost': cost})), tone: Tone.gold, icon: Icons.lock_open_rounded, expand: true, busy: busy, onPressed: _unlock),
+        if (error != null && !insufficient) ...[const SizedBox(height: 8), Notice(error!)],
+      ]),
+    );
   }
 }
 
@@ -273,7 +345,7 @@ class _Row extends StatelessWidget {
         Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: SectionTag(tag)),
         Padding(padding: const EdgeInsets.fromLTRB(16, 2, 16, 12), child: Text(tr(title), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800))),
         SizedBox(
-          height: 300,
+          height: 400,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),

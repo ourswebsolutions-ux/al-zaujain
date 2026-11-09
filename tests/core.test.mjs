@@ -743,3 +743,163 @@ describe('public, paid and premium profiles', () => {
     assert.equal(row.source, 'user');
   });
 });
+
+describe('premium profile credits', () => {
+  const credits = { mod: null };
+  let admin; let method; let pack;
+  const receipt = async () => new File([await sharp({ create: { width: 200, height: 200, channels: 3, background: '#557733' } }).jpeg().toBuffer()], 'r.jpg', { type: 'image/jpeg' });
+  const buy = async (member, fields = {}) => {
+    const form = new FormData();
+    for (const [key, value] of Object.entries({ method_id: method, sender_name: 'Sender', transaction_id: `CR${Math.random()}`, amount: '1000', package_id: pack.id, ...fields })) form.set(key, String(value));
+    form.set('receipt', await receipt());
+    return payments.submitPayment(form, member);
+  };
+  const member = (label) => makeUser({ email: `credit-${label}-${Math.random()}@example.com` });
+  const paidProfile = async (overrides = {}) => {
+    const id = await approved({ full_name: `Paid ${Math.random()}`, contact_phone: '0300 1112233', ...overrides });
+    await db.profile.update({ where: { id }, data: { access_type: 'paid' } });
+    return id;
+  };
+  const balance = async (user) => (await load(user.id)).credits;
+
+  before(async () => {
+    credits.mod = await import('../lib/credits.js');
+    admin = (await makeUser({ email: 'creditadmin@example.com', role: 'admin' })).id;
+    method = (await db.paymentMethod.create({ data: { name: 'Credits bank', account_holder: 'Al Zaujain', bank_name: 'Meezan', iban: 'PK01' } })).id;
+    pack = await db.creditPackage.create({ data: { name: 'Starter', credits: 5, price: '1000' } });
+  });
+
+  it('a package payment adds exactly its credits on approval, and only once', async () => {
+    const user = await member('buy');
+    const sent = await buy(user);
+    assert.equal(sent.ok, true);
+    assert.equal(await balance(user), 0, 'nothing is added before approval');
+    const row = await db.paymentRequest.findUnique({ where: { id: sent.id } });
+    assert.equal(row.credits, 5);
+    assert.equal(row.package_name, 'Starter');
+    const [first, second] = await Promise.all([payments.approvePayment(sent.id, admin, 0, null), payments.approvePayment(sent.id, admin, 0, null)]);
+    assert.equal([first, second].filter(Boolean).length, 1, 'two admins approving together add the credits once');
+    assert.equal(await balance(user), 5);
+    const ledger = await db.creditTransaction.findMany({ where: { user_id: user.id } });
+    assert.deepEqual(ledger.map((entry) => [entry.kind, entry.amount, entry.balance_after]), [['purchase', 5, 5]]);
+    assert.equal(await hasPaidAccess(user.id), false, 'credits are not the full-access membership');
+  });
+
+  it('a rejected package payment adds nothing, and an inactive package cannot be bought', async () => {
+    const user = await member('reject');
+    const sent = await buy(user);
+    await payments.rejectPayment(sent.id, admin, 'Wrong amount');
+    assert.equal(await balance(user), 0);
+    const hidden = await db.creditPackage.create({ data: { name: 'Old', credits: 3, price: '500', active: false } });
+    assert.equal((await buy(user, { package_id: hidden.id })).ok, false);
+    assert.equal((await buy(user)).ok, true);
+    assert.equal((await buy(user)).ok, false, 'one credit purchase waits for review at a time');
+  });
+
+  it('unlocking a paid profile costs one credit, and opening it again costs nothing', async () => {
+    const user = await member('unlock');
+    await credits.mod.adjustCredits(user.id, 3, 'Test credits', admin);
+    const id = await paidProfile();
+    const first = await credits.mod.unlockProfile(user, id);
+    assert.deepEqual([first.charged, first.balance], [1, 2]);
+    const again = await credits.mod.unlockProfile(user, id);
+    assert.deepEqual([again.charged, again.balance], [0, 2]);
+    assert.equal(await balance(user), 2);
+    assert.equal(await credits.mod.hasUnlocked(user.id, id), true);
+  });
+
+  it('many simultaneous unlocks of one profile charge once', async () => {
+    const user = await member('race');
+    await credits.mod.adjustCredits(user.id, 5, 'Test credits', admin);
+    const id = await paidProfile();
+    const results = await Promise.allSettled(Array.from({ length: 6 }, () => credits.mod.unlockProfile(user, id)));
+    assert.ok(results.every((result) => result.status === 'fulfilled'), JSON.stringify(results.filter((r) => r.status === 'rejected').map((r) => String(r.reason))));
+    assert.equal(results.reduce((sum, result) => sum + result.value.charged, 0), 1);
+    assert.equal(await balance(user), 4);
+    assert.equal(await db.profileUnlock.count({ where: { user_id: user.id } }), 1);
+  });
+
+  it('simultaneous unlocks of different profiles never spend more than the balance', async () => {
+    const user = await member('overspend');
+    await credits.mod.adjustCredits(user.id, 2, 'Test credits', admin);
+    const ids = await Promise.all(Array.from({ length: 5 }, () => paidProfile()));
+    const results = await Promise.allSettled(ids.map((id) => credits.mod.unlockProfile(user, id)));
+    assert.equal(results.filter((result) => result.status === 'fulfilled').length, 2);
+    assert.ok(results.filter((result) => result.status === 'rejected').every((result) => result.reason.code === 'insufficient'));
+    assert.equal(await balance(user), 0);
+    assert.equal(await db.profileUnlock.count({ where: { user_id: user.id } }), 2, 'a refused unlock leaves no row behind');
+  });
+
+  it('refuses with a clear message when credits run out, and the balance never goes negative', async () => {
+    const user = await member('empty');
+    const id = await paidProfile();
+    await assert.rejects(credits.mod.unlockProfile(user, id), (error) => error.code === 'insufficient' && /Please buy a premium credit package/.test(error.message));
+    await assert.rejects(db.user.update({ where: { id: user.id }, data: { credits: -1 } }), 'the database refuses a negative balance');
+    await assert.rejects(credits.mod.adjustCredits(user.id, -1, 'Too many', admin), /fewer than 0/);
+  });
+
+  it('free and exclusive profiles never use credits; staff and owners cannot spend any', async () => {
+    const user = await member('types');
+    await credits.mod.adjustCredits(user.id, 2, 'Test credits', admin);
+    const free = await approved({ full_name: 'Free Person' });
+    await db.profile.update({ where: { id: free }, data: { access_type: 'public' } });
+    const exclusive = await approved({ full_name: 'Exclusive Person' });
+    await db.profile.update({ where: { id: exclusive }, data: { access_type: 'premium' } });
+    await assert.rejects(credits.mod.unlockProfile(user, free), (error) => error.code === 'not_paid');
+    await assert.rejects(credits.mod.unlockProfile(user, exclusive), (error) => error.code === 'not_paid');
+    const own = await paidProfile();
+    await db.profile.update({ where: { id: own }, data: { user_id: user.id } });
+    await assert.rejects(credits.mod.unlockProfile(user, own), (error) => error.code === 'own');
+    await assert.rejects(credits.mod.unlockProfile({ id: admin, role: 'admin' }, own), (error) => error.code === 'member');
+    assert.equal(await balance(user), 2);
+  });
+
+  it('contact details and the full name stay hidden until the member unlocks the profile', async () => {
+    const { profileView } = await import('../lib/profile-view.js');
+    const user = await member('view');
+    await credits.mod.adjustCredits(user.id, 1, 'Test credits', admin);
+    const id = await paidProfile({ full_name: 'Maryam Siddiqui', contact_phone: '0300 9998877' });
+    const before = await profileView(await getProfile(id), user, '1.1.1.1');
+    assert.deepEqual(before.contact.rows, []);
+    assert.ok(before.contact.locked.includes('Phone'));
+    assert.equal(before.data.name, 'Maryam');
+    assert.equal(before.credits.canUnlock, true);
+    await credits.mod.unlockProfile(user, id);
+    const after = await profileView(await getProfile(id), user, '1.1.1.1');
+    assert.deepEqual(after.contact.rows.map((row) => row.value), ['0300 9998877', 'person@example.com']);
+    assert.equal(after.data.name, 'Maryam Siddiqui');
+    assert.equal(after.credits.unlocked, true);
+    const stranger = await profileView(await getProfile(id), await member('stranger'), '2.2.2.2');
+    assert.deepEqual(stranger.contact.rows, [], 'unlocking is per member');
+  });
+
+  it('manual adjustments need a reason, and removing an unlock can refund it', async () => {
+    const user = await member('adjust');
+    await assert.rejects(credits.mod.adjustCredits(user.id, 5, '  ', admin), /reason is required/);
+    await credits.mod.adjustCredits(user.id, 2, 'Goodwill', admin);
+    const id = await paidProfile();
+    await credits.mod.unlockProfile(user, id);
+    const unlock = await db.profileUnlock.findFirst({ where: { user_id: user.id } });
+    await credits.mod.revokeUnlock(unlock.id, true, admin);
+    assert.equal(await balance(user), 2);
+    assert.equal(await credits.mod.hasUnlocked(user.id, id), false);
+    const kinds = (await db.creditTransaction.findMany({ where: { user_id: user.id }, orderBy: { id: 'asc' } })).map((row) => `${row.kind}:${row.amount}:${row.balance_after}`);
+    assert.deepEqual(kinds, ['adjustment:2:2', 'unlock:-1:1', 'refund:1:2']);
+    const summary = await credits.mod.creditSummary(user.id);
+    assert.deepEqual([summary.balance, summary.purchased, summary.used], [2, 2, 0]);
+    assert.ok(await db.activityLog.findFirst({ where: { action: 'credits_adjusted', detail: { contains: 'Goodwill' } } }), 'adjustments are in the audit log');
+  });
+
+  it('the fee structure is separate, editable, and starts with the official figures', async () => {
+    const fees = await import('../lib/fees.js');
+    const current = await fees.getFees();
+    assert.equal(current.registration[0].fee, 'Rs. 5,000');
+    assert.equal(current.finalization.at(-1).fee, 'Rs. 500,000');
+    await fees.saveFees({ ...current, registration: [...current.registration, { category: '', fee: '' }], whatsapp: '0300 0000000' });
+    const saved = await fees.getFees();
+    assert.equal(saved.registration.length, 4, 'empty rows are ignored');
+    assert.equal(saved.whatsapp, '0300 0000000');
+    assert.equal(fees.whatsappDigits('0339-9077424'), '923399077424');
+    assert.equal(await db.creditPackage.count({ where: { name: { contains: 'registration' } } }), 0);
+  });
+});

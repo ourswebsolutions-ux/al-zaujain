@@ -8,16 +8,21 @@ import { FaCheck, FaEyeSlash, FaLock, FaWhatsapp } from 'react-icons/fa6';
 import { buttonClass } from '@/components/ui/Button';
 import { useT } from '@/components/i18n/LanguageProvider';
 
-const UnlockContext = createContext({ photoLocked: false, openUnlock: () => {} });
+const UnlockContext = createContext({ photoLocked: false, openUnlock: () => {}, unlockCost: 1, member: false, isUnlocked: () => false });
 
 const BENEFITS = ['View original profile photographs.', 'Access contact information.', 'Connect through WhatsApp.', 'Send direct messages.', 'Explore complete profile details.'];
 
-export function UnlockProvider({ photoLocked, signedIn, children }) {
+// `unlocked` lists the Premium profiles this member opened with credits; `unlockCost` is the credits per unlock.
+export function UnlockProvider({ photoLocked, signedIn, member = false, unlockCost = 1, unlocked = [], children }) {
   const t = useT();
   const [open, setOpen] = useState(false);
   const openUnlock = useCallback(() => setOpen(true), []);
-  const value = useMemo(() => ({ photoLocked, openUnlock }), [photoLocked, openUnlock]);
+  const value = useMemo(() => {
+    const open = new Set(unlocked);
+    return { photoLocked, openUnlock, unlockCost, member, signedIn, isUnlocked: (code) => open.has(code) };
+  }, [photoLocked, openUnlock, unlockCost, member, signedIn, unlocked]);
   const href = signedIn ? '/dashboard/payments/submit' : '/login?next=/dashboard/payments/submit';
+  const creditsHref = signedIn ? '/dashboard/credits/buy' : '/login?next=/dashboard/credits/buy';
 
   return (
     <UnlockContext.Provider value={value}>
@@ -37,7 +42,9 @@ export function UnlockProvider({ photoLocked, signedIn, children }) {
                     <li key={benefit} className="flex items-center gap-3 text-[13.5px] text-navy"><span className="grid size-5 shrink-0 place-items-center rounded-full bg-[#e4b6532b] text-[9px] text-[#946c13]"><FaCheck aria-hidden="true" /></span>{t(benefit)}</li>
                   ))}
                 </ul>
-                <Link href={href} onClick={() => setOpen(false)} className={buttonClass('gold', 'lg', 'mt-6 w-full')}>{t('View Payment Options')}</Link>
+                <Link href={creditsHref} onClick={() => setOpen(false)} className={buttonClass('gold', 'lg', 'mt-6 w-full')}>{t('Buy Premium Credits')}</Link>
+                <p className="mt-2 text-center text-xs text-muted">{t('Each credit unlocks one Premium profile, and it stays open for you.')}</p>
+                <Link href={href} onClick={() => setOpen(false)} className={buttonClass('outline', 'md', 'mt-3 w-full')}>{t('View Payment Options')}</Link>
                 <button type="button" onClick={() => setOpen(false)} className="mt-3 block w-full cursor-pointer text-center text-[13px] font-medium text-muted hover:text-navy">{t('Continue Browsing')}</button>
               </div>
             </motion.div>
@@ -51,13 +58,13 @@ export function UnlockProvider({ photoLocked, signedIn, children }) {
 export const useUnlock = () => useContext(UnlockContext);
 
 // Sits over a blurred photo. Shown on cards, and larger on the profile page.
-export function PhotoLock({ large, type = 'paid' }) {
+export function PhotoLock({ large, type = 'paid', code, className = 'absolute inset-0' }) {
   const t = useT();
-  const { photoLocked, openUnlock } = useUnlock();
-  // Public profiles are open to everyone, so their photos are never covered.
-  if (!photoLocked || type === 'public') return null;
+  const { photoLocked, openUnlock, isUnlocked } = useUnlock();
+  // Public profiles are open to everyone, and a profile this member unlocked with credits is open too.
+  if (!photoLocked || type === 'public' || (code && isUnlocked(code))) return null;
   return (
-    <button type="button" onClick={(event) => { event.preventDefault(); event.stopPropagation(); openUnlock(); }} aria-label={t('Unlock Full Profile Photograph')} className={`${KEEP_LIGHT} absolute inset-0 z-[5] flex cursor-pointer flex-col items-center justify-center overflow-hidden bg-[#03223f33] backdrop-blur-2xl backdrop-saturate-50 text-white`}>
+    <button type="button" onClick={(event) => { event.preventDefault(); event.stopPropagation(); openUnlock(); }} aria-label={t('Unlock Full Profile Photograph')} className={`${KEEP_LIGHT} ${className} z-[5] flex cursor-pointer flex-col items-center justify-center overflow-hidden bg-[#03223f33] backdrop-blur-2xl backdrop-saturate-50 text-white`}>
       <span className={`grid place-items-center rounded-full bg-[#03223f99] text-white ${large ? 'size-14 text-xl' : 'size-10 text-base'}`}><FaEyeSlash aria-hidden="true" /></span>
     </button>
   );

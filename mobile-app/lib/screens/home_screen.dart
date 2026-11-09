@@ -8,6 +8,7 @@ import '../widgets/common.dart';
 import '../widgets/enquiry_form.dart';
 import '../widgets/pickers.dart';
 import 'consultants_screen.dart';
+import 'credits_screen.dart';
 import 'info_screens.dart';
 import 'shell.dart';
 
@@ -416,18 +417,9 @@ class _Featured extends StatelessWidget {
               ),
             )
           else
-            SizedBox(
-              height: 560,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: profiles.length,
-                separatorBuilder: (_, _) => const SizedBox(width: 14),
-                itemBuilder: (context, index) => SizedBox(
-                  width: 280,
-                  child: ProposalCard(card: profiles[index], tag: profiles[index]['featured'] == true ? tr('Featured') : null),
-                ),
-              ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: CardGrid(cards: [for (final profile in profiles) {...profile, if (profile['featured'] == true) 'tag': 'Featured'}]),
             ),
           const SizedBox(height: 14),
           Center(
@@ -948,6 +940,7 @@ class _Footer extends StatelessWidget {
           ),
           link('Browse proposals', () => shellKey.currentState?.showProposals()),
           link('Marriage consultants', () => push(context, const ConsultantsScreen())),
+        link('Consultancy fees', () => push(context, const FeesScreen())),
           link('Submit a profile', () => openProfileForm(context)),
           link('Contact us', () => push(context, const ContactScreen())),
           link('Privacy', () => push(context, const LegalScreen(kind: 'privacy'))),

@@ -1,4 +1,6 @@
-import { ProfileCarousel } from './ProfileCarousel';
+import { FaArrowRight } from 'react-icons/fa6';
+import { ProposalCard } from '@/components/profile/ProposalCard';
+import { ButtonLink } from '@/components/ui/Button';
 import { Reveal } from '@/components/ui/Reveal';
 import { SectionTag, Urdu } from '@/components/ui/Text';
 import { getT } from '@/lib/i18n/server.js';
@@ -16,7 +18,15 @@ export async function Featured({ profiles }) {
         <p className="mb-4 text-base leading-[28.8px]">{t('Pakistan and overseas proposals, with the details that matter: education, work, family, and shared expectations.')}</p>
       </Reveal>
       {profiles.length > 0 ? (
-        <Reveal y={38}><ProfileCarousel profiles={profiles} /></Reveal>
+        <>
+          {/* Four cards per row on laptops and desktops, wide single cards on phones. */}
+          <ul className="grid grid-cols-4 gap-5 max-[1180px]:grid-cols-3 max-p:grid-cols-2 max-sm:grid-cols-1">
+            {profiles.map((profile, index) => (
+              <Reveal as="li" key={profile.code} y={30} delay={Math.min(index, 3) * 0.06}><ProposalCard profile={profile} tag={profile.featured ? 'Featured' : undefined} /></Reveal>
+            ))}
+          </ul>
+          <div className="mt-8 flex justify-center"><ButtonLink href="/proposals">{t('View all proposals')} <FaArrowRight aria-hidden="true" className="rtl:-scale-x-100" /></ButtonLink></div>
+        </>
       ) : (
         <p className="rounded-2xl border border-line bg-white p-8 text-center text-muted">{t('New proposals will appear here soon.')}</p>
       )}
