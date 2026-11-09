@@ -38,7 +38,7 @@ computer. They are excluded from git.
 - From the website folder:
   - `npm run test:mobile-api` — every API endpoint against a real server and a test database.
   - `npm run test:mobile-app` — drives the real app (web build) through every screen:
-    `flutter build web --profile --dart-define=AZ_SEMANTICS=true` first, then `npm run build`.
+    `flutter build web --profile --dart-define=AZ_SEMANTICS=true --dart-define=AZ_SITE=http://localhost:3214` first, then `npm run build`.
 
 ## Where things are
 

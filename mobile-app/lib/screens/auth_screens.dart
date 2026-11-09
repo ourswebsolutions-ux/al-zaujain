@@ -7,7 +7,6 @@ import '../core/app_state.dart';
 import '../core/theme.dart';
 import '../widgets/common.dart';
 import '../widgets/pickers.dart';
-import 'profile_form_screen.dart';
 import 'shell.dart';
 
 /// The website's AuthCard: a navy band with the emblem and a white form card.
@@ -102,7 +101,6 @@ class _LoginScreenState extends State<LoginScreen> {
         Text(tr('· New here?')),
         TextButton(onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => RegisterScreen(then: widget.then))), child: Text(tr('Create an account'), style: const TextStyle(fontWeight: FontWeight.w600))),
       ]),
-      TextButton(onPressed: () => push(context, const ProfileFormScreen()), child: Text(tr('Submit a profile without an account'))),
     ]);
   }
 }

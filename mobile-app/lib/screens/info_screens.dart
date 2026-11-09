@@ -80,6 +80,7 @@ class AppSettingsScreen extends StatelessWidget {
             ]),
           ),
           const SizedBox(height: 14),
+          if (builtInSite.isEmpty) ...[
           Panel(
             title: 'Connected website',
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -93,6 +94,7 @@ class AppSettingsScreen extends StatelessWidget {
               ]),
             ]),
           ),
+          ],
           const SizedBox(height: 14),
           Panel(
             title: 'App version',

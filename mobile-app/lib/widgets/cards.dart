@@ -5,6 +5,7 @@ import '../core/app_state.dart';
 import '../core/theme.dart';
 import '../screens/auth_screens.dart';
 import '../screens/payments_screen.dart';
+import '../screens/profile_form_screen.dart';
 import '../screens/profile_screen.dart';
 import 'common.dart';
 
@@ -62,6 +63,43 @@ Future<void> showUnlockSheet(BuildContext context) {
     ),
   );
 }
+
+/// In the app, browsing is open to everyone, but full proposals and profile submission are for members.
+Future<void> requireAccount(BuildContext context, Widget then, {String title = 'Create a free account to continue'}) async {
+  if (app.signedIn) {
+    await push(context, then);
+    return;
+  }
+  await showModalBottomSheet(
+    context: context,
+    builder: (sheet) => SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(22, 0, 22, 20),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Container(width: 56, height: 56, decoration: const BoxDecoration(color: AppColors.cream, shape: BoxShape.circle), child: const Icon(Icons.person_add_alt_1_rounded, color: AppColors.gold)),
+          const SizedBox(height: 12),
+          Tx(tr(title), textAlign: TextAlign.center, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 6),
+          Tx(tr('Browsing is open to everyone. Full proposals, submitting a profile, saving and chat are for registered members. It is free and takes a minute.'), textAlign: TextAlign.center, style: const TextStyle(fontSize: 13.5, color: AppColors.muted, height: 1.5)),
+          const SizedBox(height: 18),
+          AppButton('Create an account', tone: Tone.gold, expand: true, onPressed: () {
+            Navigator.pop(sheet);
+            push(context, RegisterScreen(then: then));
+          }),
+          const SizedBox(height: 10),
+          AppButton('Sign in', tone: Tone.outline, expand: true, onPressed: () {
+            Navigator.pop(sheet);
+            push(context, LoginScreen(then: then));
+          }),
+        ]),
+      ),
+    ),
+  );
+}
+
+Future<void> openProposal(BuildContext context, String code) => requireAccount(context, ProfileScreen(code: code), title: 'Create a free account to view this proposal');
+
+Future<void> openProfileForm(BuildContext context) => requireAccount(context, const ProfileFormScreen(), title: 'Create a free account to submit a profile');
 
 class SaveHeart extends StatefulWidget {
   const SaveHeart({super.key, required this.code});
@@ -157,7 +195,7 @@ class ProposalCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22), side: const BorderSide(color: AppColors.line)),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => push(context, ProfileScreen(code: '${card['code']}')),
+        onTap: () => openProposal(context, '${card['code']}'),
         child: Padding(
           padding: const EdgeInsets.all(9),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -220,7 +258,7 @@ class MatchCard extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Color(0xFFE7E9EE))),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: () => push(context, ProfileScreen(code: '${card['code']}')),
+          onTap: () => openProposal(context, '${card['code']}'),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Padding(padding: const EdgeInsets.all(6), child: _Cover(card: card, tag: card['score'] != null ? tr('{score}% match', {'score': card['score']}) : null, showSave: app.isMember)),
             Padding(

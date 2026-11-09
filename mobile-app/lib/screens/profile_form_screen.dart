@@ -191,12 +191,6 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
         body: ListView(controller: scroll, padding: const EdgeInsets.fromLTRB(16, 14, 16, 30), children: [
           if (step == 0 && !widget.editing) ...[
             Tx(tr(app.signedIn ? 'Fields marked with a lock are never shown publicly.' : 'No account needed. Fields marked with a lock are never shown publicly.'), style: const TextStyle(fontSize: 13, color: AppColors.muted)),
-            if (!app.signedIn)
-              Wrap(crossAxisAlignment: WrapCrossAlignment.center, children: [
-                Text(tr('Already registered?'), style: const TextStyle(fontSize: 13)),
-                TextButton(onPressed: () => push(context, const LoginScreen(then: ProfileFormScreen())), child: Text(tr('Sign in'))),
-                Text(tr('so this profile is added to your account.'), style: const TextStyle(fontSize: 13)),
-              ]),
             const SizedBox(height: 10),
           ],
           if (widget.editing) Padding(padding: const EdgeInsets.only(bottom: 12), child: Tx(tr('Editing a live profile sends it back to our team for review.'), style: const TextStyle(fontSize: 13, color: AppColors.muted))),

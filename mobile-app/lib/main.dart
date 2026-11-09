@@ -88,11 +88,13 @@ class _StartState extends State<_Start> {
                 Tx(tr(error.toString()), textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFFC7D3DD), height: 1.5)),
                 const SizedBox(height: 18),
                 AppButton('Try again', tone: Tone.gold, icon: Icons.refresh_rounded, onPressed: _load),
-                const SizedBox(height: 8),
-                TextButton(
-                  onPressed: () => push(context, const SetupScreen()),
-                  child: Text(tr('Change website'), style: const TextStyle(color: AppColors.champagne)),
-                ),
+                if (builtInSite.isEmpty) ...[
+                  const SizedBox(height: 8),
+                  TextButton(
+                    onPressed: () => push(context, const SetupScreen()),
+                    child: Text(tr('Change website'), style: const TextStyle(color: AppColors.champagne)),
+                  ),
+                ],
               ],
             ]),
           ),

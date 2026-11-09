@@ -151,4 +151,8 @@ const _appUrdu = <String, String>{
   'The update could not be installed. Please try again.': 'اپ ڈیٹ انسٹال نہیں ہو سکی۔ براہ کرم دوبارہ کوشش کریں۔',
   'App version': 'ایپ کا ورژن',
   'Check for updates': 'اپ ڈیٹ چیک کریں',
+  'Create a free account to continue': 'جاری رکھنے کے لیے مفت اکاؤنٹ بنائیں',
+  'Create a free account to view this proposal': 'یہ رشتہ دیکھنے کے لیے مفت اکاؤنٹ بنائیں',
+  'Create a free account to submit a profile': 'پروفائل جمع کرانے کے لیے مفت اکاؤنٹ بنائیں',
+  'Browsing is open to everyone. Full proposals, submitting a profile, saving and chat are for registered members. It is free and takes a minute.': 'رشتے دیکھنا سب کے لیے کھلا ہے۔ مکمل رشتے، پروفائل جمع کرانا، محفوظ کرنا اور بات چیت رجسٹرڈ ممبرز کے لیے ہیں۔ یہ مفت ہے اور ایک منٹ لگتا ہے۔',
 };

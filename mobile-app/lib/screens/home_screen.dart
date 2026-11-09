@@ -9,7 +9,6 @@ import '../widgets/enquiry_form.dart';
 import '../widgets/pickers.dart';
 import 'consultants_screen.dart';
 import 'info_screens.dart';
-import 'profile_form_screen.dart';
 import 'shell.dart';
 
 /// The website's homepage, section by section, arranged for a phone.
@@ -949,7 +948,7 @@ class _Footer extends StatelessWidget {
           ),
           link('Browse proposals', () => shellKey.currentState?.showProposals()),
           link('Marriage consultants', () => push(context, const ConsultantsScreen())),
-          link('Submit a profile', () => push(context, const ProfileFormScreen())),
+          link('Submit a profile', () => openProfileForm(context)),
           link('Contact us', () => push(context, const ContactScreen())),
           link('Privacy', () => push(context, const LegalScreen(kind: 'privacy'))),
           link('Terms', () => push(context, const LegalScreen(kind: 'terms'))),

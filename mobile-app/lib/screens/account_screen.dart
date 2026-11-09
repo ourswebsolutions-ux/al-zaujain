@@ -87,7 +87,7 @@ class _VisitorView extends StatelessWidget {
       ),
       const SizedBox(height: 16),
       _Menu(items: [
-        (Icons.person_add_alt_1_rounded, 'Submit a profile', () => push(context, const ProfileFormScreen()), 0),
+        (Icons.person_add_alt_1_rounded, 'Submit a profile', () => openProfileForm(context), 0),
         (Icons.travel_explore_rounded, 'Browse proposals', () => shellKey.currentState?.showProposals(), 0),
         (Icons.support_agent_rounded, 'Marriage consultants', () => push(context, const ConsultantsScreen()), 0),
         (Icons.link_rounded, 'Open the private link', () => push(context, const ManageLinksScreen()), links.length),

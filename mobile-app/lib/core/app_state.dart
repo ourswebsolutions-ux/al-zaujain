@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'api.dart';
 import 'i18n.dart';
 
-const appVersion = '1.0.1';
+const appVersion = '1.0.2';
 
 /// The website this build opens by default, set when the APK is built (scripts/build-apk.mjs reads
 /// APP_SITE_URL). With it, families never see the address screen. Settings can still change it.
@@ -41,7 +41,8 @@ class AppState extends ChangeNotifier {
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
     t.lang = _prefs.getString('lang') ?? 'en';
-    domain = _prefs.getString('domain') ?? (builtInSite.isEmpty ? null : normalise(builtInSite));
+    // A built-in website always wins, so an old address saved on the phone can never strand the app.
+    domain = builtInSite.isNotEmpty ? normalise(builtInSite) : _prefs.getString('domain');
     if (domain != null && domain!.isEmpty) domain = null;
     if (domain != null) {
       _api = Api(domain!, token: _prefs.getString('token'), onSignedOut: _expired);

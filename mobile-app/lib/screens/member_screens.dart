@@ -28,7 +28,7 @@ void openHref(BuildContext context, String? href) {
     Navigator.of(context).popUntil((route) => route.isFirst);
     shellKey.currentState?.select(2);
   } else if (profile != null) {
-    push(context, ProfileScreen(code: profile[1]!.toUpperCase()));
+    openProposal(context, profile[1]!.toUpperCase());
   } else if (path.startsWith('/dashboard/payments')) {
     push(context, const PaymentsScreen());
   } else if (path.startsWith('/dashboard/matches')) {

@@ -1,6 +1,6 @@
 // Drives the real Flutter app (built for the web with AZ_SEMANTICS=true) against a real server and a
 // fresh test database, the way a family would use it on a phone.
-//   cd mobile-app && flutter build web --release --dart-define=AZ_SEMANTICS=true
+//   cd mobile-app && flutter build web --profile --dart-define=AZ_SEMANTICS=true --dart-define=AZ_SITE=http://localhost:3214
 //   npm run build && npm run test:mobile-app
 // Screenshots go to $APP_SHOTS when it is set.
 import assert from 'node:assert/strict';
@@ -19,7 +19,7 @@ const APP_PORT = 3302;
 const SITE = `http://localhost:${API_PORT}`;
 const WEB = path.resolve('mobile-app/build/web');
 const SHOTS = process.env.APP_SHOTS;
-if (!fs.existsSync(path.join(WEB, 'main.dart.js'))) throw new Error('Build the web app first: cd mobile-app && flutter build web --release --dart-define=AZ_SEMANTICS=true');
+if (!fs.existsSync(path.join(WEB, 'main.dart.js'))) throw new Error('Build the web app first: cd mobile-app && flutter build web --profile --dart-define=AZ_SEMANTICS=true --dart-define=AZ_SITE=http://localhost:3214');
 if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
 
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'az-app-'));
@@ -179,15 +179,10 @@ const pick = async (field, option, search) => {
   await page.waitForTimeout(400);
 };
 
-await step('first launch asks for the website address and connects to it', async () => {
-  await shot('01-setup');
-  const address = page.getByRole('textbox').first();
-  await address.click();
-  await address.fill(SITE);
-  await page.waitForTimeout(300);
-  await shot('02-setup-filled');
-  await button('Connect').click();
+await step('the app opens straight to the home page, never asking for a website address', async () => {
   await visible('Find your life partner', 30000);
+  assert.equal(await page.getByRole('textbox', { name: 'https://example.com' }).count(), 0);
+  assert.equal(await button('Connect').count(), 0);
   await shot('03-home');
 });
 
@@ -246,17 +241,16 @@ await step('region tabs: a category lists only its proposals', async () => {
   await shot('10-region');
 });
 
-await step('a visitor reads a proposal: biodata sections, no contact details, sign in to chat', async () => {
+await step('a guest browses proposals but needs an account to open one', async () => {
   await fresh('Proposals');
   const card = text(sana);
   await scrollTo(card);
   await card.click();
-  await visible('Candidate information');
-  await visible('Sign in to chat');
-  await shot('11-profile-visitor');
-  await scrollTo(text('Partner requirements'), 40);
-  await shot('12-profile-partner');
-  await scrollTo(text('Share this biodata with your family.'), 40);
+  await visible('Create a free account to view this proposal');
+  assert.equal(await text('Candidate information').count(), 0, 'the proposal stays closed for guests');
+  await shot('11-guest-account-needed');
+  await button('Sign in').click();
+  await visible('Welcome back');
   await back();
 });
 
@@ -421,7 +415,7 @@ await step('account settings save the member’s details', async () => {
   await back();
 });
 
-await step('signing out, then submitting a profile without an account', async () => {
+await step('a new family creates an account, then submits a profile with a photo', async () => {
   await fresh('Account');
   await scrollTo(button('Sign out'), 60);
   await button('Sign out').click();
@@ -432,7 +426,14 @@ await step('signing out, then submitting a profile without an account', async ()
   }));
   await fresh('Account');
   await button('Submit a profile').click();
-  await visible('STEP 1 OF 7');
+  await visible('Create a free account to submit a profile');
+  await button('Create an account').click();
+  await typeIn('Your name', 'Ayesha Malik');
+  await typeIn('Email', 'ayesha@test.local');
+  await typeIn('Phone / WhatsApp', '0300 5556667');
+  await scrollTo(button('Create my account'));
+  await button('Create my account').click();
+  await visible('STEP 1 OF 7', 20000);
   await shot('28-submit-step1');
   for (let step = 2; step <= 7; step += 1) {
     await scrollTo(button('Continue'), 40);
@@ -451,19 +452,20 @@ await step('signing out, then submitting a profile without an account', async ()
   await button('Submit profile').click();
   await visible('received', 25000);
   await shot('30-submitted');
-  const row = await db.profile.findFirst({ where: { full_name: 'Ayesha Malik' } });
+  const row = await db.profile.findFirst({ where: { full_name: 'Ayesha Malik' }, include: { user: true, photos: true } });
   assert.equal(row.status, 'pending');
+  assert.equal(row.user?.email, 'ayesha@test.local', 'the profile belongs to the new account');
+  assert.equal(row.photos.length, 1);
   await button('View my profile').click();
   await visible('Waiting for review');
-  await visible('Manage this profile from an account');
-  await shot('31-private-link');
+  await shot('31-my-new-profile');
   await back();
 });
 
-await step('the private link is remembered on this phone', async () => {
+await step('the new member finds the profile under My matrimonial profile', async () => {
   await fresh('Account');
-  await button('Open the private link').click();
-  await visible('Profiles submitted from this phone');
+  await scrollTo(button('My matrimonial profile'), 40);
+  await button('My matrimonial profile').click();
   await visible('Ayesha');
   await back();
 });
@@ -492,7 +494,8 @@ await step('consultants, legal pages and settings open', async () => {
   await visible('What we collect');
   await back();
   await page.getByRole('button', { name: 'Settings' }).first().click();
-  await visible('Connected website');
+  await visible('App version');
+  assert.equal(await text('Connected website').count(), 0, 'the website address is not shown');
   await shot('32-settings');
   await back();
 });
