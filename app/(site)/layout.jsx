@@ -15,7 +15,7 @@ export default async function SiteLayout({ children }) {
   const categories = await activeCategories();
   return (
     <>
-      <a href="#main" className="fixed -top-24 left-[15px] z-[100] bg-white p-3 focus:top-[15px]">{t('Skip to content')}</a>
+      <a href="#main" className="fixed -top-24 start-[15px] z-[100] bg-white p-3 focus:top-[15px]">{t('Skip to content')}</a>
       <Header phone={settings.site_phone} phoneIntl={settings.site_phone_intl} user={user} unread={user ? await unreadCount(user.id) : 0} categories={categories} announcements={(settings.announcements ?? '').split('\n').map((line) => line.trim()).filter(Boolean)} />
       <div id="main">{children}</div>
       <Footer settings={settings} />

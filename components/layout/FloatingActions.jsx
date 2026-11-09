@@ -43,9 +43,9 @@ export function FloatingActions({ whatsapp }) {
   return (
     <>
       <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-[1050] h-[3px] bg-[#062b4e12]">
-        <motion.span className="block h-full origin-left bg-gold" style={{ scaleX: scrollYProgress }} />
+        <motion.span className="block h-full origin-left bg-gold rtl:origin-right" style={{ scaleX: scrollYProgress }} />
       </div>
-      <div aria-label={t('Quick actions')} className="fixed bottom-[22px] right-[22px] z-[1000] flex flex-col gap-3 max-g:bottom-3 max-g:right-3 max-g:gap-2.5">
+      <div aria-label={t('Quick actions')} className="fixed bottom-[22px] end-[22px] z-[1000] flex flex-col gap-3 max-g:bottom-3 max-g:end-3 max-g:gap-2.5">
         <a
           href="#top"
           onClick={scrollToTop}

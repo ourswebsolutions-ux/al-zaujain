@@ -29,7 +29,7 @@ export default async function Categories() {
     <>
       <Title>{t('Proposal categories')}</Title>
       <p className="mb-4 text-xs text-muted">{t('Each active category gets its own listing page and appears in the Proposals menu. Countries are placed in categories under Countries and cities.')}</p>
-      <Panel>{categories.map((category) => <div key={category.id}><CategoryRow category={category} /><div className="pb-2 text-right"><ActionButton action={deleteCategory} fields={{ id: category.id }} tone="outline">Delete {category.name}</ActionButton></div></div>)}</Panel>
+      <Panel>{categories.map((category) => <div key={category.id}><CategoryRow category={category} /><div className="pb-2 text-end"><ActionButton action={deleteCategory} fields={{ id: category.id }} tone="outline">Delete {category.name}</ActionButton></div></div>)}</Panel>
       <Panel title={t('Add a category')}><CategoryRow /></Panel>
     </>
   );

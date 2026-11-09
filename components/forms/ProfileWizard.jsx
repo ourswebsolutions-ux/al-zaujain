@@ -20,7 +20,7 @@ function FilePicker({ label, hint, accept = 'image/jpeg,image/png,image/webp', m
   return (
     <label className={labelClass}>
       {label}
-      <input type="file" accept={accept} multiple={multiple} onChange={(event) => onChange([...event.target.files])} className={`${inputClass} cursor-pointer file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-cream file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-navy`} />
+      <input type="file" accept={accept} multiple={multiple} onChange={(event) => onChange([...event.target.files])} className={`${inputClass} cursor-pointer file:me-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-cream file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-navy`} />
       <span className="mt-1 block font-normal text-muted">{hint}</span>
       {files?.length > 0 && <span className="mt-1 block font-medium text-[#3d6b4a]">{t('{count} selected', { count: files.length })}</span>}
     </label>
@@ -213,7 +213,7 @@ export function ProfileWizard({ countries, castes = [], initial = {}, mode = 'cr
             ) : documents}
           </section>
         ))}
-        {message && <p role="alert" className="border-l-[3px] border-[#a33a2c] bg-[#fbeeec] p-3 text-xs">{t(message)}</p>}
+        {message && <p role="alert" className="border-s-[3px] border-[#a33a2c] bg-[#fbeeec] p-3 text-xs">{t(message)}</p>}
         <div className="sticky bottom-4 z-10 flex justify-end">
           <Button type="button" tone="gold" disabled={busy} onClick={submit} className="cursor-pointer shadow-[0_10px_30px_#03223f33]">{t(busy ? 'Saving…' : mode === 'create' ? 'Save profile' : 'Save changes')} <FaCheck aria-hidden="true" /></Button>
         </div>
@@ -262,16 +262,16 @@ export function ProfileWizard({ countries, castes = [], initial = {}, mode = 'cr
           </motion.div>
         </AnimatePresence>
 
-        {message && <p role="alert" className="mt-5 border-l-[3px] border-[#a33a2c] bg-[#fbeeec] p-3 text-xs">{t(message)}</p>}
+        {message && <p role="alert" className="mt-5 border-s-[3px] border-[#a33a2c] bg-[#fbeeec] p-3 text-xs">{t(message)}</p>}
 
         <div className="mt-7 flex items-center justify-between gap-3 border-t border-[#eee6d8] pt-6">
-          <Button type="button" tone="outline" disabled={step === 0} onClick={() => goTo(step - 1)} className="cursor-pointer"><FaArrowLeft aria-hidden="true" /> {t('Back')}</Button>
+          <Button type="button" tone="outline" disabled={step === 0} onClick={() => goTo(step - 1)} className="cursor-pointer"><FaArrowLeft aria-hidden="true" className="rtl:-scale-x-100" /> {t('Back')}</Button>
           {last ? (
             <Button type="button" tone="gold" disabled={busy} onClick={submit} className="cursor-pointer">
               {busy ? 'Saving…' : mode === 'create' ? 'Submit profile' : 'Save changes'} <FaCheck aria-hidden="true" />
             </Button>
           ) : (
-            <Button type="button" onClick={next} className="cursor-pointer">{t('Continue')} <FaArrowRight aria-hidden="true" /></Button>
+            <Button type="button" onClick={next} className="cursor-pointer">{t('Continue')} <FaArrowRight aria-hidden="true" className="rtl:-scale-x-100" /></Button>
           )}
         </div>
       </div>

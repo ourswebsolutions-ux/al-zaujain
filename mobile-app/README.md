@@ -4,20 +4,27 @@ The Flutter app for the Al Zaujain Marriage Bureau website. It has no database o
 launch it asks for the website address and then uses that website's `/api/mobile` API, so accounts,
 profiles, searches, payments, chat and permissions are exactly the website's.
 
-## Build and publish a new version
+## Build and publish a new Android version
 
-1. Raise `version:` in `pubspec.yaml` (for example `1.0.1+2`; the number after `+` must always go up).
-2. Build the signed release APK:
-   ```
-   cd mobile-app
-   flutter build apk --release --target-platform android-arm,android-arm64
-   ```
-3. From the website folder, copy it to the website and update the homepage download section:
-   ```
-   npm run app:publish
-   ```
-   This writes `public/downloads/al-zaujain-v<version>.apk` and `public/downloads/app.json`.
-   Upload both with the rest of the website.
+From the website folder:
+```
+npm run app:build -- --bump
+```
+This raises the version, builds the signed APK and copies it to `public/downloads` with `app.json`.
+Upload both with the rest of the website. Installed apps see the new build the next time they open
+and offer a one-tap update (the download is checked against its SHA-256 before Android installs it).
+
+Set `APP_SITE_URL=https://your-domain` in `.env.local` first: the address is built into the app, so
+families never see the "website address" screen. Without it the app asks for the address once.
+
+## iPhone (iOS)
+
+iOS apps can only be built on a Mac. `.github/workflows/ios-app.yml` builds the app on GitHub's Macs:
+run it from the repository's Actions tab ("iOS app" → Run workflow), or push a tag like `app-v1.0.1`.
+Without signing secrets it produces an unsigned build that proves the app compiles. To install it on
+iPhones you need an Apple Developer account (USD 99 a year) and the secrets listed at the top of the
+workflow; it then builds a signed IPA and uploads it to TestFlight, from where it goes to the App Store.
+iPhone updates come through TestFlight / the App Store, not from the website.
 
 ## Signing key — keep a backup
 

@@ -46,7 +46,7 @@ export function ProfileCreator({ countries, castes }) {
     <div className="grid gap-6">
       <div role="tablist" aria-label={t('How to add the profile')} className="grid grid-cols-2 gap-3 max-m:grid-cols-1">
         {TABS.map((item) => (
-          <button key={item.key} type="button" role="tab" aria-selected={tab === item.key} onClick={() => setTab(item.key)} className={`flex cursor-pointer items-center gap-3.5 rounded-2xl border-2 p-4 text-left transition-colors ${tab === item.key ? 'border-navy bg-white shadow-[0_10px_28px_#03223f12]' : 'border-transparent bg-white/60 hover:border-[var(--d-line,#dfe2e8)]'}`}>
+          <button key={item.key} type="button" role="tab" aria-selected={tab === item.key} onClick={() => setTab(item.key)} className={`flex cursor-pointer items-center gap-3.5 rounded-2xl border-2 p-4 text-start transition-colors ${tab === item.key ? 'border-navy bg-white shadow-[0_10px_28px_#03223f12]' : 'border-transparent bg-white/60 hover:border-[var(--d-line,#dfe2e8)]'}`}>
             <span className={`grid size-11 shrink-0 place-items-center rounded-xl text-lg ${tab === item.key ? 'bg-navy text-champagne' : 'bg-cream text-[var(--d-gold,#a67b2e)]'}`}><item.icon aria-hidden="true" /></span>
             <span><span className="block text-[15px] font-bold text-navy">{t(item.label)}</span><span className="block text-xs text-muted">{t(item.text)}</span></span>
           </button>
@@ -59,7 +59,7 @@ export function ProfileCreator({ countries, castes }) {
             <label htmlFor="biodata" className="mb-1 block text-[15px] font-bold text-navy">{t('Paste the complete biodata')}</label>
             <p className="mb-3 text-xs leading-5 text-muted">{t('Copy it from WhatsApp, Word, a PDF or anywhere else. Urdu and English both work. Nothing is saved until you review it and press Save.')}</p>
             <textarea id="biodata" value={text} onChange={(event) => setText(event.target.value)} rows={14} dir="auto" placeholder={'Name: …\nAge: …\nCity: …'} className={`${inputClass} font-mono text-[13px] leading-6`} />
-            {error && <p role="alert" className="mt-3 border-l-[3px] border-[#a33a2c] bg-[#fbeeec] p-3 text-xs">{t(error)}</p>}
+            {error && <p role="alert" className="mt-3 border-s-[3px] border-[#a33a2c] bg-[#fbeeec] p-3 text-xs">{t(error)}</p>}
             <div className="mt-4 flex flex-wrap items-center gap-4">
               <Button type="button" tone="gold" disabled={busy || !text.trim()} onClick={read} className="cursor-pointer"><FaWandMagicSparkles aria-hidden="true" /> {t(busy ? 'Reading…' : 'Read biodata')}</Button>
               {result && (

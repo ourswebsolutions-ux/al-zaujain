@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa6';
 import { ProposalCard } from '@/components/profile/ProposalCard';
-import { useT } from '@/components/i18n/LanguageProvider';
+import { useLang, useT } from '@/components/i18n/LanguageProvider';
 
 const SPEED = 0.035; // pixels per millisecond while gliding
 const MIN_CARDS = 8; // enough cards that the loop never shows a gap on wide screens
@@ -11,6 +11,7 @@ const MIN_CARDS = 8; // enough cards that the loop never shows a gap on wide scr
 // A continuous, seamless loop: the cards are shown twice and the track wraps by one set's width.
 export function ProfileCarousel({ profiles }) {
   const t = useT();
+  const dir = useLang() === 'ur' ? 'rtl' : 'ltr';
   const viewport = useRef(null);
   const track = useRef(null);
   const state = useRef({ offset: 0, target: null, hover: false, focus: false, drag: null, moved: false });
@@ -102,19 +103,19 @@ export function ProfileCarousel({ profiles }) {
         onClickCapture={onClickCapture}
         className="touch-pan-y select-none overflow-hidden py-3 [mask-image:linear-gradient(90deg,transparent,#000_4%,#000_96%,transparent)]"
       >
-        <ul ref={track} className="flex w-max gap-5 will-change-transform max-m:gap-4">
+        <ul ref={track} dir="ltr" className="flex w-max gap-5 will-change-transform max-m:gap-4">
           {[...set, ...set].map((profile, index) => {
             const copy = index >= profiles.length;
             return (
-              <li key={`${profile.code}-${index}`} aria-hidden={copy || undefined} inert={copy || undefined} className="w-[290px] shrink-0 max-m:w-[76vw] [&_img]:pointer-events-none">
+              <li key={`${profile.code}-${index}`} dir={dir} aria-hidden={copy || undefined} inert={copy || undefined} className="w-[290px] shrink-0 max-m:w-[76vw] [&_img]:pointer-events-none">
                 <ProposalCard profile={profile} tag={profile.featured ? 'Featured' : undefined} />
               </li>
             );
           })}
         </ul>
       </div>
-      <button type="button" onClick={() => move(-1)} aria-label={t('Previous proposals')} className={`${arrow} -left-3 max-m:left-1`}><FaChevronLeft aria-hidden="true" /></button>
-      <button type="button" onClick={() => move(1)} aria-label={t('Next proposals')} className={`${arrow} -right-3 max-m:right-1`}><FaChevronRight aria-hidden="true" /></button>
+      <button type="button" onClick={() => move(-1)} aria-label={t('Previous proposals')} className={`${arrow} -start-3 max-m:start-1`}><FaChevronLeft aria-hidden="true" className="rtl:-scale-x-100" /></button>
+      <button type="button" onClick={() => move(1)} aria-label={t('Next proposals')} className={`${arrow} -end-3 max-m:end-1`}><FaChevronRight aria-hidden="true" className="rtl:-scale-x-100" /></button>
     </div>
   );
 }

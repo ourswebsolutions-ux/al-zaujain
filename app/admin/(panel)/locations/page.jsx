@@ -52,7 +52,7 @@ export default async function Locations() {
           </form>
           <ul className="flex flex-wrap gap-2">
             {cities.filter((city) => city.country_id === country.id).map((city) => (
-              <li key={city.id} className={`flex items-center gap-1 rounded-full border border-line py-0.5 pl-3 pr-1 text-xs ${city.active ? '' : 'opacity-60'}`}>
+              <li key={city.id} className={`flex items-center gap-1 rounded-full border border-line py-0.5 ps-3 pe-1 text-xs ${city.active ? '' : 'opacity-60'}`}>
                 {t(city.featured ? '★ ' : '')}{city.name}{!city.active && <span className="text-muted"> ({t('hidden')})</span>}
                 <ActionButton action={updateCity} fields={{ id: city.id, action: 'feature' }} tone="outline">{t(city.featured ? 'Unstar' : 'Star')}</ActionButton>
                 <ActionButton action={updateCity} fields={{ id: city.id, action: 'active' }} tone="outline">{t(city.active ? 'Hide' : 'Show')}</ActionButton>

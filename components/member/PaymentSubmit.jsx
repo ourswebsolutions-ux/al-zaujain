@@ -47,7 +47,7 @@ export function PaymentSubmit({ methods, price }) {
           <ul className="grid gap-2">
             {methods.map((item) => (
               <li key={item.id}>
-                <button type="button" onClick={() => setMethodId(item.id)} aria-pressed={item.id === methodId} className={`flex w-full cursor-pointer items-center gap-3 rounded-lg border p-3 text-left transition-colors ${item.id === methodId ? 'border-navy bg-[var(--d-tint,#062b4e0a)]' : 'border-[var(--d-line,#e7e9ee)] hover:border-[var(--d-line,#c3c9d3)]'}`}>
+                <button type="button" onClick={() => setMethodId(item.id)} aria-pressed={item.id === methodId} className={`flex w-full cursor-pointer items-center gap-3 rounded-lg border p-3 text-start transition-colors ${item.id === methodId ? 'border-navy bg-[var(--d-tint,#062b4e0a)]' : 'border-[var(--d-line,#e7e9ee)] hover:border-[var(--d-line,#c3c9d3)]'}`}>
                   <span className="grid size-9 shrink-0 place-items-center rounded-md bg-cream text-[var(--d-gold,#a67b2e)]"><FaBuildingColumns aria-hidden="true" /></span>
                   <span className="min-w-0 flex-1"><span className="block text-[13.5px] font-semibold text-navy">{item.name}</span><span className="block truncate text-xs text-muted">{item.bank_name}</span></span>
                   {item.id === methodId && <FaCheck aria-hidden="true" className="text-[var(--d-green,#1f8a3a)]" />}
@@ -76,10 +76,10 @@ export function PaymentSubmit({ methods, price }) {
           <Field label="Amount paid" name="amount" required inputMode="decimal" dir="ltr" placeholder="5000" />
           <label className={labelClass}>
             {t('Payment screenshot or receipt')}
-            <input type="file" name="receipt" required accept="image/jpeg,image/png,image/webp" className={`${inputClass} cursor-pointer file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-cream file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-navy`} />
+            <input type="file" name="receipt" required accept="image/jpeg,image/png,image/webp" className={`${inputClass} cursor-pointer file:me-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-cream file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-navy`} />
             <span className="mt-1 block font-normal text-muted">{t('JPG, PNG or WebP, up to 8 MB.')}</span>
           </label>
-          {message && <p role="alert" className="border-l-[3px] border-[#a33a2c] bg-[var(--d-red-bg,#fbeeec)] p-3 text-xs">{t(message)}</p>}
+          {message && <p role="alert" className="border-s-[3px] border-[#a33a2c] bg-[var(--d-red-bg,#fbeeec)] p-3 text-xs">{t(message)}</p>}
           <Button type="submit" tone="gold" disabled={busy || !method} className="cursor-pointer">{t(busy ? 'Sending…' : 'Submit payment')}</Button>
           <p className="text-xs leading-5 text-muted">{t('Our team checks every payment. Your access unlocks once it is approved.')}</p>
         </form>

@@ -8,8 +8,8 @@ import '../core/theme.dart';
 
 final _rtlStart = RegExp(r'^[^A-Za-z؀-ۿ]*[؀-ۿ]');
 
-/// Text that reads right-to-left when it starts in Urdu, but stays left-aligned:
-/// the page layout never mirrors, exactly as on the website (text-left with plaintext direction).
+/// Text that orders itself by its own first letters (Urdu right-to-left, English left-to-right),
+/// aligned to the start of the page: the right in Urdu, the left in English, as on the website.
 class Tx extends StatelessWidget {
   const Tx(this.text, {super.key, this.style, this.maxLines, this.overflow, this.textAlign, this.softWrap});
   final String text;
@@ -29,21 +29,21 @@ class Tx extends StatelessWidget {
       overflow: overflow,
       softWrap: softWrap,
       textDirection: rtl ? TextDirection.rtl : TextDirection.ltr,
-      textAlign: textAlign ?? TextAlign.left,
+      textAlign: textAlign ?? (Directionality.of(context) == TextDirection.rtl ? TextAlign.right : TextAlign.left),
     );
   }
 }
 
 /// An Urdu calligraphy line in the website's Nastaliq style.
 class UrduLine extends StatelessWidget {
-  const UrduLine(this.text, {super.key, this.size = 17, this.color = AppColors.deepGold, this.align = TextAlign.left});
+  const UrduLine(this.text, {super.key, this.size = 17, this.color = AppColors.deepGold, this.align});
   final String text;
   final double size;
   final Color color;
-  final TextAlign align;
+  final TextAlign? align;
 
   @override
-  Widget build(BuildContext context) => Text(text, textDirection: TextDirection.rtl, textAlign: align, style: urduStyle.copyWith(fontSize: size, color: color));
+  Widget build(BuildContext context) => Text(text, textDirection: TextDirection.rtl, textAlign: align ?? (Directionality.of(context) == TextDirection.rtl ? TextAlign.right : TextAlign.left), style: urduStyle.copyWith(fontSize: size, color: color));
 }
 
 class SectionTag extends StatelessWidget {
@@ -157,7 +157,7 @@ class Notice extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: background, border: Border(left: BorderSide(color: border, width: 3))),
+      decoration: BoxDecoration(color: background, border: BorderDirectional(start: BorderSide(color: border, width: 3))),
       child: Tx(tr(message), style: TextStyle(fontSize: 13, color: text, height: 1.45)),
     );
   }
@@ -353,7 +353,7 @@ class InfoRow extends StatelessWidget {
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         SizedBox(width: 128, child: Tx(tr(label), style: const TextStyle(fontSize: 12.5, color: AppColors.muted))),
         const SizedBox(width: 10),
-        Expanded(child: Tx(tr(value), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600), textAlign: TextAlign.right)),
+        Expanded(child: Tx(tr(value), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600), textAlign: Directionality.of(context) == TextDirection.rtl ? TextAlign.left : TextAlign.right)),
       ]),
     );
   }

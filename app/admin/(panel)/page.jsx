@@ -59,7 +59,7 @@ export default async function AdminHome() {
               <td><Link href={`/admin/profiles/${profileCode(row.id)}`} className="flex items-center gap-3 font-semibold text-navy no-underline"><Avatar name={row.full_name} /> <span>{row.full_name}<span className="block text-xs font-normal text-muted">{profileCode(row.id)}</span></span></Link></td>
               <td>{t(row.city)}</td>
               <td className="whitespace-nowrap">{formatDate(row.created_at, lang)}</td>
-              <td className="text-right">
+              <td className="text-end">
                 <span className="flex justify-end gap-2">
                   <ButtonLink tone="outline" size="sm" href={`/admin/profiles/${profileCode(row.id)}`}>{t('Review')}</ButtonLink>
                   <ActionButton action={approveProfile} fields={{ id: row.id }}>{t('Approve')}</ActionButton>

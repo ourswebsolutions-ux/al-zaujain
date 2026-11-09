@@ -28,9 +28,8 @@ class AlZaujainApp extends StatelessWidget {
         title: 'Al Zaujain',
         debugShowCheckedModeBanner: false,
         theme: buildTheme(),
-        // Urdu changes the words only: the layout always stays left-to-right, as on the website.
-        // Switching language redraws every screen in the new wording.
-        builder: (context, child) => Directionality(textDirection: TextDirection.ltr, child: KeyedSubtree(key: ValueKey(app.lang), child: child!)),
+        // Urdu turns the whole app right-to-left, as on the website. Switching language redraws every screen.
+        builder: (context, child) => Directionality(textDirection: app.t.isUrdu ? TextDirection.rtl : TextDirection.ltr, child: KeyedSubtree(key: ValueKey(app.lang), child: child!)),
         home: const _Start(),
       ),
     );

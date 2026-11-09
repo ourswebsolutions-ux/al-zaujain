@@ -752,22 +752,25 @@ await step('profile can be deleted from the table, after confirming', async () =
   assert.equal(await db.profile.findUnique({ where: { id } }), null);
 });
 
-await step('Urdu changes the text but not the layout, on the public site and dashboards', async () => {
+await step('Urdu turns the whole layout right to left, on the public site and dashboards', async () => {
   const page = await newPage();
   const box = async (selector) => { const b = await page.locator(selector).first().boundingBox(); return b ? [Math.round(b.x), Math.round(b.width)] : null; };
   await page.goto('/');
   const navOrder = () => page.$$eval('nav[aria-label] > a, nav[aria-label] > div', (items) => items.map((item) => Math.round(item.getBoundingClientRect().x)));
   const navBefore = await navOrder();
-  assert.ok(navBefore.every((x, index) => index === 0 || x > navBefore[index - 1]), 'menu runs left to right');
-  const before = { search: await box('form[aria-label]'), direction: await page.evaluate(() => getComputedStyle(document.documentElement).direction) };
+  assert.ok(navBefore.every((x, index) => index === 0 || x > navBefore[index - 1]), 'English menu runs left to right');
+  const before = await box('form[aria-label]');
+  assert.equal(await page.evaluate(() => document.documentElement.dir), 'ltr');
   await page.click('button:has-text("اردو")');
   await page.waitForFunction(() => document.documentElement.lang === 'ur');
   await page.waitForSelector('text=اپنا شریک حیات تلاش کریں');
-  assert.equal(await page.evaluate(() => document.documentElement.dir), '');
-  assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).direction), 'ltr', 'the page is not mirrored');
-  assert.deepEqual((await box('form[aria-label]')).slice(0, 1), before.search.slice(0, 1), 'the search box stays on the same side');
+  assert.equal(await page.evaluate(() => document.documentElement.dir), 'rtl');
+  assert.equal(await page.evaluate(() => getComputedStyle(document.body).direction), 'rtl', 'the page reads right to left');
+  assert.ok((await box('form[aria-label]'))[0] < before[0], 'the search box moves to the other side');
   const navAfter = await navOrder();
-  assert.ok(navAfter.every((x, index) => index === 0 || x > navAfter[index - 1]), 'menu keeps its order in Urdu');
+  assert.ok(navAfter.every((x, index) => index === 0 || x < navAfter[index - 1]), 'the Urdu menu runs right to left');
+  const width = page.viewportSize().width;
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth) <= width + 1, 'nothing overflows sideways');
   await page.goto('/proposals');
   await page.waitForSelector('text=تلاش اور فلٹر');
   await page.reload();
@@ -775,6 +778,8 @@ await step('Urdu changes the text but not the layout, on the public site and das
   await signIn(page, 'plain@test.local', 'Plain-pass-123');
   await page.waitForURL('**/dashboard');
   await page.waitForSelector('text=آغاز بہت آسان ہے');
+  const sidebar = await page.locator('aside').first().boundingBox();
+  assert.ok(sidebar.x > width / 2, 'the dashboard menu sits on the right in Urdu');
   await page.context().close();
 });
 

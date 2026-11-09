@@ -39,7 +39,7 @@ export default async function Castes() {
         <Panel title="Typed on profiles but not in the list">
           <ul className="flex flex-wrap gap-2">
             {unlisted.map((row) => (
-              <li key={row.caste} className="flex items-center gap-2 rounded-full border border-line py-0.5 pl-3 pr-1 text-xs">
+              <li key={row.caste} className="flex items-center gap-2 rounded-full border border-line py-0.5 ps-3 pe-1 text-xs">
                 <span className="max-w-[220px] truncate">{row.caste}</span>
                 <span className="text-muted">({row._count.caste})</span>
                 <ActionButton action={saveCaste} fields={{ name: row.caste }} tone="outline">{t('Add to list')}</ActionButton>

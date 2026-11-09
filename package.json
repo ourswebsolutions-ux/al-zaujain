@@ -19,7 +19,8 @@
     "test:e2e": "node tests/e2e/run.mjs",
     "test:mobile-api": "node tests/e2e/mobile-api.mjs",
     "app:publish": "node mobile-app/scripts/publish-apk.mjs",
-    "test:mobile-app": "node tests/e2e/mobile-app-web.mjs"
+    "test:mobile-app": "node tests/e2e/mobile-app-web.mjs",
+    "app:build": "node mobile-app/scripts/build-apk.mjs"
   },
   "dependencies": {
     "@prisma/adapter-mariadb": "7.10.1",

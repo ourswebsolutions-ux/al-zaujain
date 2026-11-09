@@ -4,6 +4,10 @@
 /* Urdu mode keeps the same layout; only type metrics differ. */
 @custom-variant ur (&:where(.lang-ur, .lang-ur *));
 
+/* "Towards the end of the line": right in English, left in Urdu. Used by gradients that follow the layout. */
+:root { --to-end: 90deg; }
+[dir='rtl'] { --to-end: 270deg; }
+
 @theme {
   --color-navy: #062b4e;
   --color-dark: #03223f;

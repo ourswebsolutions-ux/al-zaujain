@@ -21,7 +21,7 @@ function Detail({ label, children }) {
   return (
     <div className="flex items-baseline justify-between gap-4 py-2.5 text-[13px]">
       <dt className="shrink-0 text-muted">{label}</dt>
-      <dd className="min-w-0 break-words text-right font-medium text-navy">{children}</dd>
+      <dd className="min-w-0 break-words text-end font-medium text-navy">{children}</dd>
     </div>
   );
 }
@@ -105,12 +105,12 @@ export default async function UserDetail({ params }) {
           <div className="flex flex-wrap items-end gap-6">
             <form action={adminGrantAccess} className="flex flex-wrap items-center gap-2">
               <input type="hidden" name="user_id" value={user.id} />
-              <label className="text-[13px] text-muted">{t('Days')} <input name="days" type="number" min="0" max="3650" defaultValue={days} className={`${inputSm} ml-1 w-20`} /></label>
+              <label className="text-[13px] text-muted">{t('Days')} <input name="days" type="number" min="0" max="3650" defaultValue={days} className={`${inputSm} ms-1 w-20`} /></label>
               <Submit size="sm" className="cursor-pointer">{t(state === 'active' ? 'Extend access' : 'Grant access')}</Submit>
             </form>
             <form action={adminSetExpiry} className="flex flex-wrap items-center gap-2">
               <input type="hidden" name="user_id" value={user.id} />
-              <label className="text-[13px] text-muted">{t('End date')} <input name="expires_at" type="date" defaultValue={user.member_access?.expires_at ? user.member_access.expires_at.toISOString().slice(0, 10) : ''} className={`${inputSm} ml-1`} /></label>
+              <label className="text-[13px] text-muted">{t('End date')} <input name="expires_at" type="date" defaultValue={user.member_access?.expires_at ? user.member_access.expires_at.toISOString().slice(0, 10) : ''} className={`${inputSm} ms-1`} /></label>
               <Submit tone="outline" size="sm" className="cursor-pointer">{t('Set end date')}</Submit>
             </form>
             {state === 'active' && <ActionButton action={adminRevokeAccess} fields={{ user_id: user.id }} tone="danger">{t('Revoke access')}</ActionButton>}

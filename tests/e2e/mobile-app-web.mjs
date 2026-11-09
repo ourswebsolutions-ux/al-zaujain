@@ -201,13 +201,15 @@ await step('the home page shows the website’s sections and featured proposals'
   await shot('06-home-contact');
 });
 
-await step('Urdu changes the words but keeps the layout', async () => {
+await step('Urdu turns the app right to left', async () => {
   await page.mouse.move(200, 430); await page.mouse.wheel(0, -40000);
   await page.waitForTimeout(800);
   await page.getByRole('button', { name: 'اردو' }).first().click();
   await page.waitForTimeout(1500);
   await visible('رشتے');
   await shot('07-home-urdu');
+  const homeTab = await page.getByRole('tab', { name: /ہوم/ }).boundingBox();
+  assert.ok(homeTab.x > page.viewportSize().width / 2, 'in Urdu the app runs right to left: Home sits on the right');
   await page.getByRole('button', { name: 'English' }).first().click();
   await page.waitForTimeout(1500);
   await visible('Find your life partner');

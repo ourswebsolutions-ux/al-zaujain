@@ -29,4 +29,4 @@ export function ButtonLink({ tone, size, className = '', external, href, childre
   return <Link href={href} className={buttonClass(tone, size, className)} {...props}>{children}</Link>;
 }
 
-export const Arrow = () => <span className="text-lg leading-none">→</span>;
+export const Arrow = () => <span className="inline-block text-lg leading-none rtl:-scale-x-100">→</span>;

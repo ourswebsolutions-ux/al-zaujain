@@ -25,9 +25,9 @@ export const metadata = {
 
 const FONT_SETS = {
   en: '[--ui-font:var(--font-poppins)] [--ui-nunito:var(--font-nunito-src)] [--ui-quicksand:var(--font-quicksand-src)] [--display-font:var(--font-cormorant)] [--dash-font:var(--font-jost)]',
-  // The layout never changes in Urdu. plaintext lets each text block order itself, but never touches containers,
+  // Urdu pages are right-to-left (dir="rtl" on <html>). plaintext lets an English sentence inside still read correctly,
   // and tracking is cleared because letter spacing breaks joined Urdu letters.
-  ur: 'lang-ur [--ui-font:var(--font-naskh)] [--ui-nunito:var(--font-naskh)] [--ui-quicksand:var(--font-naskh)] [--display-font:var(--font-nastaliq)] [--dash-font:var(--font-naskh)] [&_:is(p,h1,h2,h3,h4,h5,h6,dt,dd,td,th,small,strong)]:[unicode-bidi:plaintext] **:tracking-normal! [&_body]:text-left',
+  ur: 'lang-ur [--ui-font:var(--font-naskh)] [--ui-nunito:var(--font-naskh)] [--ui-quicksand:var(--font-naskh)] [--display-font:var(--font-nastaliq)] [--dash-font:var(--font-naskh)] [&_:is(p,h1,h2,h3,h4,h5,h6,dt,dd,td,th,small,strong)]:[unicode-bidi:plaintext] **:tracking-normal!',
 };
 
 export default async function RootLayout({ children }) {
@@ -35,7 +35,7 @@ export default async function RootLayout({ children }) {
   const user = await currentUser();
   const [restrictions, paid] = await Promise.all([getRestrictions(), viewerIsPaid(user)]);
   return (
-    <html lang={lang} className={`scroll-smooth ${poppins.variable} ${nunito.variable} ${quicksand.variable} ${jost.variable} ${cormorant.variable} ${naskh.variable} ${nastaliq.variable} ${FONT_SETS[lang]}`}>
+    <html lang={lang} dir={lang === 'ur' ? 'rtl' : 'ltr'} className={`scroll-smooth ${poppins.variable} ${nunito.variable} ${quicksand.variable} ${jost.variable} ${cormorant.variable} ${naskh.variable} ${nastaliq.variable} ${FONT_SETS[lang]}`}>
       <body id="top" className="bg-paper font-sans leading-6 text-ink antialiased [&_svg]:w-auto">
         <Providers lang={lang} photoLocked={restrictions.photo && !paid} signedIn={!!user}>{children}</Providers>
       </body>

@@ -56,7 +56,7 @@ export function FieldRow({ field, value, onChange, error, countries, cities, cas
     <div className={field.type === 'textarea' || field.wide ? 'col-span-2 max-m:col-auto' : ''}>
       <label htmlFor={field.name} className={labelClass}>
         {t(field.label)}{field.required && <span className="text-[#a33a2c]"> *</span>}
-        {field.private && <FaLock aria-label={t('Private')} className="ml-1.5 inline-block text-[9px] text-muted" />}
+        {field.private && <FaLock aria-label={t('Private')} className="ms-1.5 inline-block text-[9px] text-muted" />}
       </label>
       <FieldControl field={field} value={value} onChange={onChange} error={error} countries={countries} cities={cities} castes={castes} />
       {field.hint && <p className="mt-1 text-[11px] text-muted">{t(field.hint)}</p>}

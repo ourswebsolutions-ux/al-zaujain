@@ -29,7 +29,7 @@ export function Notice({ state }) {
   const t = useT();
   if (!state?.message) return null;
   return (
-    <p role="status" className={`my-3 border-l-[3px] p-3 text-xs leading-5 ${state.ok ? 'border-[#588465] bg-[var(--d-green-bg,#eef4ef)]' : 'border-[#a33a2c] bg-[var(--d-red-bg,#fbeeec)]'}`}>{t(state.message, state)}</p>
+    <p role="status" className={`my-3 border-s-[3px] p-3 text-xs leading-5 ${state.ok ? 'border-[#588465] bg-[var(--d-green-bg,#eef4ef)]' : 'border-[#a33a2c] bg-[var(--d-red-bg,#fbeeec)]'}`}>{t(state.message, state)}</p>
   );
 }
 

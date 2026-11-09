@@ -65,7 +65,7 @@ export default async function Users({ searchParams }) {
             <td><Badge value={row.role} /></td>
             <td>
               <Badge value={row.status} />
-              {row.chat_disabled && <span className="ml-1.5"><Badge value={t('Chat restricted')} /></span>}
+              {row.chat_disabled && <span className="ms-1.5"><Badge value={t('Chat restricted')} /></span>}
             </td>
             <td>{row._count.profiles}</td>
             <td className="whitespace-nowrap">{formatDate(row.created_at, lang)}</td>

@@ -13,7 +13,7 @@ function Title({ icon: Icon, label, ur }) {
   return (
     <span className="flex items-center gap-[7px] text-[10px] leading-[15px] text-navy">
       <Icon aria-hidden="true" className="text-xs text-[#a37a2c]" /> {label}
-      <Urdu as="span" className="ml-auto text-[11px] font-normal leading-[24.2px] text-[#7e6c48] max-m:text-xs max-m:leading-[26.4px]">{ur}</Urdu>
+      <Urdu as="span" className="ms-auto text-[11px] font-normal leading-[24.2px] text-[#7e6c48] max-m:text-xs max-m:leading-[26.4px]">{ur}</Urdu>
     </span>
   );
 }
@@ -26,7 +26,7 @@ export function ContactForm() {
   return (
     <form action={action} className="min-w-0">
       <h3 className="mb-[7px] text-xl font-bold leading-[29px] max-m:text-lg max-m:leading-[26.1px]">
-        <FaPenToSquare aria-hidden="true" className="mr-2 inline-block text-[#a9802c]" /> {t('A little about your enquiry')}
+        <FaPenToSquare aria-hidden="true" className="me-2 inline-block text-[#a9802c]" /> {t('A little about your enquiry')}
       </h3>
       <div className="grid grid-cols-2 gap-[18px] max-b:grid-cols-1 max-m:gap-4">
         <label className="text-[11px] font-medium leading-[16.5px]">
@@ -62,7 +62,7 @@ export function ContactForm() {
         <Urdu as="span" className="mt-[5px] block text-[10px] leading-[22px]">ہماری ٹیم آپ کے دیے گئے نمبر پر رابطہ کرے گی۔</Urdu>
       </p>
       {state?.message && (
-        <p role="status" className={`mt-[18px] border-l-[3px] p-[15px] text-xs ${state.ok ? 'border-[#588465] bg-[#eef4ef]' : 'border-[#a33a2c] bg-[#fbeeec]'}`}>{t(state.message)}</p>
+        <p role="status" className={`mt-[18px] border-s-[3px] p-[15px] text-xs ${state.ok ? 'border-[#588465] bg-[#eef4ef]' : 'border-[#a33a2c] bg-[#fbeeec]'}`}>{t(state.message)}</p>
       )}
     </form>
   );

@@ -94,7 +94,7 @@ export function ChatThread({ conversationId, currentUserId, initialMessages, ini
       {block ? (
         <div className="border-t border-line bg-[var(--d-gold-bg,#fcf4e1)] p-4 text-center text-xs font-semibold text-[var(--d-gold,#806126)]">
           {t(block)}
-          {block === INBOX_LOCKED && <button type="button" onClick={openUnlock} className="ml-2 cursor-pointer underline">{t('Unlock Full Profile Access')}</button>}
+          {block === INBOX_LOCKED && <button type="button" onClick={openUnlock} className="ms-2 cursor-pointer underline">{t('Unlock Full Profile Access')}</button>}
         </div>
       ) : (
         <form onSubmit={send} className="flex gap-2 border-t border-line bg-white p-3">

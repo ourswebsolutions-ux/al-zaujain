@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/app_state.dart';
+import '../core/updater.dart';
 import '../core/theme.dart';
 import 'account_screen.dart';
 import 'home_screen.dart';
@@ -27,6 +28,15 @@ class ShellState extends State<Shell> {
   void showProposals({Map<String, String> filters = const {}, String path = ''}) {
     setState(() { index = 1; _visited.add(1); });
     WidgetsBinding.instance.addPostFrameCallback((_) => proposals.currentState?.search(filters: filters, path: path));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // A newer APK on the website is offered once each time the app opens.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) Updater.check(context);
+    });
   }
 
   void select(int value) => setState(() { index = value; _visited.add(value); });

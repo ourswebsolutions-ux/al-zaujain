@@ -41,7 +41,7 @@ export function Table({ head, children, empty, toolbar, footer }) {
     <div className={`${surface} overflow-hidden`}>
       {toolbar && <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--d-line,#eef0f3)] p-4">{toolbar}</div>}
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[720px] border-collapse text-left text-[13.5px] text-[var(--d-text,#47566a)]">
+        <table className="w-full min-w-[720px] border-collapse text-start text-[13.5px] text-[var(--d-text,#47566a)]">
           <thead className="bg-[var(--d-hover,#f6f7fb)] text-[11.5px] font-semibold uppercase tracking-[.6px] text-[var(--d-text,#5d6b80)]">
             <tr>{head.map((label, index) => <th key={index} scope="col" className="whitespace-nowrap px-5 py-3.5 font-semibold">{t(label)}</th>)}</tr>
           </thead>
@@ -65,9 +65,9 @@ export function TablePager({ page, pages, total, perPage, path, query }) {
     <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--d-line,#eef0f3)] px-5 py-3.5 text-[13px] text-muted">
       <span>{t('Showing {from} to {to} of {total} entries', { from, to, total })}</span>
       <nav aria-label={t('Pagination')} className="flex items-center gap-1">
-        {page > 1 && <Link href={buildHref(page - 1)} aria-label={t('Previous')} className={`${box} bg-[var(--d-hover,#f2f3f6)] text-navy hover:bg-[var(--d-hover,#e7e9ee)]`}><FaChevronLeft aria-hidden="true" className="text-[10px]" /></Link>}
+        {page > 1 && <Link href={buildHref(page - 1)} aria-label={t('Previous')} className={`${box} bg-[var(--d-hover,#f2f3f6)] text-navy hover:bg-[var(--d-hover,#e7e9ee)]`}><FaChevronLeft aria-hidden="true" className="rtl:-scale-x-100 text-[10px]" /></Link>}
         {numbers.map((number) => <Link key={number} href={buildHref(number)} aria-current={number === page ? 'page' : undefined} className={`${box} ${number === page ? 'bg-navy text-white shadow-[0_2px_6px_#062b4e55]' : 'bg-[var(--d-hover,#f2f3f6)] text-navy hover:bg-[var(--d-hover,#e7e9ee)]'}`}>{number}</Link>)}
-        {page < pages && <Link href={buildHref(page + 1)} aria-label={t('Next')} className={`${box} bg-[var(--d-hover,#f2f3f6)] text-navy hover:bg-[var(--d-hover,#e7e9ee)]`}><FaChevronRight aria-hidden="true" className="text-[10px]" /></Link>}
+        {page < pages && <Link href={buildHref(page + 1)} aria-label={t('Next')} className={`${box} bg-[var(--d-hover,#f2f3f6)] text-navy hover:bg-[var(--d-hover,#e7e9ee)]`}><FaChevronRight aria-hidden="true" className="rtl:-scale-x-100 text-[10px]" /></Link>}
       </nav>
     </div>
   );
@@ -216,7 +216,7 @@ export function Switch({ name, defaultChecked, label, text }) {
         {text && <span className="mt-0.5 block text-xs leading-5 text-muted">{t(text)}</span>}
       </span>
       <input type="checkbox" name={name} defaultChecked={defaultChecked} className="peer sr-only" />
-      <span aria-hidden="true" className="relative h-6 w-11 shrink-0 rounded-full bg-[var(--d-hover,#cfd5de)] transition-colors duration-200 after:absolute after:left-0.5 after:top-0.5 after:size-5 after:rounded-full after:bg-white after:shadow-[0_1px_3px_#03223f40] after:transition-transform after:duration-200 after:content-[''] peer-checked:bg-[#1f8a3a] peer-checked:after:translate-x-5 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-navy" />
+      <span aria-hidden="true" className="relative h-6 w-11 shrink-0 rounded-full bg-[var(--d-hover,#cfd5de)] transition-colors duration-200 after:absolute after:start-0.5 after:top-0.5 after:size-5 after:rounded-full after:bg-white after:shadow-[0_1px_3px_#03223f40] after:transition-transform after:duration-200 after:content-[''] peer-checked:bg-[#1f8a3a] peer-checked:after:translate-x-5 rtl:peer-checked:after:-translate-x-5 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-navy" />
     </label>
   );
 }

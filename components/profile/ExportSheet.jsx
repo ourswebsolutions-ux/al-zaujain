@@ -10,7 +10,7 @@ function Rows({ rows }) {
       {rows.map((row) => (
         <div key={row.label} className="flex items-baseline justify-between gap-3 border-b border-dashed border-[#e9e2d4] py-1.5">
           <dt className="shrink-0 text-[11px] text-muted">{t(row.label)}</dt>
-          <dd className="break-words text-right text-[12.5px] font-semibold text-navy">{t(row.value)}</dd>
+          <dd className="break-words text-end text-[12.5px] font-semibold text-navy">{t(row.value)}</dd>
         </div>
       ))}
     </dl>
@@ -33,7 +33,7 @@ export function ExportSheet({ data, subtitle, photo, phone, generatedOn }) {
             <p className="text-[22px] font-bold tracking-[1px]">AL ZAUJAIN</p>
             <p className="text-[10px] font-medium tracking-[1.6px] text-champagne">{t('INTERNATIONAL MARRIAGE CONSULTANCY')}</p>
           </div>
-          <div className="text-right">
+          <div className="text-end">
             <p className="text-[9px] tracking-[2px] text-champagne">{t('PROFILE ID')}</p>
             <p className="text-xl font-bold">{data.code}</p>
           </div>
@@ -50,9 +50,9 @@ export function ExportSheet({ data, subtitle, photo, phone, generatedOn }) {
           <img src="/images/logo.png" alt="" className="size-[150px] rounded-[20px] border-4 border-white bg-[#e9e1d1] p-6" />
         )}
         <div>
-          <p className="font-nunito text-[32px] font-extrabold leading-tight text-navy">{data.name}{data.verified && <span className="ml-2 align-middle text-sm font-semibold text-verified">✓ {t('Verified')}</span>}</p>
+          <p className="font-nunito text-[32px] font-extrabold leading-tight text-navy">{data.name}{data.verified && <span className="ms-2 align-middle text-sm font-semibold text-verified">✓ {t('Verified')}</span>}</p>
           <p className="mt-1 text-[13px] text-muted">{subtitle}</p>
-          <Urdu keep className="text-left text-base leading-10 text-[#9b712b]">رشتے محبت کے، فیصلے اپنوں کے</Urdu>
+          <Urdu keep className="text-start text-base leading-10 text-[#9b712b]">رشتے محبت کے، فیصلے اپنوں کے</Urdu>
         </div>
       </div>
 

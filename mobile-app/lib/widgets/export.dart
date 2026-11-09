@@ -179,10 +179,10 @@ class ExportSheet extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(24),
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            if (photo != null) Padding(padding: const EdgeInsets.only(right: 18), child: NetImage(photo, width: 150, height: 150, radius: 14)),
+            if (photo != null) Padding(padding: const EdgeInsetsDirectional.only(end: 18), child: NetImage(photo, width: 150, height: 150, radius: 14)),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Row(children: [Flexible(child: Tx('${data['name']}', style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700))), if (data['verified'] == true) const Padding(padding: EdgeInsets.only(left: 6), child: VerifiedBadge(size: 20))]),
+                Row(children: [Flexible(child: Tx('${data['name']}', style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700))), if (data['verified'] == true) const Padding(padding: EdgeInsetsDirectional.only(start: 6), child: VerifiedBadge(size: 20))]),
                 Tx(subtitle.where((part) => part.isNotEmpty).map(tr).join(' · '), style: const TextStyle(fontSize: 13, color: AppColors.muted)),
               ]),
             ),

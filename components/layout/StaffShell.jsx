@@ -18,7 +18,7 @@ export function StaffShell({ title, items, footer, theme: initialTheme = 'light'
   const root = items[0].href;
   return (
     <div className={`flex min-h-dvh bg-[var(--d-bg,#f4f5f8)] text-ink ${theme === 'dark' ? DARK_THEME : ''}`}>
-      <aside className={`${KEEP_LIGHT} fixed inset-y-0 left-0 z-40 w-[250px] overflow-y-auto bg-navy text-white transition-transform duration-200 b:sticky b:top-0 b:h-dvh b:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`${KEEP_LIGHT} fixed inset-y-0 start-0 z-40 w-[250px] overflow-y-auto bg-navy text-white transition-transform duration-200 b:sticky b:top-0 b:h-dvh b:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full max-b:rtl:translate-x-full'}`}>
         <Link href="/" className="flex items-center gap-2.5 border-b border-white/10 p-5 text-white no-underline">
           <Image src="/images/logo.png" alt="Al Zaujain" width={44} height={44} className="rounded-full bg-white" />
           <span className="text-sm font-bold leading-tight tracking-[.5px]">AL ZAUJAIN<small className="block text-[10px] font-medium text-champagne">{t(title)}</small></span>

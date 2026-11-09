@@ -23,7 +23,7 @@ export default async function ConversationPage({ params }) {
 
   return (
     <div className="grid h-[calc(100dvh-124px)] min-h-[460px] grid-cols-[300px_1fr] overflow-hidden rounded-2xl border border-[var(--d-line,#e7e9ee)] bg-white shadow-[0_10px_28px_#03223f08] max-b:h-[calc(100dvh-180px)] max-b:grid-cols-1 max-m:h-[calc(100dvh-160px)]">
-      <aside data-native-scroll className="overflow-y-auto border-r border-line max-b:hidden"><ChatList conversations={await listConversations(user.id)} activeId={id} /></aside>
+      <aside data-native-scroll className="overflow-y-auto border-e border-line max-b:hidden"><ChatList conversations={await listConversations(user.id)} activeId={id} /></aside>
       <section className="flex min-h-0 min-w-0 flex-col">
         <header className={`${KEEP_LIGHT} flex items-center justify-between gap-3 bg-navy px-5 py-3 text-white`}>
           <div className="min-w-0">

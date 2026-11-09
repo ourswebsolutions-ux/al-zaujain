@@ -120,17 +120,17 @@ export function SearchSelect({
         onChange={(event) => { setQuery(event.target.value); setTyped(true); setActive(0); setOpen(true); }}
         onBlur={onBlur}
         onKeyDown={onKeyDown}
-        className={`${inputClassName} mt-0! pr-9! text-ellipsis`}
+        className={`${inputClassName} mt-0! pe-9! text-ellipsis`}
       />
       {current && !open ? (
-        <button type="button" tabIndex={-1} onClick={clear} aria-label={t('Clear')} className="absolute right-2 top-1/2 grid size-6 -translate-y-1/2 cursor-pointer place-items-center rounded-full text-[11px] text-muted hover:bg-cream hover:text-navy">
+        <button type="button" tabIndex={-1} onClick={clear} aria-label={t('Clear')} className="absolute end-2 top-1/2 grid size-6 -translate-y-1/2 cursor-pointer place-items-center rounded-full text-[11px] text-muted hover:bg-cream hover:text-navy">
           <FaXmark aria-hidden="true" />
         </button>
       ) : (
-        <FaChevronDown aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-muted" />
+        <FaChevronDown aria-hidden="true" className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-[10px] text-muted" />
       )}
       {open && (
-        <ul id={listId} role="listbox" aria-label={label} className="absolute left-0 top-full z-40 mt-1 max-h-64 w-full min-w-[200px] overflow-auto rounded-lg border border-line bg-white py-1 text-[13px] text-navy shadow-[0_18px_40px_#03223f24]">
+        <ul id={listId} role="listbox" aria-label={label} className="absolute start-0 top-full z-40 mt-1 max-h-64 w-full min-w-[200px] overflow-auto rounded-lg border border-line bg-white py-1 text-[13px] text-navy shadow-[0_18px_40px_#03223f24]">
           {list.length === 0 && <li className="px-3 py-2.5 text-muted">{t('No matches. Try another spelling.')}</li>}
           {list.map((item, index) => (
             <li

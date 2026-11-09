@@ -1,0 +1,93 @@
+# Builds the iPhone version of the Al Zaujain app on a GitHub Mac (iOS apps can only be built on macOS).
+#
+# Always: an unsigned build that proves the app compiles (download it from the run's artifacts).
+# With Apple signing secrets set: a signed IPA, uploaded to TestFlight / App Store Connect.
+#
+# Repository settings → Secrets and variables → Actions:
+#   Variable APP_SITE_URL                 the live website, e.g. https://alzaujain.com
+#   Secret   IOS_CERTIFICATE_P12_BASE64   Apple Distribution certificate (.p12), base64
+#   Secret   IOS_CERTIFICATE_PASSWORD     its password
+#   Secret   IOS_PROVISION_PROFILE_BASE64 App Store provisioning profile for com.alzaujain.app, base64
+#   Secret   IOS_TEAM_ID                  Apple Developer team ID
+#   Secret   APPSTORE_API_KEY_ID / APPSTORE_API_ISSUER_ID / APPSTORE_API_KEY_P8   App Store Connect API key
+name: iOS app
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['app-v*']
+
+jobs:
+  ios:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: mobile-app
+    env:
+      SIGNING: ${{ secrets.IOS_CERTIFICATE_P12_BASE64 != '' }}
+      UPLOAD: ${{ secrets.APPSTORE_API_KEY_ID != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.9
+          cache: true
+
+      - run: flutter pub get
+      - run: flutter test
+
+      - name: Build (unsigned)
+        if: env.SIGNING != 'true'
+        run: |
+          flutter build ios --release --no-codesign ${APP_SITE_URL:+--dart-define=AZ_SITE=$APP_SITE_URL}
+          cd build/ios/iphoneos && zip -qr ../../../al-zaujain-ios-unsigned.zip Runner.app
+        env:
+          APP_SITE_URL: ${{ vars.APP_SITE_URL }}
+
+      - name: Install the signing certificate and profile
+        if: env.SIGNING == 'true'
+        run: |
+          KEYCHAIN=$RUNNER_TEMP/signing.keychain-db
+          security create-keychain -p "" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "" "$KEYCHAIN"
+          echo "${{ secrets.IOS_CERTIFICATE_P12_BASE64 }}" | base64 --decode > $RUNNER_TEMP/cert.p12
+          security import $RUNNER_TEMP/cert.p12 -P "${{ secrets.IOS_CERTIFICATE_PASSWORD }}" -A -t cert -f pkcs12 -k "$KEYCHAIN"
+          security list-keychain -d user -s "$KEYCHAIN"
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "${{ secrets.IOS_PROVISION_PROFILE_BASE64 }}" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/al-zaujain.mobileprovision
+          PROFILE_UUID=$(security cms -D -i ~/Library/MobileDevice/Provisioning\ Profiles/al-zaujain.mobileprovision | plutil -extract UUID raw -)
+          cat > $RUNNER_TEMP/ExportOptions.plist <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>teamID</key><string>${{ secrets.IOS_TEAM_ID }}</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>provisioningProfiles</key><dict><key>com.alzaujain.app</key><string>$PROFILE_UUID</string></dict>
+          </dict></plist>
+          PLIST
+
+      - name: Build the signed IPA
+        if: env.SIGNING == 'true'
+        run: flutter build ipa --release --export-options-plist=$RUNNER_TEMP/ExportOptions.plist ${APP_SITE_URL:+--dart-define=AZ_SITE=$APP_SITE_URL}
+        env:
+          APP_SITE_URL: ${{ vars.APP_SITE_URL }}
+
+      - name: Upload to TestFlight
+        if: env.SIGNING == 'true' && env.UPLOAD == 'true'
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "${{ secrets.APPSTORE_API_KEY_P8 }}" > ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8
+          xcrun altool --upload-app -f build/ios/ipa/*.ipa -t ios --apiKey ${{ secrets.APPSTORE_API_KEY_ID }} --apiIssuer ${{ secrets.APPSTORE_API_ISSUER_ID }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: al-zaujain-ios
+          path: |
+            mobile-app/al-zaujain-ios-unsigned.zip
+            mobile-app/build/ios/ipa/*.ipa
+          if-no-files-found: ignore

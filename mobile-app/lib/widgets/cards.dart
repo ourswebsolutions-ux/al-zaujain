@@ -131,10 +131,10 @@ class _Cover extends StatelessWidget {
             ),
           ),
         if (tag != null)
-          Positioned(left: 10, top: 10, child: Container(padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6), decoration: BoxDecoration(color: const Color(0xEDFCFBF8), borderRadius: BorderRadius.circular(20)), child: Text(tag!, style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700)))),
-        if (showSave) Positioned(right: 8, top: 8, child: SaveHeart(code: '${card['code']}')),
-        Positioned(left: 10, bottom: 10, child: TypeBadge(card['type'] as String?)),
-        Positioned(right: 10, bottom: 10, child: Container(padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5), decoration: BoxDecoration(color: const Color(0xD9062B4E), borderRadius: BorderRadius.circular(6)), child: Text('${card['code']}', style: const TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w700)))),
+          PositionedDirectional(start: 10, top: 10, child: Container(padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6), decoration: BoxDecoration(color: const Color(0xEDFCFBF8), borderRadius: BorderRadius.circular(20)), child: Text(tag!, style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700)))),
+        if (showSave) PositionedDirectional(end: 8, top: 8, child: SaveHeart(code: '${card['code']}')),
+        PositionedDirectional(start: 10, bottom: 10, child: TypeBadge(card['type'] as String?)),
+        PositionedDirectional(end: 10, bottom: 10, child: Container(padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5), decoration: BoxDecoration(color: const Color(0xD9062B4E), borderRadius: BorderRadius.circular(6)), child: Text('${card['code']}', style: const TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w700)))),
       ]),
     );
   }
@@ -170,7 +170,7 @@ class ProposalCard extends StatelessWidget {
                     TextSpan(text: '${card['name']} ', style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w800)),
                     TextSpan(text: '· ${card['age'] ?? ''}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.muted)),
                   ]), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                  if (card['verified'] == true) const Padding(padding: EdgeInsets.only(left: 6), child: VerifiedBadge(size: 18)),
+                  if (card['verified'] == true) const Padding(padding: EdgeInsetsDirectional.only(start: 6), child: VerifiedBadge(size: 18)),
                 ]),
                 const SizedBox(height: 4),
                 Row(children: [
@@ -228,7 +228,7 @@ class MatchCard extends StatelessWidget {
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Row(children: [
                   Flexible(child: Text('${card['name']}, ${card['age'] ?? ''}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600))),
-                  if (card['verified'] == true) const Padding(padding: EdgeInsets.only(left: 4), child: VerifiedBadge(size: 14)),
+                  if (card['verified'] == true) const Padding(padding: EdgeInsetsDirectional.only(start: 4), child: VerifiedBadge(size: 14)),
                 ]),
                 Tx(placeOf(card), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: AppColors.muted)),
                 Tx([card['education'], card['profession'] == null ? null : tr('${card['profession']}')].where((part) => part != null && '$part'.isNotEmpty).join(' · '), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: AppColors.muted)),

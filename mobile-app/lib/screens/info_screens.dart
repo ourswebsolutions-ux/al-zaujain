@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/app_state.dart';
+import '../core/updater.dart';
 import '../core/theme.dart';
 import '../widgets/common.dart';
 import '../widgets/enquiry_form.dart';
@@ -93,7 +94,16 @@ class AppSettingsScreen extends StatelessWidget {
             ]),
           ),
           const SizedBox(height: 14),
-          Center(child: Text(tr('Version {version}', {'version': appVersion}), style: const TextStyle(fontSize: 12, color: AppColors.muted))),
+          Panel(
+            title: 'App version',
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              FutureBuilder<String>(future: Updater.versionLabel(), builder: (context, snapshot) => Text(tr('Version {version}', {'version': snapshot.data ?? appVersion}), style: const TextStyle(fontSize: 14))),
+              if (Updater.supported) ...[
+                const SizedBox(height: 10),
+                AppButton('Check for updates', icon: Icons.system_update_rounded, small: true, onPressed: () => Updater.check(context, manual: true)),
+              ],
+            ]),
+          ),
           if (app.signedIn) ...[const SizedBox(height: 14), AppButton('Sign out', tone: Tone.outline, icon: Icons.logout_rounded, expand: true, onPressed: () async {
             await app.signOut();
             if (context.mounted) Navigator.of(context).popUntil((route) => route.isFirst);

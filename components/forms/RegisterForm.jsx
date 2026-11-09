@@ -66,7 +66,7 @@ export function RegisterForm({ claim }) {
 
       <div className="rounded-xl border border-[#ddcfb1] bg-[#f8f4eb] p-4">
         <label htmlFor="password" className={labelClass}>{t('Your password')}</label>
-        <div className="mt-2 flex items-center gap-1 rounded-[7px] border border-[#dce0dc] bg-white pr-1 focus-within:border-gold">
+        <div className="mt-2 flex items-center gap-1 rounded-[7px] border border-[#dce0dc] bg-white pe-1 focus-within:border-gold">
           <input
             id="password"
             name="password"

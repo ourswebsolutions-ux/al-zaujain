@@ -36,7 +36,7 @@ const AGES = Array.from({ length: 53 }, (_, index) => index + 18);
 const check = 'flex cursor-pointer items-center gap-2 text-xs font-semibold text-navy';
 const label = 'block text-[11px] font-bold leading-[16.5px] text-navy';
 const control = 'mt-1.5 block h-[44px] w-full rounded-lg border border-[#e2ddd2] bg-white px-3 text-[13px] font-normal text-ink transition-colors focus:border-gold focus:outline-none';
-const select = `${control} appearance-none bg-[url("data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2016%2016'%3e%3cpath%20fill='none'%20stroke='%23343a40'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke-width='2'%20d='m2%205%206%206%206-6'/%3e%3c/svg%3e")] bg-[length:14px_10px] bg-[position:right_12px_center] bg-no-repeat pr-8`;
+const select = `${control} appearance-none bg-[url("data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2016%2016'%3e%3cpath%20fill='none'%20stroke='%23343a40'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke-width='2'%20d='m2%205%206%206%206-6'/%3e%3c/svg%3e")] bg-[length:14px_10px] bg-[position:right_12px_center] bg-no-repeat pe-8`;
 
 // Every field maps to a filter the proposals page already understands, so results come from the database.
 export async function AdvancedSearch({ countries, cities, castes, nationalities }) {
@@ -70,11 +70,11 @@ export async function AdvancedSearch({ countries, cities, castes, nationalities 
             <div className={label}>
               {t('Age range')}
               <div className="mt-1.5 grid grid-cols-2 gap-2">
-                <select name="age_min" aria-label={t('Minimum age')} defaultValue="" className={`${select} mt-0! pl-2.5 pr-7 max-m:bg-[position:right_7px_center] max-m:pl-2 max-m:pr-5`}>
+                <select name="age_min" aria-label={t('Minimum age')} defaultValue="" className={`${select} mt-0! ps-2.5 pe-7 max-m:bg-[position:right_7px_center] max-m:ps-2 max-m:pe-5`}>
                   <option value="">{t('From')}</option>
                   {AGES.map((age) => <option key={age} value={age}>{age}</option>)}
                 </select>
-                <select name="age_max" aria-label={t('Maximum age')} defaultValue="" className={`${select} mt-0! pl-2.5 pr-7 max-m:bg-[position:right_7px_center] max-m:pl-2 max-m:pr-5`}>
+                <select name="age_max" aria-label={t('Maximum age')} defaultValue="" className={`${select} mt-0! ps-2.5 pe-7 max-m:bg-[position:right_7px_center] max-m:ps-2 max-m:pe-5`}>
                   <option value="">{t('To')}</option>
                   {AGES.map((age) => <option key={age} value={age}>{age}</option>)}
                 </select>
@@ -120,11 +120,11 @@ export async function AdvancedSearch({ countries, cities, castes, nationalities 
             <div className={label}>
               {t('Height')}
               <div className="mt-1.5 grid grid-cols-2 gap-2">
-                <select name="height_min" aria-label={t('Minimum height')} defaultValue="" className={`${select} mt-0! pl-2.5 pr-7 max-m:bg-[position:right_7px_center] max-m:pl-2 max-m:pr-5`}>
+                <select name="height_min" aria-label={t('Minimum height')} defaultValue="" className={`${select} mt-0! ps-2.5 pe-7 max-m:bg-[position:right_7px_center] max-m:ps-2 max-m:pe-5`}>
                   <option value="">{t('From')}</option>
                   {HEIGHT_OPTIONS.map(([cm, text]) => <option key={cm} value={cm}>{text}</option>)}
                 </select>
-                <select name="height_max" aria-label={t('Maximum height')} defaultValue="" className={`${select} mt-0! pl-2.5 pr-7 max-m:bg-[position:right_7px_center] max-m:pl-2 max-m:pr-5`}>
+                <select name="height_max" aria-label={t('Maximum height')} defaultValue="" className={`${select} mt-0! ps-2.5 pe-7 max-m:bg-[position:right_7px_center] max-m:ps-2 max-m:pe-5`}>
                   <option value="">{t('To')}</option>
                   {HEIGHT_OPTIONS.map(([cm, text]) => <option key={cm} value={cm}>{text}</option>)}
                 </select>
@@ -157,7 +157,7 @@ export async function AdvancedSearch({ countries, cities, castes, nationalities 
           <p className="pt-1.5 text-[11px] font-bold uppercase tracking-[1.2px] text-bronze">{t('Popular searches')}</p>
           <ul className="flex flex-wrap gap-2">
             {POPULAR.map(([text, href]) => (
-              <li key={href}><Link href={href} className="group inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-xs font-semibold text-navy no-underline transition-colors hover:border-gold hover:bg-navy hover:text-white">{t(text)} <FaArrowRight aria-hidden="true" className="text-[9px] text-gold transition-transform group-hover:translate-x-0.5" /></Link></li>
+              <li key={href}><Link href={href} className="group inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-xs font-semibold text-navy no-underline transition-colors hover:border-gold hover:bg-navy hover:text-white">{t(text)} <FaArrowRight aria-hidden="true" className="rtl:-scale-x-100 text-[9px] text-gold transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" /></Link></li>
             ))}
           </ul>
           <p className="pt-1.5 text-[11px] font-bold uppercase tracking-[1.2px] text-bronze">{t('Browse by category')}</p>

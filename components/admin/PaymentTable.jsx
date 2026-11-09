@@ -40,7 +40,7 @@ export async function PaymentTable({ path, statuses, query }) {
         <tr key={row.id}>
           <td><Identity name={row.user.name} sub={row.user.email} href={`/admin/users/${row.user.id}`} /></td>
           <td>{row.method_name}</td>
-          <td dir="ltr" className="text-left font-mono text-[12.5px]">{row.transaction_id}</td>
+          <td dir="ltr" className="text-start font-mono text-[12.5px]">{row.transaction_id}</td>
           <td className="whitespace-nowrap">{Number(row.amount).toLocaleString('en-PK')}</td>
           <td><Badge value={row.status} label={PAYMENT_STATUS[row.status]} /></td>
           <td className="whitespace-nowrap">{formatDateTime(row.created_at, lang)}</td>

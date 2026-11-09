@@ -58,6 +58,8 @@ const info = {
   size: bytes.length,
   sha256: crypto.createHash('sha256').update(bytes).digest('hex'),
   minAndroid: minSdk ? ANDROID[minSdk] ?? null : null,
+  // The website built into the app (APP_SITE_URL), so the homepage need not tell families to type it.
+  site: process.env.APP_SITE || null,
   date: new Date().toISOString(),
 };
 fs.writeFileSync(path.join(downloads, 'app.json'), `${JSON.stringify(info, null, 2)}\n`);

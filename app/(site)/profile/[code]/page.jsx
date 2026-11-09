@@ -67,11 +67,11 @@ export default async function ProfilePage({ params }) {
         <article className="mx-auto max-w-[1240px] overflow-hidden rounded-[26px] border border-line bg-white shadow-[0_24px_60px_#03223f14]">
           <BiodataHeader data={data} />
           <div className="grid grid-cols-[320px_1fr] max-b:grid-cols-1">
-            <aside className="border-r border-[#eee6d8] bg-paper p-7 max-b:border-b max-b:border-r-0 max-m:p-5">
+            <aside className="border-e border-[#eee6d8] bg-paper p-7 max-b:border-b max-b:border-e-0 max-m:p-5">
               <div className="b:sticky b:top-6">
                 <div className="relative mx-auto grid aspect-square max-w-[380px] place-items-center overflow-hidden rounded-[20px] bg-[#e9e1d1] ring-4 ring-white shadow-[0_10px_28px_#03223f1f]">
                   {photoLocked && <PhotoLock large type={profile.access_type} />}
-                  <TypeBadge type={profile.access_type} className="absolute left-3 top-3 z-10" />
+                  <TypeBadge type={profile.access_type} className="absolute start-3 top-3 z-10" />
                   {photos[0] ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={`/media/photos/${photos[0].file}`} alt={`Portrait of ${profile.display_name}`} className="size-full object-cover" />

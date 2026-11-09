@@ -20,10 +20,10 @@ function Cover({ profile, tag, saved }) {
         <Image src="/images/logo.png" alt="" width={120} height={120} className="rounded-full opacity-60" />
       )}
       {profile.photo && <PhotoLock type={profile.type} />}
-      {tag && <span className="absolute left-3 top-3 z-10 rounded-[20px] bg-[#fcfbf8ed] px-3 py-[7px] font-sans text-[10px] font-bold leading-[15px] tracking-[.6px] text-navy">{tag}</span>}
+      {tag && <span className="absolute start-3 top-3 z-10 rounded-[20px] bg-[#fcfbf8ed] px-3 py-[7px] font-sans text-[10px] font-bold leading-[15px] tracking-[.6px] text-navy">{tag}</span>}
       {saved !== undefined && <SaveButton code={profile.code} saved={saved} />}
-      <TypeBadge type={profile.type} className="absolute bottom-3 left-3 z-10" />
-      <span className="absolute bottom-3 right-3 z-10 rounded-md bg-[#062b4ed9] px-2.5 py-1.5 font-sans text-[10px] font-bold leading-[15px] tracking-[.6px] text-white">{profile.code}</span>
+      <TypeBadge type={profile.type} className="absolute bottom-3 start-3 z-10" />
+      <span className="absolute bottom-3 end-3 z-10 rounded-md bg-[#062b4ed9] px-2.5 py-1.5 font-sans text-[10px] font-bold leading-[15px] tracking-[.6px] text-white">{profile.code}</span>
     </div>
   );
 }
@@ -47,10 +47,10 @@ export function ProposalCard({ profile, tag, matchScore, saved }) {
       <div className="px-3 pb-3 pt-[23px]">
         <h3 className="mb-2 text-[23px] font-extrabold leading-[27.6px]">
           {profile.name} <span className="text-[19px] font-semibold leading-[22.8px] text-muted">· {profile.age}</span>
-          {profile.verified && <VerifiedBadge className="ml-1.5 text-lg" />}
+          {profile.verified && <VerifiedBadge className="ms-1.5 text-lg" />}
         </h3>
         <p className="mb-4 truncate text-[13px] leading-[23.4px] text-muted">
-          <FaLocationDot aria-hidden="true" className="mr-[5px] inline-block align-[-1px] text-[var(--d-gold,#b18433)]" />
+          <FaLocationDot aria-hidden="true" className="me-[5px] inline-block align-[-1px] text-[var(--d-gold,#b18433)]" />
           {[t(profile.city), t(profile.country)].filter(Boolean).join(', ')}
         </p>
         <dl className="my-5 border-t border-[var(--d-line,#eee6d8)] pt-[5px]">
@@ -60,7 +60,7 @@ export function ProposalCard({ profile, tag, matchScore, saved }) {
         </dl>
         <Link href={`/profile/${profile.code}`} className="group flex items-center justify-between gap-2 rounded-xl bg-cream p-[15px] text-[13px] font-bold leading-[19.5px] text-navy no-underline transition-colors hover:bg-navy hover:text-white">
           {t('View proposal')}
-          <FaArrowRight aria-hidden="true" className="transition-transform duration-200 group-hover:translate-x-[3px]" />
+          <FaArrowRight aria-hidden="true" className="rtl:-scale-x-100 transition-transform duration-200 group-hover:translate-x-[3px] rtl:group-hover:-translate-x-[3px]" />
         </Link>
       </div>
     </article>

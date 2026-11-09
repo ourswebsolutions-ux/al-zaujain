@@ -282,7 +282,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
             TextInput(label: 'Phone', controller: phone, keyboard: TextInputType.phone),
             TextInput(label: 'Email', initial: '${app.user?['email'] ?? ''}', enabled: false),
             _notice('details'),
-            Align(alignment: Alignment.centerLeft, child: AppButton('Save details', busy: busy.contains('details'), onPressed: () => _run('details', () => app.api.post('me/details', {'name': name.text, 'phone': phone.text}), app.updateAccount))),
+            Align(alignment: AlignmentDirectional.centerStart, child: AppButton('Save details', busy: busy.contains('details'), onPressed: () => _run('details', () => app.api.post('me/details', {'name': name.text, 'phone': phone.text}), app.updateAccount))),
           ]),
         ),
         const SizedBox(height: 14),
@@ -298,7 +298,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
               title: Tx(tr('Show my profile to members whose profiles I visit. Turn this off to appear only as “A member”.'), style: const TextStyle(fontSize: 13)),
             ),
             _notice('notifications'),
-            Align(alignment: Alignment.centerLeft, child: AppButton('Save preferences', busy: busy.contains('notifications'), onPressed: () => _run('notifications', () => app.api.post('me/notifications', {'match_frequency': frequency, 'show_in_views': showInViews}), app.updateAccount))),
+            Align(alignment: AlignmentDirectional.centerStart, child: AppButton('Save preferences', busy: busy.contains('notifications'), onPressed: () => _run('notifications', () => app.api.post('me/notifications', {'match_frequency': frequency, 'show_in_views': showInViews}), app.updateAccount))),
           ]),
         ),
         const SizedBox(height: 14),
@@ -309,7 +309,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
             PasswordInput(label: 'New password', controller: password, newPassword: true),
             _notice('password'),
             Align(
-              alignment: Alignment.centerLeft,
+              alignment: AlignmentDirectional.centerStart,
               child: AppButton('Change password', busy: busy.contains('password'), onPressed: () => _run('password', () => app.api.post('me/password', {'current': current.text, 'password': password.text}), (result) {
                 app.setToken('${result['token']}');
                 current.clear();

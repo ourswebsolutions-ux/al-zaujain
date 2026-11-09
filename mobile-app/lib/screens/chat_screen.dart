@@ -133,7 +133,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                               final message = messages[index];
                               final mine = message['sender_id'] == me;
                               return Align(
-                                alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
+                                alignment: mine ? AlignmentDirectional.centerEnd : AlignmentDirectional.centerStart,
                                 child: Container(
                                   constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.78),
                                   margin: const EdgeInsets.only(bottom: 10),
@@ -141,7 +141,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                                   decoration: BoxDecoration(
                                     color: mine ? AppColors.navy : Colors.white,
                                     border: mine ? null : Border.all(color: AppColors.line),
-                                    borderRadius: BorderRadius.only(topLeft: const Radius.circular(14), topRight: const Radius.circular(14), bottomLeft: Radius.circular(mine ? 14 : 3), bottomRight: Radius.circular(mine ? 3 : 14)),
+                                    borderRadius: BorderRadiusDirectional.only(topStart: const Radius.circular(14), topEnd: const Radius.circular(14), bottomStart: Radius.circular(mine ? 14 : 3), bottomEnd: Radius.circular(mine ? 3 : 14)),
                                   ),
                                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                                     Tx('${message['body']}', style: TextStyle(fontSize: 14.5, height: 1.45, color: mine ? Colors.white : AppColors.navy)),
@@ -167,7 +167,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                           )
                         : Container(
                             color: Colors.white,
-                            padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+                            padding: const EdgeInsetsDirectional.fromSTEB(12, 8, 8, 8),
                             child: Row(children: [
                               Expanded(
                                 child: TextField(

@@ -49,10 +49,10 @@ export async function AppSection({ whatsapp }) {
         {release ? (
           <>
             <div className="mt-8 flex flex-wrap items-center gap-[22px]">
-              <a href={release.url} download className="flex items-center gap-3.5 rounded-xl bg-navy px-[22px] py-3 text-left text-white no-underline transition hover:-translate-y-0.5 hover:bg-dark hover:text-white">
+              <a href={release.url} download className="flex items-center gap-3.5 rounded-xl bg-navy px-[22px] py-3 text-start text-white no-underline transition hover:-translate-y-0.5 hover:bg-dark hover:text-white">
                 <FaAndroid aria-hidden="true" className="text-[30px]" />
                 <span className="text-xs leading-[16.8px]">{t('Download for')}<strong className="block text-[23px] font-bold leading-[32.2px]">{t('Android')}</strong></span>
-                <FaDownload aria-hidden="true" className="ml-1 text-lg text-gold-soft" />
+                <FaDownload aria-hidden="true" className="ms-1 text-lg text-gold-soft" />
               </a>
               <figure className="flex items-center gap-3">
                 <span className="block size-[104px] overflow-hidden rounded-xl border border-line bg-white p-1.5 [&_svg]:size-full" role="img" aria-label={t('QR code to download the Android app')} dangerouslySetInnerHTML={{ __html: await qrSvg(downloadUrl) }} />
@@ -67,7 +67,7 @@ export async function AppSection({ whatsapp }) {
               {[
                 t('Download the app on your Android phone.'),
                 t('Open the downloaded file. If Android asks, allow installing apps from your browser, then tap Install.'),
-                t('Open Al Zaujain and enter this website’s address: {site}', { site }),
+                release.builtInSite ? t('Open Al Zaujain and sign in with the same account you use on this website.') : t('Open Al Zaujain and enter this website’s address: {site}', { site }),
               ].map((step, index) => (
                 <li key={step} className="flex gap-3">
                   <b className="grid size-6 shrink-0 place-items-center rounded-full bg-[#eadbb8] text-[10px] font-medium text-[#7c5919]">0{index + 1}</b>
@@ -82,7 +82,7 @@ export async function AppSection({ whatsapp }) {
         ) : (
           <>
             <div className="mt-8 flex flex-wrap items-center gap-[22px]">
-              <span className="flex items-center gap-3.5 rounded-xl bg-navy px-[22px] py-3 text-left text-white">
+              <span className="flex items-center gap-3.5 rounded-xl bg-navy px-[22px] py-3 text-start text-white">
                 <FaAndroid aria-hidden="true" className="text-[30px]" />
                 <span className="text-xs leading-[16.8px]">{t('Coming soon for')}<strong className="block text-[23px] font-bold leading-[32.2px]">{t('Android')}</strong></span>
               </span>

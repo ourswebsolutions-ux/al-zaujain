@@ -126,7 +126,7 @@ class _PickerSheetState extends State<_PickerSheet> {
       title: Tx(option.text, style: TextStyle(fontSize: 15, fontWeight: chosen ? FontWeight.w700 : FontWeight.w400, color: muted ? AppColors.muted : AppColors.navy)),
       trailing: Row(mainAxisSize: MainAxisSize.min, children: [
         if (option.alt != null) Text(option.alt!, textDirection: TextDirection.rtl, style: const TextStyle(fontFamily: 'NotoNaskhArabic', fontSize: 14, color: AppColors.muted)),
-        if (chosen) const Padding(padding: EdgeInsets.only(left: 8), child: Icon(Icons.check_rounded, color: AppColors.green, size: 20)),
+        if (chosen) const Padding(padding: EdgeInsetsDirectional.only(start: 8), child: Icon(Icons.check_rounded, color: AppColors.green, size: 20)),
       ]),
       onTap: () => Navigator.pop(context, option.value),
     );
@@ -213,7 +213,7 @@ class FieldShell extends StatelessWidget {
     final column = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           Flexible(child: Tx('${tr(label)}${required ? ' *' : ''}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600))),
-          if (locked) Padding(padding: const EdgeInsets.only(left: 6), child: Tooltip(message: tr('Never shown publicly'), child: const Icon(Icons.lock_rounded, size: 13, color: AppColors.bronze))),
+          if (locked) Padding(padding: const EdgeInsetsDirectional.only(start: 6), child: Tooltip(message: tr('Never shown publicly'), child: const Icon(Icons.lock_rounded, size: 13, color: AppColors.bronze))),
         ]),
         const SizedBox(height: 6),
         child,

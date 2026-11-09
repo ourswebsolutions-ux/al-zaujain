@@ -8,7 +8,7 @@ import { getT } from '@/lib/i18n/server.js';
 function Detail({ icon: Icon, label, value }) {
   return (
     <div className="flex items-center justify-between gap-[15px] border-b border-line py-3.5 max-m:items-start max-m:gap-2.5">
-      <dt className="text-[11px] font-medium leading-[16.5px] max-m:text-[10px] max-m:leading-[15px]"><Icon aria-hidden="true" className="mr-[7px] inline-block text-[#a17a33]" /> {label}</dt>
+      <dt className="text-[11px] font-medium leading-[16.5px] max-m:text-[10px] max-m:leading-[15px]"><Icon aria-hidden="true" className="me-[7px] inline-block text-[#a17a33]" /> {label}</dt>
       <dd className="whitespace-nowrap rounded-[5px] bg-[#fcf4e1] px-[9px] py-1.5 text-[10px] leading-[15px] text-[#806126] max-m:px-1.5 max-m:py-[5px] max-m:text-[8px] max-m:leading-3">{value}</dd>
     </div>
   );
@@ -61,7 +61,7 @@ export async function Registration({ settings }) {
 
       <div className="col-span-2 grid grid-cols-3 rounded-[10px] border border-[#dcd1bd] bg-white/45 max-m:col-auto max-m:grid-cols-1">
         {VALUES.map(([Icon, text]) => (
-          <div key={text} className="flex items-center gap-[17px] border-r border-[#dcd1bd] px-[25px] py-5 text-[13px] font-medium leading-[19.5px] last:border-0 max-b:gap-3 max-b:p-4 max-m:gap-5 max-m:border-b max-m:border-r-0 max-m:px-[22px] max-m:py-[18px]">
+          <div key={text} className="flex items-center gap-[17px] border-e border-[#dcd1bd] px-[25px] py-5 text-[13px] font-medium leading-[19.5px] last:border-0 max-b:gap-3 max-b:p-4 max-m:gap-5 max-m:border-b max-m:border-e-0 max-m:px-[22px] max-m:py-[18px]">
             <Icon aria-hidden="true" className="shrink-0 text-[27px] text-[#aa812f] max-b:text-[22px]" />
             <span>{t(text)}</span>
           </div>

@@ -8,8 +8,8 @@ import { getT } from '@/lib/i18n/server.js';
 const AGE_OPTIONS = [['', 'Any adult age'], ['18-25', '18–25'], ['26-30', '26–30'], ['31-35', '31–35'], ['36-45', '36–45'], ['46-99', '46 and above']];
 
 const label = 'block text-[11px] font-bold leading-[16.5px] text-navy max-m:text-[10px] max-m:leading-[15px]';
-const control = 'mt-1.5 block h-[43px] w-full rounded-md border border-[#dee2e6] bg-white pl-3 pr-3 text-xs font-normal leading-[18px] text-ink max-m:h-auto max-m:py-2.5 max-m:pl-[9px] max-m:text-[11px] max-m:leading-[16.5px]';
-const selectControl = `${control} pr-8 max-m:pr-[29px] bg-[url("data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2016%2016'%3e%3cpath%20fill='none'%20stroke='%23343a40'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke-width='2'%20d='m2%205%206%206%206-6'/%3e%3c/svg%3e")] bg-[length:16px_12px] bg-[position:right_12px_center] bg-no-repeat appearance-none`;
+const control = 'mt-1.5 block h-[43px] w-full rounded-md border border-[#dee2e6] bg-white ps-3 pe-3 text-xs font-normal leading-[18px] text-ink max-m:h-auto max-m:py-2.5 max-m:ps-[9px] max-m:text-[11px] max-m:leading-[16.5px]';
+const selectControl = `${control} pe-8 max-m:pe-[29px] bg-[url("data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2016%2016'%3e%3cpath%20fill='none'%20stroke='%23343a40'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke-width='2'%20d='m2%205%206%206%206-6'/%3e%3c/svg%3e")] bg-[length:16px_12px] bg-[position:right_12px_center] bg-no-repeat appearance-none`;
 
 async function HeroCopyBlock({ settings }) {
   const t = await getT();
@@ -23,7 +23,7 @@ async function HeroCopyBlock({ settings }) {
         {t(settings.hero_sub1)}<br />{t(settings.hero_sub2)}
       </Reveal>
       <Reveal y={12}>
-        <Urdu className="mb-5 text-left text-[23px] leading-[51.75px] text-champagne max-m:text-[22px] max-m:leading-[49.5px]">{settings.hero_urdu}</Urdu>
+        <Urdu className="mb-5 text-start text-[23px] leading-[51.75px] text-champagne max-m:text-[22px] max-m:leading-[49.5px]">{settings.hero_urdu}</Urdu>
       </Reveal>
       <Reveal y={12}>
         <ButtonLink tone="gold" href="/#contact" className="px-[21px] py-[14px]">{t('Speak to our team')} <Arrow /></ButtonLink>
@@ -84,14 +84,14 @@ export async function Hero({ settings, cities }) {
     <div className="relative overflow-hidden bg-white">
       <div className="relative flex min-h-[540px] items-center justify-between gap-10 px-[4.5%] py-12 min-[1450px]:py-[65px] max-b:min-h-0 max-b:gap-[25px] max-b:px-[4%] max-b:py-[35px] max-m:block max-m:px-[6%] max-m:py-8">
         <Image src="/images/pakistani-couple.png" alt="" fill priority sizes="100vw" className="object-cover object-[60%_39%] max-m:object-[74%_0%]" />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,#03223ff7,#03223fb8_40%,#03223f2b_72%,#03223f6b)] max-m:bg-[#03223f55] max-m:bg-[linear-gradient(90deg,#03223fed,#03223f80),linear-gradient(0deg,#03223f_48%,transparent)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(var(--to-end),#03223ff7,#03223fb8_40%,#03223f2b_72%,#03223f6b)] max-m:bg-[#03223f55] max-m:bg-[linear-gradient(var(--to-end),#03223fed,#03223f80),linear-gradient(0deg,#03223f_48%,transparent)]" />
         <HeroCopyBlock settings={settings} />
         <SearchBox cities={cities} />
       </div>
       <div className="flex justify-around gap-[15px] bg-cream px-[3%] py-[23px] text-[11px] leading-[16.5px] max-b:gap-2.5 max-b:text-[9px] max-b:leading-[13.5px] max-m:block max-m:px-[6%] max-m:py-4 max-m:text-[10px] max-m:leading-[15px]">
         {BENEFITS.map((benefit, index) => (
           <span key={benefit} className="max-m:mb-2.5 max-m:block">
-            <b className="mr-2.5 inline-grid size-7 place-items-center rounded-full bg-[#eadbb8] text-[10px] font-medium leading-[15px] text-[#7c5919] max-b:mr-[5px] max-m:size-6 max-m:text-[9px]">0{index + 1}</b>
+            <b className="me-2.5 inline-grid size-7 place-items-center rounded-full bg-[#eadbb8] text-[10px] font-medium leading-[15px] text-[#7c5919] max-b:me-[5px] max-m:size-6 max-m:text-[9px]">0{index + 1}</b>
             {t(benefit)}
           </span>
         ))}

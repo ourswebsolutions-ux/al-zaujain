@@ -11,7 +11,7 @@ export async function WhatsAppChannel({ compact = false }) {
   const t = await getT();
   const body = (
     <div className={`${KEEP_LIGHT} relative overflow-hidden rounded-[26px] bg-[linear-gradient(120deg,#03223f,#062b4e_55%,#0b3d33)] text-white shadow-[0_24px_60px_#03223f30] ${compact ? 'p-6' : 'p-10 max-m:p-6'}`}>
-      <span aria-hidden="true" className="absolute -right-10 -top-10 size-56 rounded-full bg-whatsapp/25 blur-3xl" />
+      <span aria-hidden="true" className="absolute -end-10 -top-10 size-56 rounded-full bg-whatsapp/25 blur-3xl" />
       <div className="relative flex items-center gap-6 max-m:flex-col max-m:items-start">
         <span className={`grid shrink-0 place-items-center rounded-2xl bg-whatsapp text-white shadow-[0_12px_30px_#14874455] ${compact ? 'size-14 text-3xl' : 'size-20 text-[44px] max-m:size-16 max-m:text-4xl'}`}><FaWhatsapp aria-hidden="true" /></span>
         <div className="min-w-0 flex-1">

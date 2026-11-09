@@ -15,7 +15,7 @@ function Detail({ label, children }) {
   return (
     <div className="flex items-baseline justify-between gap-4 py-2.5 text-[13px]">
       <dt className="shrink-0 text-muted">{label}</dt>
-      <dd className="min-w-0 break-words text-right font-medium text-navy">{children}</dd>
+      <dd className="min-w-0 break-words text-end font-medium text-navy">{children}</dd>
     </div>
   );
 }
@@ -57,7 +57,7 @@ export default async function PaymentRequestDetail({ params }) {
               <textarea name="admin_note" rows={3} maxLength={500} defaultValue={payment.admin_note ?? ''} placeholder={t('Internal note, not shown to the user')} aria-label={t('Internal note')} className={`${inputSm} w-full`} />
               {pending ? (
                 <>
-                  <label className="text-[13px] text-muted">{t('Access length in days')} <input name="days" type="number" min="0" max="3650" defaultValue={await defaultAccessDays()} className={`${inputSm} ml-2 w-24`} /></label>
+                  <label className="text-[13px] text-muted">{t('Access length in days')} <input name="days" type="number" min="0" max="3650" defaultValue={await defaultAccessDays()} className={`${inputSm} ms-2 w-24`} /></label>
                   <div className="flex flex-wrap gap-2">
                     <Submit name="decision" value="approve" className="cursor-pointer">{t('Approve payment')}</Submit>
                     <Submit name="decision" value="reject" tone="danger" className="cursor-pointer">{t('Reject payment')}</Submit>

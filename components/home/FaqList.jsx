@@ -20,7 +20,7 @@ export function FaqList({ faqs }) {
                 type="button"
                 aria-expanded={open}
                 onClick={() => setOpenId(open ? null : faq.id)}
-                className="flex w-full cursor-pointer items-center justify-between gap-5 py-6 text-left text-lg font-extrabold leading-[27px] focus-visible:outline-3 focus-visible:outline-offset-[5px] focus-visible:outline-gold"
+                className="flex w-full cursor-pointer items-center justify-between gap-5 py-6 text-start text-lg font-extrabold leading-[27px] focus-visible:outline-3 focus-visible:outline-offset-[5px] focus-visible:outline-gold"
               >
                 <span>{t(faq.question)}</span>
                 <FaPlus aria-hidden="true" className={`shrink-0 text-[13px] transition-transform duration-300 ${open ? 'rotate-45' : ''}`} />

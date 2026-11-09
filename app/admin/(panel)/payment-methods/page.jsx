@@ -18,7 +18,7 @@ export default async function PaymentMethods() {
           <tr key={row.id}>
             <td><Identity name={row.name} sub={row.bank_name} src={row.qr_image && row.active ? `/media/payments/${row.qr_image}` : null} href={`/admin/payment-methods/${row.id}`} /></td>
             <td>{row.account_holder}</td>
-            <td dir="ltr" className="text-left text-[12.5px]">{row.iban && <span className="block">{row.iban}</span>}{row.account_number}</td>
+            <td dir="ltr" className="text-start text-[12.5px]">{row.iban && <span className="block">{row.iban}</span>}{row.account_number}</td>
             <td><Badge value={row.active ? 'active' : 'inactive'} /></td>
             <td>
               <div className="flex items-center gap-1">

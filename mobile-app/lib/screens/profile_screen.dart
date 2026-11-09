@@ -98,7 +98,7 @@ class _ProfileBodyState extends State<_ProfileBody> {
                 const SizedBox(height: 14),
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   Flexible(child: Tx('${biodata['name']}', textAlign: TextAlign.center, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w600))),
-                  if (biodata['verified'] == true) const Padding(padding: EdgeInsets.only(left: 8), child: VerifiedBadge(size: 21)),
+                  if (biodata['verified'] == true) const Padding(padding: EdgeInsetsDirectional.only(start: 8), child: VerifiedBadge(size: 21)),
                 ]),
                 Text(place, style: const TextStyle(fontSize: 13, color: AppColors.muted)),
                 if (data['yourScore'] != null) Padding(padding: const EdgeInsets.only(top: 8), child: Pill(tr('{score}% match with your profile', {'score': data['yourScore']}))),
@@ -169,9 +169,9 @@ class _ProfileBodyState extends State<_ProfileBody> {
             IgnorePointer(
               child: Center(child: Container(width: 58, height: 58, decoration: const BoxDecoration(color: Color(0x9903223F), shape: BoxShape.circle), child: const Icon(Icons.visibility_off_rounded, color: Colors.white, size: 26))),
             ),
-          Positioned(left: 12, top: 12, child: TypeBadge('${profile['type']}')),
+          PositionedDirectional(start: 12, top: 12, child: TypeBadge('${profile['type']}')),
           if (photos.length > 1)
-            Positioned(right: 12, bottom: 12, child: Container(padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4), decoration: BoxDecoration(color: const Color(0xB3062B4E), borderRadius: BorderRadius.circular(12)), child: Text('${photo + 1}/${photos.length}', style: const TextStyle(color: Colors.white, fontSize: 12)))),
+            PositionedDirectional(end: 12, bottom: 12, child: Container(padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4), decoration: BoxDecoration(color: const Color(0xB3062B4E), borderRadius: BorderRadius.circular(12)), child: Text('${photo + 1}/${photos.length}', style: const TextStyle(color: Colors.white, fontSize: 12)))),
         ]),
       ),
       if (locked) Padding(padding: const EdgeInsets.only(top: 8), child: TextButton.icon(onPressed: () => showUnlockSheet(context), icon: const Icon(Icons.lock_open_rounded, size: 16), label: Text(tr('Unlock Full Profile Photograph')))),

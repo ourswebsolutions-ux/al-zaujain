@@ -8,7 +8,7 @@ import { SectionTag, Urdu } from '@/components/ui/Text';
 import { getT } from '@/lib/i18n/server.js';
 
 const linkClass = 'mb-[13px] block text-xs leading-[18px] text-[#e0e6eb] no-underline hover:text-champagne';
-const icon = 'mr-[7px] inline-block align-[-2px] text-champagne';
+const icon = 'me-[7px] inline-block align-[-2px] text-champagne';
 
 export async function Footer({ settings }) {
   const t = await getT();
@@ -20,7 +20,7 @@ export async function Footer({ settings }) {
           <SectionTag className="text-[9px]! leading-[13.5px]! text-champagne!">{t('YOUR FAMILY’S NEXT CHAPTER')}</SectionTag>
           <h2 className="mb-2.5 text-[28px] font-medium leading-[33.6px] max-m:mb-5 max-m:text-[25px] max-m:leading-[35px]">{t('Let’s begin with a conversation.')}</h2>
         </div>
-        <ButtonLink tone="gold" href="/#contact">{t('Talk to Al Zaujain')} <FaArrowRight aria-hidden="true" /></ButtonLink>
+        <ButtonLink tone="gold" href="/#contact">{t('Talk to Al Zaujain')} <FaArrowRight aria-hidden="true" className="rtl:-scale-x-100" /></ButtonLink>
       </Reveal>
 
       <div className="relative z-10 grid grid-cols-[1.25fr_.8fr_1fr] gap-[60px] pb-5 max-b:gap-[30px] max-m:grid-cols-1 max-m:gap-7">
@@ -30,7 +30,7 @@ export async function Footer({ settings }) {
         </div>
         <div>
           <h3 className="mb-5 text-[13px] font-medium leading-[15.6px] max-m:mb-3.5">{t('Explore Al Zaujain')}</h3>
-          <Link className={linkClass} href="/#how-it-works">{t('How it works')} <FaArrowRight aria-hidden="true" className={`${icon} ml-1`} /></Link>
+          <Link className={linkClass} href="/#how-it-works">{t('How it works')} <FaArrowRight aria-hidden="true" className={`${icon} ms-1`} className="rtl:-scale-x-100" /></Link>
           <Link className={linkClass} href="/proposals">{t('Browse proposals')}</Link>
           <Link className={linkClass} href="/consultants">{t('Marriage consultants')}</Link>
           <Link className={linkClass} href="/submit-profile">{t('Submit a profile')}</Link>
@@ -51,9 +51,9 @@ export async function Footer({ settings }) {
       </div>
 
       <div className="relative z-10 flex items-center justify-between gap-5 border-t border-white/13 py-5 text-[10px] leading-[15px] text-[#c2d0da] max-m:flex-wrap max-m:gap-[18px]">
-        <span><FaHeart aria-hidden="true" className="mr-[7px] inline-block text-[#dab660]" /> {t('Shared values')}</span>
-        <span><FaPeopleRoof aria-hidden="true" className="mr-[7px] inline-block text-[#dab660]" /> {t('Family involvement')}</span>
-        <span><FaComments aria-hidden="true" className="mr-[7px] inline-block text-[#dab660]" /> {t('Personal conversations')}</span>
+        <span><FaHeart aria-hidden="true" className="me-[7px] inline-block text-[#dab660]" /> {t('Shared values')}</span>
+        <span><FaPeopleRoof aria-hidden="true" className="me-[7px] inline-block text-[#dab660]" /> {t('Family involvement')}</span>
+        <span><FaComments aria-hidden="true" className="me-[7px] inline-block text-[#dab660]" /> {t('Personal conversations')}</span>
         <Urdu keep as="span" className="text-[15px] leading-[33px] text-[#deca9c] max-m:text-base max-m:leading-[35.2px]">رشتے محبت کے، فیصلے اپنوں کے</Urdu>
       </div>
 

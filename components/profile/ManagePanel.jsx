@@ -20,7 +20,7 @@ export async function ManagePanel({ profile, actions, editHref, token, children 
       <div className="flex flex-wrap items-center gap-3">
         <ButtonLink href={editHref}><FaPenToSquare aria-hidden="true" /> {t('Edit profile')}</ButtonLink>
         {profile.status === 'approved' && <ButtonLink tone="outline" href={`/profile/${actions.code}`}>{t('View public page')}</ButtonLink>}
-        <details className="group ml-auto text-right">
+        <details className="group ms-auto text-end">
           <summary className="inline-flex cursor-pointer list-none items-center gap-2 text-xs font-semibold text-[#a33a2c]"><FaTrash aria-hidden="true" /> {t('Delete profile')}</summary>
           <form action={deleteOwnProfile} className="mt-2 flex flex-wrap items-center justify-end gap-2">
             <input type="hidden" name="code" value={actions.code} />

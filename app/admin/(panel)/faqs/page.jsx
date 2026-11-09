@@ -30,7 +30,7 @@ export default async function Faqs() {
   return (
     <div className="max-w-[760px]">
       <Title>{t('FAQs')}</Title>
-      {faqs.map((faq) => <Panel key={faq.id}><FaqForm faq={faq} /><div className="mt-2 text-right"><ActionButton action={deleteFaq} fields={{ id: faq.id }} tone="outline">{t('Delete')}</ActionButton></div></Panel>)}
+      {faqs.map((faq) => <Panel key={faq.id}><FaqForm faq={faq} /><div className="mt-2 text-end"><ActionButton action={deleteFaq} fields={{ id: faq.id }} tone="outline">{t('Delete')}</ActionButton></div></Panel>)}
       <Panel title={t('Add a question')}><FaqForm /></Panel>
     </div>
   );

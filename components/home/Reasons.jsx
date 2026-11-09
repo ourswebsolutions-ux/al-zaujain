@@ -23,7 +23,7 @@ export async function Reasons() {
         {REASONS.map((reason, index) => (
           <Reveal as="article" key={reason.title} y={28} scale={0.94} className="relative rounded-[8px_34px_8px_34px] bg-navy p-[34px] text-white transition-[transform,box-shadow] duration-[250ms] hover:-translate-y-1 hover:shadow-[0_16px_35px_#03223f30] max-[500px]:p-[26px]">
             <span className="mb-[26px] grid size-[60px] place-items-center rounded-full bg-cream text-2xl text-[#a67b2e]"><reason.icon aria-hidden="true" /></span>
-            <span className="absolute right-7 top-9 text-[30px] font-extrabold leading-[45px] text-gold-soft">0{index + 1}</span>
+            <span className="absolute end-7 top-9 text-[30px] font-extrabold leading-[45px] text-gold-soft">0{index + 1}</span>
             <h3 className="mb-2 text-[23px] font-extrabold leading-[27.6px]">{t(reason.title)}</h3>
             <p className="mb-4 text-base leading-[28.8px] text-[#e3e8ed]">{t(reason.text)}</p>
             <Urdu className="mb-4 text-[17px] leading-[42.5px] text-[#e3e8ed] max-m:text-[15px] max-m:leading-[37.5px]">{reason.ur}</Urdu>

@@ -11,7 +11,7 @@ import { FaArrowUpRightFromSquare, FaBars, FaBell, FaComments, FaEye, FaGaugeHig
 import { NotificationList } from './NotificationList';
 import { logout } from '@/app/actions/auth';
 import { readAllNotifications } from '@/app/actions/member';
-import { useT } from '@/components/i18n/LanguageProvider';
+import { useLang, useT } from '@/components/i18n/LanguageProvider';
 import { LanguageSwitch } from '@/components/i18n/LanguageSwitch';
 
 const MEMBER_NAV = [
@@ -80,7 +80,7 @@ function Sidebar({ groups, counts, pathname, onNavigate, user }) {
               const active = isActive(item.href, pathname);
               return (
                 <Link key={item.href} href={item.href} onClick={onNavigate} aria-current={active ? 'page' : undefined} className={`relative mb-0.5 flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] no-underline transition-colors duration-150 ${active ? 'font-medium text-white' : 'text-[#c7d3dd] hover:bg-white/5 hover:text-white'}`}>
-                  {active && <motion.span layoutId="active-nav" transition={{ type: 'spring', stiffness: 420, damping: 36 }} className="absolute inset-0 rounded-lg border-l-2 border-gold-soft bg-white/10" />}
+                  {active && <motion.span layoutId="active-nav" transition={{ type: 'spring', stiffness: 420, damping: 36 }} className="absolute inset-0 rounded-lg border-s-2 border-gold-soft bg-white/10" />}
                   <item.icon aria-hidden="true" className={`relative text-sm ${active ? 'text-gold-soft' : ''}`} />
                   <span className="relative flex-1">{t(item.label)}</span>
                   <Badge count={counts[item.badge]} className="relative" />
@@ -93,7 +93,7 @@ function Sidebar({ groups, counts, pathname, onNavigate, user }) {
       <div className="border-t border-white/10 p-3">
         <Link href="/" className="flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] text-[#c7d3dd] no-underline hover:bg-white/5 hover:text-white"><FaArrowUpRightFromSquare aria-hidden="true" className="text-xs" /> {t('Visit website')}</Link>
         <form action={logout}>
-          <button type="submit" className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left text-[13px] text-[#c7d3dd] hover:bg-white/5 hover:text-white"><FaRightFromBracket aria-hidden="true" className="text-xs" /> {t('Sign out')}</button>
+          <button type="submit" className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-start text-[13px] text-[#c7d3dd] hover:bg-white/5 hover:text-white"><FaRightFromBracket aria-hidden="true" className="text-xs" /> {t('Sign out')}</button>
         </form>
         <p dir="ltr" className="mt-1 truncate px-3 text-[11px] text-[#8fa3b5]">{user.email}</p>
       </div>
@@ -114,7 +114,7 @@ function useDismiss(open, close) {
   return ref;
 }
 
-const panel = 'absolute right-0 top-full z-40 mt-2 rounded-2xl border border-[var(--d-line,#e7e9ee)] bg-white shadow-[0_18px_48px_#03223f26]';
+const panel = 'absolute end-0 top-full z-40 mt-2 rounded-2xl border border-[var(--d-line,#e7e9ee)] bg-white shadow-[0_18px_48px_#03223f26]';
 const motionProps = { initial: { opacity: 0, y: -6 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: -6 }, transition: { duration: 0.15 } };
 
 function NotificationMenu({ count, recent, setCount }) {
@@ -125,11 +125,11 @@ function NotificationMenu({ count, recent, setCount }) {
     <div ref={ref} className="relative">
       <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-label={count ? t('Notifications, {count} unread', { count }) : t('Notifications')} className="relative grid size-10 cursor-pointer place-items-center rounded-full text-[15px] text-navy transition-colors hover:bg-[var(--d-hover,#f2f3f6)]">
         <FaBell aria-hidden="true" />
-        <Badge count={count} className="absolute -right-0.5 -top-0.5" />
+        <Badge count={count} className="absolute -end-0.5 -top-0.5" />
       </button>
       <AnimatePresence>
         {open && (
-          <motion.div {...motionProps} className={`${panel} w-[min(380px,calc(100vw-24px))] p-4 max-m:fixed max-m:left-3 max-m:right-3 max-m:top-16 max-m:mt-0 max-m:w-auto`}>
+          <motion.div {...motionProps} className={`${panel} w-[min(380px,calc(100vw-24px))] p-4 max-m:fixed max-m:start-3 max-m:end-3 max-m:top-16 max-m:mt-0 max-m:w-auto`}>
             <div className="mb-1 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-navy">{t('Notifications')}</h2>
               {count > 0 && <button type="button" onClick={() => { setCount(0); readAllNotifications(); }} className="cursor-pointer text-[11px] font-semibold text-[var(--d-gold,#9b712b)]">{t('Mark all as read')}</button>}
@@ -150,7 +150,7 @@ function AccountMenu({ user, avatar }) {
   const link = 'block rounded-lg px-3 py-2 text-[13px] text-navy no-underline hover:bg-[var(--d-hover,#f7f8fa)]';
   return (
     <div ref={ref} className="relative">
-      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-label={t('Account menu')} className="flex cursor-pointer items-center gap-2.5 rounded-full py-1 pl-1 pr-3 transition-colors hover:bg-[var(--d-hover,#f2f3f6)] max-m:pr-1">
+      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-label={t('Account menu')} className="flex cursor-pointer items-center gap-2.5 rounded-full py-1 ps-1 pe-3 transition-colors hover:bg-[var(--d-hover,#f2f3f6)] max-m:pe-1">
         {avatar ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={`/media/photos/${avatar}`} alt="" className="size-8 rounded-full object-cover" />
@@ -163,7 +163,7 @@ function AccountMenu({ user, avatar }) {
             <Link href="/dashboard/profile" onClick={() => setOpen(false)} className={link}>{t('My profile')}</Link>
             <Link href="/dashboard/settings" onClick={() => setOpen(false)} className={link}>{t('Account settings')}</Link>
             <Link href="/" onClick={() => setOpen(false)} className={link}>{t('Visit website')}</Link>
-            <form action={logout}><button type="submit" className={`${link} w-full cursor-pointer text-left text-[var(--d-red,#a33a2c)]`}>{t('Sign out')}</button></form>
+            <form action={logout}><button type="submit" className={`${link} w-full cursor-pointer text-start text-[var(--d-red,#a33a2c)]`}>{t('Sign out')}</button></form>
           </motion.div>
         )}
       </AnimatePresence>
@@ -175,6 +175,7 @@ const POLL_MS = 30000;
 
 export function MemberShell({ user, avatar, unreadMessages, unreadAlerts, recent, theme: initialTheme = 'light', children }) {
   const t = useT();
+  const rtl = useLang() === 'ur';
   const pathname = usePathname();
   const [drawer, setDrawer] = useState(false);
   const [theme, setTheme] = useState(initialTheme);
@@ -201,7 +202,7 @@ export function MemberShell({ user, avatar, unreadMessages, unreadAlerts, recent
 
   return (
     <div className={`min-h-dvh bg-[var(--d-bg,#f4f5f8)] text-ink ${theme === 'dark' ? DARK_THEME : ''}`}>
-      <aside className="fixed inset-y-0 left-0 z-30 w-[264px] max-b:hidden">
+      <aside className="fixed inset-y-0 start-0 z-30 w-[264px] max-b:hidden">
         <Sidebar groups={groups} counts={counts} pathname={pathname} user={user} />
       </aside>
 
@@ -209,26 +210,26 @@ export function MemberShell({ user, avatar, unreadMessages, unreadAlerts, recent
         {drawer && (
           <>
             <motion.button type="button" aria-label={t('Close menu')} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDrawer(false)} className="fixed inset-0 z-40 bg-dark/50 b:hidden" />
-            <motion.aside initial={{ x: -280 }} animate={{ x: 0 }} exit={{ x: -280 }} transition={{ type: 'tween', duration: 0.22 }} className="fixed inset-y-0 left-0 z-50 w-[272px] b:hidden">
+            <motion.aside initial={{ x: rtl ? 280 : -280 }} animate={{ x: 0 }} exit={{ x: rtl ? 280 : -280 }} transition={{ type: 'tween', duration: 0.22 }} className="fixed inset-y-0 start-0 z-50 w-[272px] b:hidden">
               <Sidebar groups={groups} counts={counts} pathname={pathname} user={user} onNavigate={() => setDrawer(false)} />
             </motion.aside>
           </>
         )}
       </AnimatePresence>
 
-      <div className="b:pl-[264px]">
+      <div className="b:ps-[264px]">
         <header className="sticky top-0 z-20 flex h-[68px] items-center gap-3 border-b border-[var(--d-line,#e7e9ee)] bg-white/90 px-7 backdrop-blur max-m:h-[60px] max-m:px-3">
           <button type="button" onClick={() => setDrawer(true)} aria-label={t('Open menu')} className="grid size-10 cursor-pointer place-items-center rounded-full text-navy hover:bg-[var(--d-hover,#f2f3f6)] b:hidden"><FaBars aria-hidden="true" /></button>
           <p className="truncate text-[15px] font-semibold text-navy">{t(title)}</p>
-          <form action="/proposals" role="search" className="ml-auto flex items-center gap-2 rounded-full border border-[var(--d-line,#e7e9ee)] bg-[var(--d-hover,#f7f8fa)] px-3.5 focus-within:border-gold max-p:hidden">
+          <form action="/proposals" role="search" className="ms-auto flex items-center gap-2 rounded-full border border-[var(--d-line,#e7e9ee)] bg-[var(--d-hover,#f7f8fa)] px-3.5 focus-within:border-gold max-p:hidden">
             <FaMagnifyingGlass aria-hidden="true" className="text-xs text-muted" />
             <input name="q" type="search" aria-label={t('Search proposals')} placeholder={t('Search proposals')} maxLength={80} className="w-52 bg-transparent py-2 text-[13px] text-navy focus:outline-none" />
           </form>
-          <div className="flex items-center gap-1 max-p:ml-auto">
+          <div className="flex items-center gap-1 max-p:ms-auto">
             <LanguageSwitch className="me-2 text-navy max-m:me-0" />
             <Link href="/messages" aria-label={messages ? t('Messages, {count} unread', { count: messages }) : t('Messages')} className="relative grid size-10 place-items-center rounded-full text-[15px] text-navy transition-colors hover:bg-[var(--d-hover,#f2f3f6)]">
               <FaComments aria-hidden="true" />
-              <Badge count={messages} className="absolute -right-0.5 -top-0.5" />
+              <Badge count={messages} className="absolute -end-0.5 -top-0.5" />
             </Link>
             <ThemeToggle theme={theme} onChange={setTheme} className="text-navy hover:bg-[var(--d-hover,#f2f3f6)]" />
             <NotificationMenu count={alerts} recent={recent} setCount={setAlerts} />
@@ -247,7 +248,7 @@ export function MemberShell({ user, avatar, unreadMessages, unreadAlerts, recent
             const active = isActive(item.href, pathname);
             return (
               <Link key={item.href} href={item.href} aria-current={active ? 'page' : undefined} className={`relative flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium no-underline ${active ? 'text-navy' : 'text-muted'}`}>
-                <span className="relative text-base"><item.icon aria-hidden="true" className={active ? 'text-[var(--d-gold,#a67b2e)]' : ''} /><Badge count={counts[item.badge]} className="absolute -right-3 -top-2" /></span>
+                <span className="relative text-base"><item.icon aria-hidden="true" className={active ? 'text-[var(--d-gold,#a67b2e)]' : ''} /><Badge count={counts[item.badge]} className="absolute -end-3 -top-2" /></span>
                 {t(item.label)}
               </Link>
             );

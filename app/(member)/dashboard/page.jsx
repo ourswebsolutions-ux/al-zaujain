@@ -34,18 +34,18 @@ async function Hero({ user, primary, welcome }) {
   const completion = primary?.completion;
   return (
     <section className={`${KEEP_LIGHT} relative overflow-hidden rounded-[20px] bg-navy px-8 py-7 text-white shadow-[0_18px_44px_#03223f33] max-m:px-5`}>
-      <div className="absolute -right-16 -top-24 size-72 rounded-full border border-gold-soft/15" aria-hidden="true" />
-      <div className="absolute -right-4 -top-36 size-72 rounded-full border border-gold-soft/10" aria-hidden="true" />
+      <div className="absolute -end-16 -top-24 size-72 rounded-full border border-gold-soft/15" aria-hidden="true" />
+      <div className="absolute -end-4 -top-36 size-72 rounded-full border border-gold-soft/10" aria-hidden="true" />
       <div className="relative flex flex-wrap items-center justify-between gap-6">
         <div className="min-w-0 max-w-[620px]">
-          <Urdu className="text-left text-[15px] leading-9 text-champagne">السلام علیکم</Urdu>
+          <Urdu className="text-start text-[15px] leading-9 text-champagne">السلام علیکم</Urdu>
           <h1 className="text-[28px] font-semibold leading-tight tracking-[-0.5px] max-m:text-[23px]">{t(welcome ? 'Welcome, {name}' : 'Welcome back, {name}', { name: firstName(user.name) })}</h1>
           <p className="mt-2 text-[13px] leading-[22px] text-[#c7d3dd]">
             {t(welcome ? 'Your account is ready. Create your matrimonial biodata to start receiving proposals.' : primary ? REVIEW[primary.status] : 'Create your matrimonial biodata to start receiving proposals.')}
           </p>
           <div className="mt-4">
-            {!primary ? <ButtonLink tone="gold" href="/dashboard/edit">{t('Create my biodata')} <FaArrowRight aria-hidden="true" /></ButtonLink>
-              : completion.percent < 100 && <ButtonLink tone="gold" size="md" href={`/dashboard/${completion.missing[0].href}`}>{t('Complete my profile')} <FaArrowRight aria-hidden="true" /></ButtonLink>}
+            {!primary ? <ButtonLink tone="gold" href="/dashboard/edit">{t('Create my biodata')} <FaArrowRight aria-hidden="true" className="rtl:-scale-x-100" /></ButtonLink>
+              : completion.percent < 100 && <ButtonLink tone="gold" size="md" href={`/dashboard/${completion.missing[0].href}`}>{t('Complete my profile')} <FaArrowRight aria-hidden="true" className="rtl:-scale-x-100" /></ButtonLink>}
           </div>
         </div>
         {completion && (
@@ -130,7 +130,7 @@ export default async function DashboardPage({ searchParams }) {
                 {primary.completion.missing.slice(0, 4).map((item) => (
                   <li key={item.label}>
                     <Link href={`/dashboard/${item.href}`} className="flex items-center justify-between gap-2 text-[13px] text-navy no-underline hover:text-[var(--d-gold,#9b712b)]">
-                      {t(item.label)} <FaArrowRight aria-hidden="true" className="text-[10px] text-muted" />
+                      {t(item.label)} <FaArrowRight aria-hidden="true" className="rtl:-scale-x-100 text-[10px] text-muted" />
                     </Link>
                   </li>
                 ))}

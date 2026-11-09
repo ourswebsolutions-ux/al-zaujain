@@ -19,7 +19,7 @@ export function NewUserForm() {
           {[['user', 'Member', 'Can submit a profile, chat and receive matches.'], ['consultant', 'Consultant', 'Signs in to the consultant dashboard.']].map(([value, label, text]) => (
             <label key={value} className={`cursor-pointer rounded-lg border p-4 transition-colors ${role === value ? 'border-navy bg-[var(--d-tint,#062b4e0a)]' : 'border-[var(--d-line,#dfe2e8)] hover:border-[var(--d-line,#c3c9d3)]'}`}>
               <input type="radio" name="role" value={value} checked={role === value} onChange={() => setRole(value)} className="accent-navy" />
-              <span className="ml-2 text-sm font-semibold text-navy">{t(label)}</span>
+              <span className="ms-2 text-sm font-semibold text-navy">{t(label)}</span>
               <span className="mt-1 block text-xs text-muted">{t(text)}</span>
             </label>
           ))}

@@ -119,7 +119,7 @@ export function ProfileActions({ text, sheet, code, compact }) {
         <Button type="button" size={size} tone="gold" disabled={!!busy} onClick={downloadPdf} className="cursor-pointer"><FaFilePdf aria-hidden="true" /> {busy === 'pdf' ? 'Creating…' : 'Download PDF'}</Button>
       </div>
       {notice && <p role="status" className={`mt-3 w-fit rounded-md px-3 py-2 text-xs font-semibold ${notice.ok ? 'bg-[#eef4ef] text-[#3d6b4a]' : 'bg-[#fbeeec] text-[#a33a2c]'}`}>{notice.message}</p>}
-      <div aria-hidden="true" className="pointer-events-none fixed -left-[10000px] top-0">
+      <div aria-hidden="true" className="pointer-events-none fixed -start-[10000px] top-0">
         <div ref={sheetRef}><ExportSheet {...sheet} /></div>
       </div>
     </div>

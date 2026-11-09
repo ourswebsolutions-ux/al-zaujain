@@ -19,7 +19,7 @@ export function CopyRow({ label, value }) {
     <div className="flex items-center justify-between gap-3 border-b border-[var(--d-line,#eef0f3)] py-2.5 last:border-0">
       <div className="min-w-0">
         <p className="text-[11px] text-muted">{t(label)}</p>
-        <p dir="ltr" className="break-all text-left font-mono text-[13.5px] font-medium text-navy">{value}</p>
+        <p dir="ltr" className="break-all text-start font-mono text-[13.5px] font-medium text-navy">{value}</p>
       </div>
       <button type="button" onClick={copy} aria-label={t('Copy {label}', { label: t(label) })} className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md bg-[var(--d-hover,#f2f3f6)] px-2.5 py-1.5 text-xs font-medium text-navy hover:bg-[var(--d-hover,#e7e9ee)]">
         {copied ? <FaCheck aria-hidden="true" className="text-[var(--d-green,#1f8a3a)]" /> : <FaCopy aria-hidden="true" />} {t(copied ? 'Copied' : 'Copy')}

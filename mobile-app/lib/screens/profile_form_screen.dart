@@ -378,7 +378,7 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
         for (final photo in photos)
           Stack(children: [
             ClipRRect(borderRadius: BorderRadius.circular(10), child: Image.memory(photo.bytes, width: 88, height: 88, fit: BoxFit.cover)),
-            Positioned(right: 2, top: 2, child: InkWell(onTap: () => setState(() => photos.remove(photo)), child: Container(decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle), child: const Icon(Icons.close_rounded, size: 18, color: AppColors.red)))),
+            PositionedDirectional(end: 2, top: 2, child: InkWell(onTap: () => setState(() => photos.remove(photo)), child: Container(decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle), child: const Icon(Icons.close_rounded, size: 18, color: AppColors.red)))),
           ]),
         if (remaining > 0)
           Semantics(
@@ -444,7 +444,7 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
         clipBehavior: Clip.antiAlias,
         child: file == null
             ? Column(mainAxisAlignment: MainAxisAlignment.center, children: [const Icon(Icons.badge_rounded, color: AppColors.gold), const SizedBox(height: 4), Text(tr(label), style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)), Text(tr('Clear photo or scan.'), style: const TextStyle(fontSize: 10.5, color: AppColors.muted))])
-            : Stack(fit: StackFit.expand, children: [Image.memory(file.bytes, fit: BoxFit.cover), Positioned(right: 4, top: 4, child: InkWell(onTap: () => onPicked(null), child: Container(decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle), child: const Icon(Icons.close_rounded, size: 18, color: AppColors.red))))]),
+            : Stack(fit: StackFit.expand, children: [Image.memory(file.bytes, fit: BoxFit.cover), PositionedDirectional(end: 4, top: 4, child: InkWell(onTap: () => onPicked(null), child: Container(decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle), child: const Icon(Icons.close_rounded, size: 18, color: AppColors.red))))]),
       ),
     ));
   }

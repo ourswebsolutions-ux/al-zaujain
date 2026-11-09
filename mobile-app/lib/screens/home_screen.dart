@@ -68,10 +68,10 @@ class _TopBar extends StatelessWidget {
       padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
       child: Column(
         children: [
-          if (announcements.isNotEmpty) SizedBox(height: 30, child: Marquee(messages: announcements)),
+          if (announcements.isNotEmpty) SizedBox(height: 30, child: Directionality(textDirection: TextDirection.ltr, child: Marquee(messages: announcements))),
           Container(
             color: Colors.white,
-            padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
+            padding: const EdgeInsetsDirectional.fromSTEB(16, 10, 8, 10),
             child: Row(
               children: [
                 Image.asset('assets/images/logo.png', width: 42, height: 42),
@@ -162,7 +162,7 @@ class _MarqueeState extends State<Marquee> with SingleTickerProviderStateMixin {
             animation: controller,
             builder: (context, _) => OverflowBox(
               maxWidth: double.infinity,
-              alignment: Alignment.centerLeft,
+              alignment: AlignmentDirectional.centerStart,
               child: Transform.translate(offset: Offset(-controller.value * width, 0), child: Row(mainAxisSize: MainAxisSize.min, children: [for (var i = 0; i < copies; i++) _set()])),
             ),
           ),
@@ -600,7 +600,7 @@ class _Reasons extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               decoration: const BoxDecoration(
                 color: AppColors.navy,
-                borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(30), bottomLeft: Radius.circular(30), bottomRight: Radius.circular(8)),
+                borderRadius: BorderRadiusDirectional.only(topStart: Radius.circular(8), topEnd: Radius.circular(30), bottomStart: Radius.circular(30), bottomEnd: Radius.circular(8)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -680,7 +680,7 @@ class _Registration extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.sand,
               border: Border.all(color: AppColors.sandLine),
-              borderRadius: const BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(6), bottomLeft: Radius.circular(6), bottomRight: Radius.circular(24)),
+              borderRadius: const BorderRadiusDirectional.only(topStart: Radius.circular(24), topEnd: Radius.circular(6), bottomStart: Radius.circular(6), bottomEnd: Radius.circular(24)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -759,8 +759,8 @@ class _Faqs extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             decoration: const BoxDecoration(
               color: AppColors.cream,
-              border: Border(left: BorderSide(color: AppColors.gold, width: 4)),
-              borderRadius: BorderRadius.only(topRight: Radius.circular(20), bottomRight: Radius.circular(20)),
+              border: BorderDirectional(start: BorderSide(color: AppColors.gold, width: 4)),
+              borderRadius: BorderRadiusDirectional.only(topEnd: Radius.circular(20), bottomEnd: Radius.circular(20)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

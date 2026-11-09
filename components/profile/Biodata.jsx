@@ -9,7 +9,7 @@ function SectionHeading({ letter, title, ur }) {
     <div className="mb-5 flex items-center gap-3 border-b border-[#eee6d8] pb-3">
       <span aria-hidden="true" className="grid size-8 shrink-0 place-items-center rounded-full border border-gold font-nunito text-[13px] font-extrabold text-[#9b712b]">{letter}</span>
       <h2 className="min-w-0 font-quicksand text-[19px] font-bold text-navy max-m:text-[16px]">{title}</h2>
-      {ur && <Urdu as="span" className="ml-auto shrink-0 whitespace-nowrap text-base leading-9 text-[#9b712b] max-m:text-xs">{ur}</Urdu>}
+      {ur && <Urdu as="span" className="ms-auto shrink-0 whitespace-nowrap text-base leading-9 text-[#9b712b] max-m:text-xs">{ur}</Urdu>}
     </div>
   );
 }
@@ -25,7 +25,7 @@ async function InfoGrid({ rows, columns = 'grid-cols-3 max-p:grid-cols-2 max-m:g
       {rows.map((row) => (
         <div key={row.label} className="flex items-baseline justify-between gap-3 border-b border-dashed border-[#e9e2d4] py-2.5">
           <dt className="shrink-0 text-xs text-muted">{t(row.label)}</dt>
-          <dd className="min-w-0 break-words text-right text-sm font-semibold text-navy">{t(row.value)}</dd>
+          <dd className="min-w-0 break-words text-end text-sm font-semibold text-navy">{t(row.value)}</dd>
         </div>
       ))}
     </dl>
@@ -42,7 +42,7 @@ export async function BiodataHeader({ data }) {
           <p className="text-lg font-bold tracking-[1px] max-m:text-[15px]">{t('AL ZAUJAIN')}</p>
           <p className="text-[10px] font-medium tracking-[1.4px] text-champagne max-m:text-[7px] max-m:tracking-[.3px]">{t('INTERNATIONAL MARRIAGE CONSULTANCY')}</p>
         </div>
-        <div className="ml-auto shrink-0 text-right">
+        <div className="ms-auto shrink-0 text-end">
           <p className="text-[9px] tracking-[2px] text-champagne">{t('PROFILE ID')}</p>
           <p className="font-nunito text-xl font-extrabold">{data.code}</p>
         </div>
@@ -113,7 +113,7 @@ export function NameLine({ data }) {
   return (
     <h1 className="text-[28px] font-semibold leading-tight text-navy">
       {data.name}
-      {data.verified && <VerifiedBadge className="ml-2 text-[21px]" />}
+      {data.verified && <VerifiedBadge className="ms-2 text-[21px]" />}
     </h1>
   );
 }

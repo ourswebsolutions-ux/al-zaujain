@@ -6,7 +6,7 @@ import { toggleSaved } from '@/app/actions/member';
 import { useT } from '@/components/i18n/LanguageProvider';
 
 const styles = {
-  overlay: 'absolute right-3 top-3 z-10 size-9 justify-center rounded-full bg-[var(--d-overlay,#fcfbf8ed)] shadow-[0_2px_8px_#03223f26] hover:scale-105',
+  overlay: 'absolute end-3 top-3 z-10 size-9 justify-center rounded-full bg-[var(--d-overlay,#fcfbf8ed)] shadow-[0_2px_8px_#03223f26] hover:scale-105',
   button: 'gap-2 rounded-[9px] border border-line bg-white px-[21px] py-[14px] text-[13px] font-extrabold leading-[19.5px] hover:bg-cream max-m:px-[17px] max-m:py-3 max-m:text-xs',
 };
 

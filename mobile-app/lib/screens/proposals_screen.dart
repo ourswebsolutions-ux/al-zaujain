@@ -176,7 +176,7 @@ class ProposalsScreenState extends State<ProposalsScreen> {
                     child: ListView(scrollDirection: Axis.horizontal, children: [
                       for (final tab in tabs)
                         Padding(
-                          padding: const EdgeInsets.only(right: 8),
+                          padding: const EdgeInsetsDirectional.only(end: 8),
                           child: ChoiceChip(
                             label: Text(tab['all'] == true ? tr('All {name}', {'name': tr('${tab['name']}')}) : tr('${tab['name']}')),
                             selected: '${tab['href']}' == '${data?['path']}',
@@ -279,7 +279,7 @@ class _FilterSheetState extends State<FilterSheet> {
     final heights = ((app.config['heights'] as List?) ?? []).cast<Map>().map((item) => Option('${item['value']}', '${item['label']}'.split(' (').first)).toList();
     return Column(children: [
       Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 8, 8),
+        padding: const EdgeInsetsDirectional.fromSTEB(20, 0, 8, 8),
         child: Row(children: [
           Expanded(child: Text(tr('Search and filter'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700))),
           TextButton(onPressed: () => setState(() => values = {}), child: Text(tr('Clear all'))),
