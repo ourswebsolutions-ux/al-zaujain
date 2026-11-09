@@ -14,6 +14,7 @@ import 'payments_screen.dart';
 import 'preferences_screen.dart';
 import 'profile_form_screen.dart';
 import 'profile_screen.dart';
+import 'saved_screen.dart';
 import 'shell.dart';
 
 /// Opens the app screen for a website link stored on a notification, such as /messages/12.
@@ -26,7 +27,7 @@ void openHref(BuildContext context, String? href) {
     push(context, ChatScreen(id: int.parse(chat[1]!)));
   } else if (path == '/messages') {
     Navigator.of(context).popUntil((route) => route.isFirst);
-    shellKey.currentState?.select(2);
+    shellKey.currentState?.select(Tabs.messages);
   } else if (profile != null) {
     openProposal(context, profile[1]!.toUpperCase());
   } else if (path.startsWith('/dashboard/payments')) {
@@ -38,25 +39,46 @@ void openHref(BuildContext context, String? href) {
   } else if (path.startsWith('/dashboard/views')) {
     push(context, const ViewsScreen());
   } else if (path.startsWith('/dashboard/saved')) {
-    Navigator.of(context).popUntil((route) => route.isFirst);
-    shellKey.currentState?.select(3);
+    push(context, const SavedScreen());
   } else if (path.startsWith('/dashboard/edit') || path.startsWith('/dashboard/profile')) {
     push(context, const MyProfilesScreen());
   } else if (path.startsWith('/dashboard')) {
     Navigator.of(context).popUntil((route) => route.isFirst);
-    shellKey.currentState?.select(4);
+    shellKey.currentState?.select(Tabs.account);
   } else {
     openLink(context, app.api.absolute(href));
   }
 }
 
+/// The Matches tab: recommended matches for members, a sign-in prompt for visitors.
+class MatchesTab extends StatelessWidget {
+  const MatchesTab({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: app,
+      builder: (context, _) {
+        if (app.isMember) return MatchesScreen(key: ValueKey(app.api.token), tab: true);
+        return Scaffold(
+          appBar: AppBar(title: Text(tr('Matches'))),
+          body: app.signedIn
+              ? EmptyState(icon: Icons.favorite_border_rounded, title: 'Matches are for members', text: 'Team accounts can open every profile from the admin panel.', action: AppButton('Search proposals', tone: Tone.gold, onPressed: () => shellKey.currentState?.select(Tabs.search)))
+              : const SignInPrompt(icon: Icons.favorite_border_rounded, title: 'Your recommended matches', text: 'Sign in and add your profile to see proposals ranked for you on both sides.'),
+        );
+      },
+    );
+  }
+}
+
 class MatchesScreen extends StatelessWidget {
-  const MatchesScreen({super.key});
+  const MatchesScreen({super.key, this.tab = false});
+  final bool tab;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(tr('Recommended matches'))),
+      appBar: AppBar(title: Text(tr('Recommended matches')), automaticallyImplyLeading: !tab),
       body: Loader(
         load: () => app.api.get('matches'),
         builder: (context, data, reload) {

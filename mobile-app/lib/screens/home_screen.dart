@@ -6,8 +6,8 @@ import '../core/theme.dart';
 import '../widgets/cards.dart';
 import '../widgets/common.dart';
 import '../widgets/enquiry_form.dart';
-import '../widgets/pickers.dart';
 import 'consultants_screen.dart';
+import 'home_header.dart';
 import 'credits_screen.dart';
 import 'info_screens.dart';
 import 'shell.dart';
@@ -19,7 +19,8 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.navy,
+      drawer: const HomeDrawer(),
       floatingActionButton: FloatingActionButton(
         heroTag: 'whatsapp',
         backgroundColor: AppColors.whatsapp,
@@ -37,75 +38,26 @@ class HomeScreen extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const _TopBar(),
-              const _Hero(),
-              const _Benefits(),
-              const _Locations(),
-              _Featured(profiles: ((data['profiles'] as List?) ?? []).cast<Map>().map((item) => item.cast<String, dynamic>()).toList()),
-              const _Journey(),
+              const HomeHeader(),
+              Container(
+                decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+                clipBehavior: Clip.antiAlias,
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  _Featured(profiles: ((data['profiles'] as List?) ?? []).cast<Map>().map((item) => item.cast<String, dynamic>()).toList()),
+                  const _Locations(),
+                  const SizedBox(height: 26),
+                  const _Journey(),
               const Padding(padding: EdgeInsets.fromLTRB(16, 0, 16, 28), child: WhatsAppChannelCard()),
               const _Reasons(),
               const _Registration(),
               _Faqs(faqs: ((data['faqs'] as List?) ?? []).cast<Map>().map((item) => item.cast<String, dynamic>()).toList()),
               const _Contact(),
               const _Footer(),
+                ]),
+              ),
             ],
           );
         },
-      ),
-    );
-  }
-}
-
-class _TopBar extends StatelessWidget {
-  const _TopBar();
-
-  @override
-  Widget build(BuildContext context) {
-    final announcements = ((app.site['announcements'] as List?) ?? []).map((item) => tr('$item')).toList();
-    return Container(
-      color: AppColors.navy,
-      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-      child: Column(
-        children: [
-          if (announcements.isNotEmpty) SizedBox(height: 30, child: Directionality(textDirection: TextDirection.ltr, child: Marquee(messages: announcements))),
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsetsDirectional.fromSTEB(16, 10, 8, 10),
-            child: Row(
-              children: [
-                Image.asset('assets/images/logo.png', width: 42, height: 42),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(tr('AL ZAUJAIN'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 1)),
-                      Text(
-                        tr('INTERNATIONAL MARRIAGE CONSULTANCY'),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 8.5, letterSpacing: 0.8, color: AppColors.bronze),
-                      ),
-                    ],
-                  ),
-                ),
-                TextButton(
-                  onPressed: () => app.setLanguage(app.lang == 'ur' ? 'en' : 'ur'),
-                  child: Text(
-                    app.lang == 'ur' ? 'English' : 'اردو',
-                    style: TextStyle(fontFamily: app.lang == 'ur' ? null : 'NotoNaskhArabic', fontWeight: FontWeight.w700, color: AppColors.navy),
-                  ),
-                ),
-                IconButton(
-                  tooltip: tr('Al Zaujain AI'),
-                  onPressed: () => showAssistant(context),
-                  icon: const Icon(Icons.support_agent_rounded, color: AppColors.gold),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -172,168 +124,6 @@ class _MarqueeState extends State<Marquee> with SingleTickerProviderStateMixin {
   }
 }
 
-class _Hero extends StatelessWidget {
-  const _Hero();
-
-  @override
-  Widget build(BuildContext context) {
-    final site = app.site;
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: Image.asset('assets/images/hero.jpg', fit: BoxFit.cover, alignment: const Alignment(0.5, -1)),
-        ),
-        Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [const Color(0xED03223F), const Color(0xCC03223F), AppColors.dark.withValues(alpha: 0.97)]),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                tr('${site['hero_eyebrow']}'),
-                style: const TextStyle(color: AppColors.champagne, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.2),
-              ),
-              const SizedBox(height: 10),
-              Tx(
-                '${tr('${site['hero_line1']}')}\n${tr('${site['hero_line2']}')}',
-                style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w600, height: 1.25, letterSpacing: -0.8),
-              ),
-              Tx(
-                tr('${site['hero_highlight']}'),
-                style: const TextStyle(color: AppColors.goldSoft, fontSize: 32, fontWeight: FontWeight.w600, height: 1.3, letterSpacing: -0.8),
-              ),
-              const SizedBox(height: 10),
-              Tx('${tr('${site['hero_sub1']}')} ${tr('${site['hero_sub2']}')}', style: const TextStyle(color: Colors.white, fontSize: 13, height: 1.7)),
-              if ('${site['hero_urdu']}'.isNotEmpty) UrduLine('${site['hero_urdu']}', size: 21, color: AppColors.champagne),
-              const SizedBox(height: 8),
-              AppButton('Speak to our team', tone: Tone.gold, trailing: Icons.arrow_forward_rounded, onPressed: () => push(context, const ContactScreen())),
-              const SizedBox(height: 24),
-              const _SearchBox(),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// "Find your life partner": the website's quick search.
-class _SearchBox extends StatefulWidget {
-  const _SearchBox();
-
-  @override
-  State<_SearchBox> createState() => _SearchBoxState();
-}
-
-class _SearchBoxState extends State<_SearchBox> {
-  static const ages = [('', 'Any adult age'), ('18-25', '18–25'), ('26-30', '26–30'), ('31-35', '31–35'), ('36-45', '36–45'), ('46-99', '46 and above')];
-  final query = TextEditingController();
-  String gender = 'female';
-  String age = '';
-  String city = '';
-
-  @override
-  Widget build(BuildContext context) {
-    final cities = [...((app.config['featuredCities'] as List?) ?? []).map((city) => Option('$city')), Option('overseas', tr('Overseas'))];
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: const [BoxShadow(color: Color(0x31001528), blurRadius: 40, offset: Offset(0, 12))],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            tr('BISMILLAH. LET’S BEGIN.'),
-            style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w600, letterSpacing: 1, color: Color(0xFF916B29)),
-          ),
-          const SizedBox(height: 6),
-          Text(tr('Find your life partner'), style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w600, letterSpacing: -0.5)),
-          const SizedBox(height: 2),
-          Row(
-            children: [
-              Flexible(
-                child: Text(tr('A few preferences. A thoughtful start.'), style: const TextStyle(fontSize: 12, color: AppColors.muted)),
-              ),
-              TextButton(
-                onPressed: () => shellKey.currentState?.showProposals(filters: const {'_open': '1'}),
-                child: Text(
-                  tr('Advanced search'),
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF916B29), decoration: TextDecoration.underline),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          TextInput(label: 'Name, caste or profession', controller: query, placeholder: 'e.g. Jutt, Doctor, Ayesha', maxLength: 80),
-          Row(
-            children: [
-              Expanded(
-                child: PickerField(label: 'Looking for', options: [Option('female', tr('Bride')), Option('male', tr('Groom'))], value: gender, onChanged: (value) => setState(() => gender = value.isEmpty ? 'female' : value)),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: PickerField(label: 'Age range', options: [for (final (value, label) in ages) Option(value, tr(label))], value: age, onChanged: (value) => setState(() => age = value)),
-              ),
-            ],
-          ),
-          PickerField(label: 'Preferred city', options: cities, value: city, anyLabel: 'Any city', onChanged: (value) => setState(() => city = value)),
-          AppButton(
-            'Search rishtay',
-            tone: Tone.gold,
-            expand: true,
-            trailing: Icons.arrow_forward_rounded,
-            onPressed: () {
-              shellKey.currentState?.showProposals(filters: {'q': query.text.trim(), 'gender': gender, 'age': age, 'city': city});
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Benefits extends StatelessWidget {
-  const _Benefits();
-  @override
-  Widget build(BuildContext context) {
-    const items = ['Share your preferences', 'Involve your family', 'Begin a conversation'];
-    return Container(
-      color: AppColors.cream,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Column(
-        children: [
-          for (var i = 0; i < items.length; i++)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                children: [
-                  Container(
-                    width: 26,
-                    height: 26,
-                    alignment: Alignment.center,
-                    decoration: const BoxDecoration(color: Color(0xFFEADBB8), shape: BoxShape.circle),
-                    child: Text('0${i + 1}', style: const TextStyle(fontSize: 10, color: Color(0xFF7C5919))),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(tr(items[i]), style: const TextStyle(fontSize: 13)),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
 /// Proposals by region: the website's Proposals menu.
 class _Locations extends StatelessWidget {
   const _Locations();
@@ -378,6 +168,7 @@ class _Locations extends StatelessWidget {
   }
 }
 
+/// "Featured Profiles" on the cream sheet, two cards side by side, as in the app design.
 class _Featured extends StatelessWidget {
   const _Featured({required this.profiles});
   final List<Json> profiles;
@@ -386,47 +177,27 @@ class _Featured extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: AppColors.cream,
-      margin: const EdgeInsets.only(top: 22),
-      padding: const EdgeInsets.symmetric(vertical: 30),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SectionTag('A GLIMPSE OF YOUR NEXT CHAPTER'),
-                const SizedBox(height: 4),
-                Text(tr('Featured proposals'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
-                const UrduLine('ایک بامعنی رشتے کی طرف پہلا قدم', size: 15),
-                Tx(tr('Pakistan and overseas proposals, with the details that matter: education, work, family, and shared expectations.'), style: const TextStyle(fontSize: 14, height: 1.6)),
-              ],
-            ),
+      padding: const EdgeInsets.fromLTRB(16, 22, 16, 26),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Row(children: [
+          Expanded(child: Text(tr('Featured Profiles'), style: const TextStyle(fontFamily: 'Playfair', fontSize: 21, fontVariations: [FontVariation('wght', 600)], color: AppColors.navy))),
+          TextButton(
+            onPressed: () => shellKey.currentState?.showProposals(),
+            style: TextButton.styleFrom(foregroundColor: AppColors.bronze, padding: const EdgeInsets.symmetric(horizontal: 6)),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [Text(tr('View All'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)), const SizedBox(width: 2), const Icon(Icons.chevron_right_rounded, size: 18)]),
           ),
-          const SizedBox(height: 16),
-          if (profiles.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Panel(
-                child: Text(
-                  tr('New proposals will appear here soon.'),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: AppColors.muted),
-                ),
-              ),
-            )
-          else
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: CardGrid(cards: [for (final profile in profiles) {...profile, if (profile['featured'] == true) 'tag': 'Featured'}]),
-            ),
-          const SizedBox(height: 14),
-          Center(
-            child: AppButton('Browse proposals', tone: Tone.outline, trailing: Icons.arrow_forward_rounded, onPressed: () => shellKey.currentState?.showProposals()),
-          ),
-        ],
-      ),
+        ]),
+        const SizedBox(height: 12),
+        if (profiles.isEmpty)
+          Panel(child: Text(tr('New proposals will appear here soon.'), textAlign: TextAlign.center, style: const TextStyle(color: AppColors.muted)))
+        else
+          LayoutBuilder(builder: (context, size) {
+            final columns = size.maxWidth > 1000 ? 4 : size.maxWidth > 640 ? 3 : 2;
+            const gap = 12.0;
+            final width = (size.maxWidth - gap * (columns - 1)) / columns;
+            return Wrap(spacing: gap, runSpacing: gap, children: [for (final profile in profiles) SizedBox(width: width, child: HomeProfileCard(card: profile))]);
+          }),
+      ]),
     );
   }
 }

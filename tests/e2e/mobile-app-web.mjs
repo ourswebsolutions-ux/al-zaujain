@@ -181,17 +181,18 @@ const pick = async (field, option, search) => {
 };
 
 await step('the app opens straight to the home page, never asking for a website address', async () => {
-  await visible('Find your life partner', 30000);
+  await visible('Featured Profiles', 30000);
+  await page.getByRole('textbox', { name: 'Find your life partner' }).first().waitFor();
+  for (const quick of ['Bride', 'Groom', 'By City', 'Values']) await button(quick).waitFor();
   assert.equal(await page.getByRole('textbox', { name: 'https://example.com' }).count(), 0);
   assert.equal(await button('Connect').count(), 0);
   await shot('03-home');
 });
 
 await step('the home page shows the website’s sections and featured proposals', async () => {
-  await visible('Search rishtay');
-  for (const heading of ['Featured proposals', 'From a first conversation', 'Join Our Official WhatsApp Channel', 'A personal approach.', 'A clear identity.', 'Your questions.', 'A little about your enquiry']) {
+  for (const heading of ['Featured Profiles', 'From a first conversation', 'Join Our Official WhatsApp Channel', 'A personal approach.', 'A clear identity.', 'Your questions.', 'A little about your enquiry']) {
     await scrollTo(text(heading), 40);
-    if (heading === 'Featured proposals') await shot('04-home-featured');
+    if (heading === 'Featured Profiles') await shot('04-home-featured');
     if (heading === 'A personal approach.') await shot('05-home-reasons');
   }
   await shot('06-home-contact');
@@ -200,20 +201,24 @@ await step('the home page shows the website’s sections and featured proposals'
 await step('Urdu turns the app right to left', async () => {
   await page.mouse.move(200, 430); await page.mouse.wheel(0, -40000);
   await page.waitForTimeout(800);
+  await button('Menu').click();
+  await page.waitForTimeout(600);
   await page.getByRole('button', { name: 'اردو' }).first().click();
   await page.waitForTimeout(1500);
   await visible('رشتے');
   await shot('07-home-urdu');
   const homeTab = await page.getByRole('tab', { name: /ہوم/ }).boundingBox();
   assert.ok(homeTab.x > page.viewportSize().width / 2, 'in Urdu the app runs right to left: Home sits on the right');
+  await button('مینو').click();
+  await page.waitForTimeout(600);
   await page.getByRole('button', { name: 'English' }).first().click();
   await page.waitForTimeout(1500);
-  await visible('Find your life partner');
+  await visible('Featured Profiles');
 });
 
 await step('the home search opens matching proposals: brides only', async () => {
-  await scrollTo(button('Search rishtay'));
-  await button('Search rishtay').click();
+  await page.mouse.move(200, 430); await page.mouse.wheel(0, -40000);
+  await button('Bride').click();
   await visible('2 proposals found');
   await scrollTo(text(sana));
   assert.equal(await text('Bilal').isVisible().catch(() => false), false);
@@ -243,7 +248,7 @@ await step('region tabs: a category lists only its proposals', async () => {
 });
 
 await step('a guest browses proposals but needs an account to open one', async () => {
-  await fresh('Proposals');
+  await fresh('Search');
   const card = text(sana);
   await scrollTo(card);
   await card.click();
@@ -256,7 +261,7 @@ await step('a guest browses proposals but needs an account to open one', async (
 });
 
 await step('a member signs in and lands on the dashboard', async () => {
-  await fresh('Account');
+  await fresh('Profile');
   await button('Sign in').click();
   const email = page.getByRole('textbox', { name: 'Email' }).first();
   await email.click();
@@ -271,7 +276,7 @@ await step('a member signs in and lands on the dashboard', async () => {
 });
 
 await step('members see locked contact details, save a proposal and find it under Saved', async () => {
-  await fresh('Proposals');
+  await fresh('Search');
   const card = text(sana);
   await scrollTo(card);
   await card.click();
@@ -282,14 +287,16 @@ await step('members see locked contact details, save a proposal and find it unde
   await visible('Locked');
   await shot('15-profile-member-locked');
   await back();
-  await goTab('Saved');
+  await goTab('Profile');
+  await scrollTo(button('Saved profiles'), 40);
+  await button('Saved profiles').click();
   await visible(sana);
   await shot('16-saved');
   assert.equal(await db.savedProfile.count(), 1);
 });
 
 await step('chat: start a conversation from a proposal and send a message', async () => {
-  await fresh('Proposals');
+  await fresh('Search');
   const card = text(sana);
   await scrollTo(card);
   await card.click();
@@ -310,7 +317,7 @@ await step('chat: start a conversation from a proposal and send a message', asyn
 });
 
 await step('unlock popup leads to payment options; a payment with a receipt is submitted', async () => {
-  await fresh('Proposals');
+  await fresh('Search');
   const card = text(sana);
   await scrollTo(card);
   await card.click();
@@ -340,7 +347,7 @@ await step('unlock popup leads to payment options; a payment with a receipt is s
 });
 
 await step('payment status, history and unlocked access', async () => {
-  await fresh('Account');
+  await fresh('Profile');
   await scrollTo(button('My Payment Status'), 40);
   await button('My Payment Status').click();
   await visible('Your payment is being reviewed');
@@ -350,7 +357,7 @@ await step('payment status, history and unlocked access', async () => {
 });
 
 await step('the member edits their profile through every step, and it goes back to review', async () => {
-  await fresh('Account');
+  await fresh('Profile');
   await scrollTo(button('My matrimonial profile'), 40);
   await button('My matrimonial profile').click();
   await text(bilalProfile).click();
@@ -376,7 +383,7 @@ await step('the member edits their profile through every step, and it goes back 
 });
 
 await step('partner preferences save through the website’s rules', async () => {
-  await fresh('Account');
+  await fresh('Profile');
   await scrollTo(button('Partner preferences'), 40);
   await button('Partner preferences').click();
   await visible('Describe who you are looking for');
@@ -397,7 +404,7 @@ await step('partner preferences save through the website’s rules', async () =>
 });
 
 await step('notifications list the payment and open its page', async () => {
-  await fresh('Account');
+  await fresh('Profile');
   await scrollTo(button('Notifications'), 40);
   await button('Notifications').click();
   await visible('Payment received');
@@ -406,7 +413,7 @@ await step('notifications list the payment and open its page', async () => {
 });
 
 await step('account settings save the member’s details', async () => {
-  await fresh('Account');
+  await fresh('Profile');
   await scrollTo(button('Account settings'), 40);
   await button('Account settings').click();
   await typeIn('Name', 'Bilal A. Ahmed');
@@ -417,7 +424,7 @@ await step('account settings save the member’s details', async () => {
 });
 
 await step('a new family creates an account, then submits a profile with a photo', async () => {
-  await fresh('Account');
+  await fresh('Profile');
   await scrollTo(button('Sign out'), 60);
   await button('Sign out').click();
   await visible('Register now');
@@ -425,7 +432,7 @@ await step('a new family creates an account, then submits a profile with a photo
     full_name: 'Ayesha Malik', gender: 'female', date_of_birth: `${new Date().getFullYear() - 24}-04-04`, height_cm: '163', marital_status: 'Never married', mother_tongue: 'Urdu', caste: 'Awan', nationality: 'Pakistani', origin_country: 'Pakistan', origin_city: 'Multan', profile_created_by: 'Mother', description: 'Kind and educated.', contact_phone: '0300 5556667', contact_email: 'ayesha@test.local',
     education_level: 'Masters', occupation: 'Teacher', employment_status: 'Employed', religion: 'Islam', country_id: '1', city: 'Multan', partner_demand: 'A respectful family.',
   }));
-  await fresh('Account');
+  await fresh('Profile');
   await button('Submit a profile').click();
   await visible('Create a free account to submit a profile');
   await button('Create an account').click();
@@ -464,7 +471,7 @@ await step('a new family creates an account, then submits a profile with a photo
 });
 
 await step('the new member finds the profile under My matrimonial profile', async () => {
-  await fresh('Account');
+  await fresh('Profile');
   await scrollTo(button('My matrimonial profile'), 40);
   await button('My matrimonial profile').click();
   await visible('Ayesha');
@@ -477,7 +484,7 @@ await step('a member unlocks a Premium profile with credits, once', async () => 
   await adjustCredits(bilalUser.id, 3, 'Test credits', bilalUser.id);
   await db.profile.update({ where: { id: Number(hira.slice(3)) }, data: { access_type: 'paid' } });
   await page.evaluate(() => localStorage.removeItem('flutter.profile_draft'));
-  await fresh('Account');
+  await fresh('Profile');
   // The previous steps left another family signed in; switch to the member with credits.
   if (!(await button('Register now').count())) {
     await scrollTo(button('Sign out'), 60);
@@ -494,7 +501,7 @@ await step('a member unlocks a Premium profile with credits, once', async () => 
     await page.getByRole('button', { name: 'Sign in' }).last().click();
     await visible('Welcome back, Bilal', 20000);
   }
-  await fresh('Proposals');
+  await fresh('Search');
   const card = text(hira);
   await scrollTo(card);
   await card.click();
@@ -515,7 +522,7 @@ await step('a member unlocks a Premium profile with credits, once', async () => 
 });
 
 await step('a member buys a credit package from the app; credits wait for approval', async () => {
-  await fresh('Account');
+  await fresh('Profile');
   await scrollTo(button('Buy Premium Credits'), 40);
   await button('Buy Premium Credits').click();
   await visible('Most popular');
@@ -536,7 +543,7 @@ await step('a member buys a credit package from the app; credits wait for approv
   assert.equal(request?.package_id, starter.id);
   assert.equal(request?.credits, 5);
   assert.equal((await db.user.findUnique({ where: { email: MEMBER.email } })).credits, 2, 'no credits before approval');
-  await fresh('Account');
+  await fresh('Profile');
   await scrollTo(button('Premium Credits'), 40);
   await button('Premium Credits').click();
   await visible('is waiting for review');
@@ -544,7 +551,7 @@ await step('a member buys a credit package from the app; credits wait for approv
 });
 
 await step('the official fee structure opens from the menu', async () => {
-  await fresh('Account');
+  await fresh('Profile');
   await scrollTo(button('Consultancy fees'), 40);
   await button('Consultancy fees').click();
   await visible('Advance registration fees');
@@ -553,7 +560,7 @@ await step('the official fee structure opens from the menu', async () => {
 });
 
 await step('the contact form sends an enquiry to the bureau', async () => {
-  await fresh('Account');
+  await fresh('Profile');
   await scrollTo(button('Contact us'), 30);
   await button('Contact us').click();
   await typeIn('Enter your full name', 'Parent Name');
@@ -566,7 +573,7 @@ await step('the contact form sends an enquiry to the bureau', async () => {
 });
 
 await step('consultants, legal pages and settings open', async () => {
-  await fresh('Account');
+  await fresh('Profile');
   await scrollTo(button('Marriage consultants'), 30);
   await button('Marriage consultants').click();
   await visible('Professional marriage consultants');
@@ -584,7 +591,7 @@ await step('consultants, legal pages and settings open', async () => {
 
 await step('tablet width shows proposals in a grid', async () => {
   await page.setViewportSize({ width: 900, height: 1100 });
-  await fresh('Proposals');
+  await fresh('Search');
   await page.waitForTimeout(1500);
   await shot('33-tablet-proposals');
   await page.setViewportSize({ width: 412, height: 860 });

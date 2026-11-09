@@ -21,6 +21,7 @@ const { closeDb, getDb } = await import('../../lib/db.js');
 const { createProfile } = await import('../../lib/profiles.js');
 const { profileCode } = await import('../../lib/format.js');
 const { saveSettings } = await import('../../lib/settings.js');
+const { hashPassword } = await import('../../lib/security.js');
 const db = getDb();
 
 const server = spawn('npx', ['next', 'start', '-p', String(PORT)], { env, stdio: ['ignore', 'pipe', 'pipe'], detached: true });
@@ -457,6 +458,36 @@ await step('premium credits: buy a package, admin approves, unlock once, protect
   const history = (await get('credits', buyer)).body.transactions.map((row) => `${row.kind}:${row.amount}:${row.balance}`);
   assert.deepEqual(history, ['unlock:-1:4', 'purchase:5:5']);
   await saveSettings({ restrict_photo: '0' });
+});
+
+await step('staff open the website panels inside the app with a one-minute link', async () => {
+  const member = (await post('auth/login', { email: 'bilal@test.local', password: 'New-pass-12345' })).body.token;
+  assert.equal((await post('staff/web-link', {}, member)).status, 403, 'members get no panel link');
+  assert.equal((await get('admin/summary', member)).status, 403);
+  assert.equal((await post('staff/web-link', {})).status, 401);
+
+  await db.user.create({ data: { email: 'boss@test.local', password_hash: hashPassword('Boss-pass-12345'), name: 'Asif Raza', role: 'admin' } });
+  const token = (await post('auth/login', { email: 'boss@test.local', password: 'Boss-pass-12345' })).body.token;
+  const summary = (await get('admin/summary', token)).body;
+  for (const key of ['pendingProfiles', 'payments', 'verification', 'enquiries', 'profiles', 'members']) assert.equal(typeof summary[key], 'number', key);
+
+  const { url } = (await post('staff/web-link', { next: '/admin/payment-requests' }, token)).body;
+  assert.match(url, /^\/app-login\?t=/);
+  const opened = await fetch(`${BASE}${url}`, { redirect: 'manual' });
+  assert.equal(opened.status, 303);
+  assert.equal(opened.headers.get('location'), '/admin/payment-requests');
+  const cookie = opened.headers.get('set-cookie')?.split(';')[0];
+  assert.match(cookie ?? '', /^az_session=/);
+  const panel = await fetch(`${BASE}/admin/payment-requests`, { headers: { cookie }, redirect: 'manual' });
+  assert.equal(panel.status, 200, 'the in-app browser is signed in to the admin panel');
+
+  const tampered = url.replace(/t=(\d+)/, (match, id) => `t=${Number(id) + 1}`);
+  assert.equal((await fetch(`${BASE}${tampered}`, { redirect: 'manual' })).headers.get('location'), '/login', 'a changed link is refused');
+  const outside = (await post('staff/web-link', { next: '//evil.example/admin' }, token)).body.url;
+  assert.equal(new URLSearchParams(outside.split('?')[1]).get('next'), '/admin', 'links only lead into the panel');
+  const later = (await post('staff/web-link', {}, token)).body.url;
+  await post('auth/logout', {}, token);
+  assert.equal((await fetch(`${BASE}${later}`, { redirect: 'manual' })).headers.get('location'), '/login', 'signing out of the app voids unused links');
 });
 
 await step('the website pages that now share code still render', async () => {

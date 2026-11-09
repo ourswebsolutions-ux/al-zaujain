@@ -408,3 +408,129 @@ class CardGrid extends StatelessWidget {
     });
   }
 }
+
+/// The home screen card from the app design: a round portrait in a gold ring, the heart, the
+/// name in serif, age and city, and two small facts. Premium profiles keep their lock badge.
+class HomeProfileCard extends StatelessWidget {
+  const HomeProfileCard({super.key, required this.card});
+  final Json card;
+
+  @override
+  Widget build(BuildContext context) {
+    final code = '${card['code']}';
+    final type = '${card['type'] ?? 'paid'}';
+    final unlocked = type == 'paid' && app.unlocked.contains(code);
+    final photo = card['photo'] as String?;
+    final blurred = photo != null && photosLocked && type != 'public' && !unlocked;
+    final facts = <(IconData, String)>[
+      if (card['education'] != null) (Icons.school_rounded, tr('${card['education']}')),
+      if (card['profession'] != null) (Icons.work_rounded, tr('${card['profession']}')),
+    ];
+    final (IconData badgeIcon, Color badgeColor, String hint) = type == 'premium'
+        ? (Icons.workspace_premium_rounded, AppColors.navy, 'Exclusive proposal, introduced by our consultants')
+        : type == 'paid' && !unlocked
+            ? (Icons.lock_rounded, AppColors.gold, 'Premium profile: unlock with credits')
+            : (Icons.lock_open_rounded, const Color(0xFF1F8A3A), unlocked ? 'Unlocked for you' : 'Free profile');
+    return Material(
+      color: const Color(0xFFFFFDF8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18), side: const BorderSide(color: Color(0xFFEDE3CF))),
+      elevation: 0,
+      shadowColor: const Color(0x2203223F),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => openProposal(context, code),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Stack(clipBehavior: Clip.none, children: [
+              Center(
+                child: LayoutBuilder(builder: (context, size) {
+                  final d = (size.maxWidth * 0.68).clamp(80.0, 140.0);
+                  return Container(
+                    width: d,
+                    height: d,
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFFE9C77B), Color(0xFFB8893A)]),
+                      boxShadow: const [BoxShadow(color: Color(0x2603223F), blurRadius: 14, offset: Offset(0, 6))],
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: const BoxDecoration(color: Color(0xFFF5EBDA), shape: BoxShape.circle),
+                      child: ClipOval(
+                        child: Stack(fit: StackFit.expand, children: [
+                          photo == null
+                              ? Container(color: const Color(0xFFF1E6D2), padding: const EdgeInsets.all(18), child: Opacity(opacity: 0.55, child: Image.asset('assets/images/logo.png')))
+                              : NetImage('/media/photos/$photo'),
+                          if (blurred) Container(color: const Color(0x3303223F), alignment: Alignment.center, child: const Icon(Icons.visibility_off_rounded, color: Colors.white, size: 22)),
+                        ]),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+              PositionedDirectional(
+                end: -4,
+                top: -4,
+                child: app.isMember
+                    ? SaveHeart(code: code)
+                    : Material(
+                        color: Colors.white,
+                        shape: const CircleBorder(),
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: () => requireAccount(context, ProfileScreen(code: code), title: 'Create a free account to save proposals'),
+                          child: Padding(padding: const EdgeInsets.all(7), child: Icon(Icons.favorite_border_rounded, size: 19, color: const Color(0xFFC0392B), semanticLabel: tr('Save profile'))),
+                        ),
+                      ),
+              ),
+              PositionedDirectional(
+                start: 2,
+                bottom: 0,
+                child: Tooltip(
+                  message: tr(hint),
+                  child: Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(color: badgeColor, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2.5)),
+                    child: Icon(badgeIcon, size: 13, color: type == 'paid' && !unlocked ? AppColors.dark : Colors.white, semanticLabel: tr(hint)),
+                  ),
+                ),
+              ),
+            ]),
+            const SizedBox(height: 10),
+            Row(children: [
+              Flexible(child: Text('${card['name']}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Playfair', fontSize: 17, color: AppColors.navy, fontVariations: [FontVariation('wght', 600)]))),
+              if (card['verified'] == true) const Padding(padding: EdgeInsetsDirectional.only(start: 4), child: VerifiedBadge(size: 15)),
+            ]),
+            const SizedBox(height: 2),
+            Text(
+              [if (card['age'] != null) '${card['age']}', if (card['city'] != null) tr('${card['city']}')].join('  •  '),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 12.5, color: AppColors.muted),
+            ),
+            if (facts.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              const Divider(height: 1),
+              const SizedBox(height: 8),
+              Row(children: [
+                for (var i = 0; i < facts.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 8),
+                  Flexible(
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      Icon(facts[i].$1, size: 13, color: AppColors.navy),
+                      const SizedBox(width: 4),
+                      Flexible(child: Text(facts[i].$2, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: Color(0xFF47566A)))),
+                    ]),
+                  ),
+                ],
+              ]),
+            ],
+          ]),
+        ),
+      ),
+    );
+  }
+}

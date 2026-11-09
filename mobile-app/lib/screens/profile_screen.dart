@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../core/api.dart';
@@ -20,7 +22,17 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.cream,
-      appBar: AppBar(title: Text(code)),
+      appBar: AppBar(
+        centerTitle: true,
+        title: const Text('AL ZAUJAIN', style: TextStyle(fontFamily: 'Cinzel', fontSize: 19, letterSpacing: 2, color: Colors.white, fontVariations: [FontVariation('wght', 600)])),
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert_rounded),
+            onSelected: (value) => copyText(context, code, 'Profile ID copied.'),
+            itemBuilder: (_) => [PopupMenuItem(value: 'copy', child: Text(tr('Copy profile ID {code}', {'code': code})))],
+          ),
+        ],
+      ),
       body: ListenableBuilder(
         listenable: app,
         builder: (context, _) => Loader(
@@ -44,7 +56,6 @@ class _ProfileBody extends StatefulWidget {
 }
 
 class _ProfileBodyState extends State<_ProfileBody> {
-  int photo = 0;
   bool chatting = false;
 
   Json get data => widget.data;
@@ -90,18 +101,19 @@ class _ProfileBodyState extends State<_ProfileBody> {
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(22), border: Border.all(color: AppColors.line), boxShadow: const [BoxShadow(color: Color(0x1403223F), blurRadius: 40, offset: Offset(0, 18))]),
           child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            BiodataHeader(data: biodata),
+            _Hero(
+              photos: photos,
+              locked: locked,
+              type: '${profile['type']}',
+              photoPublic: profile['photoPublic'] != false,
+              biodata: biodata,
+              code: '${profile['code']}',
+              canSave: data['canSave'] == true,
+            ),
             Container(
               color: AppColors.paper,
               padding: const EdgeInsets.all(16),
               child: Column(children: [
-                _gallery(photos, locked),
-                const SizedBox(height: 14),
-                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Flexible(child: Tx('${biodata['name']}', textAlign: TextAlign.center, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w600))),
-                  if (biodata['verified'] == true) const Padding(padding: EdgeInsetsDirectional.only(start: 8), child: VerifiedBadge(size: 21)),
-                ]),
-                Text(place, style: const TextStyle(fontSize: 13, color: AppColors.muted)),
                 if (data['yourScore'] != null) Padding(padding: const EdgeInsets.only(top: 8), child: Pill(tr('{score}% match with your profile', {'score': data['yourScore']}))),
                 const SizedBox(height: 14),
                 if (!premium)
@@ -112,10 +124,10 @@ class _ProfileBodyState extends State<_ProfileBody> {
                   const SizedBox(height: 10),
                   AppButton(app.signedIn ? 'Chat now' : 'Sign in to chat', tone: Tone.gold, icon: Icons.forum_rounded, expand: true, busy: chatting, onPressed: _chat),
                 ],
-                if (data['canSave'] == true) ...[const SizedBox(height: 10), _SaveButton(code: '${profile['code']}')],
                 if (data['credits'] != null) ...[const SizedBox(height: 12), _UnlockPanel(code: '${profile['code']}', credits: (data['credits'] as Map).cast<String, dynamic>(), onUnlocked: widget.reload)],
               ]),
             ),
+            BiodataHeader(data: biodata),
             Padding(
               padding: const EdgeInsets.all(16),
               child: CandidateSection(
@@ -139,44 +151,6 @@ class _ProfileBodyState extends State<_ProfileBody> {
       if (compatible.isNotEmpty) _Row(tag: 'SUGGESTED FOR THIS PROFILE', title: 'Compatible proposals', cards: compatible),
       if (similar.isNotEmpty) _Row(tag: 'YOU MAY ALSO LIKE', title: 'Similar proposals', cards: similar),
       const SizedBox(height: 30),
-    ]);
-  }
-
-  Widget _gallery(List<Map> photos, bool locked) {
-    if (photos.isEmpty) {
-      return AspectRatio(
-        aspectRatio: 1,
-        child: Container(
-          decoration: BoxDecoration(color: const Color(0xFFE9E1D1), borderRadius: BorderRadius.circular(18)),
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Opacity(opacity: 0.6, child: Image.asset('assets/images/logo.png', width: 110)),
-            if (profile['photoPublic'] == false) Padding(padding: const EdgeInsets.only(top: 10), child: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.lock_rounded, size: 13, color: AppColors.muted), const SizedBox(width: 5), Text(tr('Photo shared through the consultancy'), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.muted))])),
-          ]),
-        ),
-      );
-    }
-    return Column(children: [
-      AspectRatio(
-        aspectRatio: 1,
-        child: Stack(fit: StackFit.expand, children: [
-          PageView.builder(
-            itemCount: photos.length,
-            onPageChanged: (index) => setState(() => photo = index),
-            itemBuilder: (context, index) => GestureDetector(
-              onTap: locked ? () => showUnlockSheet(context) : () => push(context, PhotoViewer(paths: photos.map((item) => '${item['file']}').toList(), start: index)),
-              child: NetImage('${photos[index]['file']}', radius: 18),
-            ),
-          ),
-          if (locked)
-            IgnorePointer(
-              child: Center(child: Container(width: 58, height: 58, decoration: const BoxDecoration(color: Color(0x9903223F), shape: BoxShape.circle), child: const Icon(Icons.visibility_off_rounded, color: Colors.white, size: 26))),
-            ),
-          PositionedDirectional(start: 12, top: 12, child: TypeBadge('${profile['type']}')),
-          if (photos.length > 1)
-            PositionedDirectional(end: 12, bottom: 12, child: Container(padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4), decoration: BoxDecoration(color: const Color(0xB3062B4E), borderRadius: BorderRadius.circular(12)), child: Text('${photo + 1}/${photos.length}', style: const TextStyle(color: Colors.white, fontSize: 12)))),
-        ]),
-      ),
-      if (locked) Padding(padding: const EdgeInsets.only(top: 8), child: TextButton.icon(onPressed: () => showUnlockSheet(context), icon: const Icon(Icons.lock_open_rounded, size: 16), label: Text(tr('Unlock Full Profile Photograph')))),
     ]);
   }
 }
@@ -248,31 +222,6 @@ class _UnlockPanelState extends State<_UnlockPanel> {
         if (error != null && !insufficient) ...[const SizedBox(height: 8), Notice(error!)],
       ]),
     );
-  }
-}
-
-class _SaveButton extends StatefulWidget {
-  const _SaveButton({required this.code});
-  final String code;
-  @override
-  State<_SaveButton> createState() => _SaveButtonState();
-}
-
-class _SaveButtonState extends State<_SaveButton> {
-  bool busy = false;
-  @override
-  Widget build(BuildContext context) {
-    final saved = app.saved.contains(widget.code);
-    return AppButton(saved ? 'Saved' : 'Save profile', tone: Tone.outline, icon: saved ? Icons.favorite_rounded : Icons.favorite_border_rounded, expand: true, busy: busy, onPressed: () async {
-      setState(() => busy = true);
-      try {
-        await app.toggleSaved(widget.code, !saved);
-      } on ApiException catch (error) {
-        if (context.mounted) showMessage(context, error.message, error: true);
-      } finally {
-        if (mounted) setState(() => busy = false);
-      }
-    });
   }
 }
 
@@ -376,4 +325,233 @@ class PhotoViewer extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The top of a proposal from the app design: the round portrait framed by gold laurels, the heart,
+/// the name in serif, three facts, a few lines about them, their values as tags, and ✕ / ♥.
+class _Hero extends StatefulWidget {
+  const _Hero({required this.photos, required this.locked, required this.type, required this.photoPublic, required this.biodata, required this.code, required this.canSave});
+  final List<Map> photos;
+  final bool locked;
+  final String type;
+  final bool photoPublic;
+  final Json biodata;
+  final String code;
+  final bool canSave;
+
+  @override
+  State<_Hero> createState() => _HeroState();
+}
+
+class _HeroState extends State<_Hero> {
+  bool busy = false;
+
+  String? _row(String label) {
+    final rows = ((widget.biodata['candidate'] as List?) ?? const []).cast<Map>();
+    final row = rows.where((item) => item['label'] == label);
+    final value = row.isEmpty ? null : '${row.first['value'] ?? ''}'.trim();
+    return value == null || value.isEmpty ? null : value;
+  }
+
+  String? _place() {
+    final rows = ((widget.biodata['residence'] as List?) ?? const []).cast<Map>();
+    final row = rows.where((item) => item['label'] == 'City');
+    return row.isEmpty ? null : '${row.first['value']}'.split(' (').first;
+  }
+
+  Future<void> _save() async {
+    if (!widget.canSave) {
+      if (!app.signedIn) {
+        await push(context, LoginScreen(then: ProfileScreen(code: widget.code), replace: true));
+      } else {
+        showMessage(context, 'Only members can save proposals.');
+      }
+      return;
+    }
+    final saved = app.saved.contains(widget.code);
+    setState(() => busy = true);
+    try {
+      await app.toggleSaved(widget.code, !saved);
+      if (mounted) showMessage(context, saved ? 'Removed from your saved profiles.' : 'Saved to your shortlist.');
+    } on ApiException catch (error) {
+      if (mounted) showMessage(context, error.message, error: true);
+    } finally {
+      if (mounted) setState(() => busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final photos = widget.photos;
+    final saved = app.saved.contains(widget.code);
+    final age = _row('Age');
+    final facts = <(IconData, String)>[
+      if (_row('Education') case final education?) (Icons.school_rounded, tr(education)),
+      if (_row('Work details') case final work?) (Icons.work_rounded, tr(work)),
+      if (_place() case final city?) (Icons.location_on_rounded, tr(city)),
+    ];
+    final tags = [for (final label in ['Religion', 'Maslak', 'Marital status', 'Caste', 'Mother language', 'Family status']) _row(label)].whereType<String>().take(6).toList();
+    final about = '${widget.biodata['about'] ?? ''}'.trim();
+    final size = (MediaQuery.of(context).size.width * 0.5).clamp(150.0, 230.0);
+    return Container(
+      decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFFFBF4E6), Color(0xFFFFFCF6)])),
+      padding: const EdgeInsets.fromLTRB(18, 24, 18, 20),
+      child: Column(children: [
+        SizedBox(
+          width: size + 56,
+          height: size + 16,
+          child: Stack(alignment: Alignment.center, clipBehavior: Clip.none, children: [
+            Positioned.fill(child: CustomPaint(painter: _LaurelPainter(radius: size / 2 + 14))),
+            GestureDetector(
+              onTap: photos.isEmpty ? null : (widget.locked ? () => showUnlockSheet(context) : () => push(context, PhotoViewer(paths: photos.map((item) => '${item['file']}').toList()))),
+              child: Container(
+                width: size,
+                height: size,
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFFE9C77B), Color(0xFFB8893A)]), boxShadow: [BoxShadow(color: Color(0x3303223F), blurRadius: 24, offset: Offset(0, 10))]),
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(color: Color(0xFFF5EBDA), shape: BoxShape.circle),
+                  child: ClipOval(
+                    child: Stack(fit: StackFit.expand, children: [
+                      photos.isEmpty ? Container(color: const Color(0xFFEFE3CC), padding: EdgeInsets.all(size * 0.2), child: Opacity(opacity: 0.55, child: Image.asset('assets/images/logo.png'))) : NetImage('${photos.first['file']}'),
+                      if (widget.locked) Container(color: const Color(0x3303223F), alignment: Alignment.center, child: const Icon(Icons.visibility_off_rounded, color: Colors.white, size: 30)),
+                    ]),
+                  ),
+                ),
+              ),
+            ),
+            PositionedDirectional(
+              end: 30,
+              bottom: size * 0.06,
+              child: Material(
+                color: Colors.white,
+                shape: const CircleBorder(side: BorderSide(color: Color(0xFFEDE3CF))),
+                elevation: 3,
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: busy ? null : _save,
+                  child: Padding(padding: const EdgeInsets.all(9), child: Icon(saved ? Icons.favorite_rounded : Icons.favorite_border_rounded, color: const Color(0xFFC0392B), size: 22, semanticLabel: tr(saved ? 'Remove from saved' : 'Save profile'))),
+                ),
+              ),
+            ),
+            PositionedDirectional(start: 26, top: 4, child: TypeBadge(widget.type)),
+          ]),
+        ),
+        if (photos.length > 1 && !widget.locked)
+          TextButton.icon(onPressed: () => push(context, PhotoViewer(paths: photos.map((item) => '${item['file']}').toList())), icon: const Icon(Icons.photo_library_rounded, size: 16), label: Text(tr('{count} photos', {'count': photos.length}))),
+        if (widget.locked) TextButton.icon(onPressed: () => showUnlockSheet(context), icon: const Icon(Icons.lock_open_rounded, size: 16), label: Text(tr('Unlock Full Profile Photograph'))),
+        if (photos.isEmpty && !widget.photoPublic)
+          Padding(padding: const EdgeInsets.only(top: 8), child: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.lock_rounded, size: 13, color: AppColors.muted), const SizedBox(width: 5), Text(tr('Photo shared through the consultancy'), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.muted))])),
+        const SizedBox(height: 10),
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Flexible(child: Tx('${widget.biodata['name']}', textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Playfair', fontSize: 27, color: AppColors.navy, fontVariations: [FontVariation('wght', 600)]))),
+          if (widget.biodata['verified'] == true) const Padding(padding: EdgeInsetsDirectional.only(start: 8), child: VerifiedBadge(size: 20)),
+        ]),
+        Text([?age, if (_place() case final city?) tr(city)].join('  •  '), style: const TextStyle(fontSize: 13.5, color: AppColors.muted)),
+        if (facts.isNotEmpty) ...[
+          const SizedBox(height: 14),
+          Wrap(alignment: WrapAlignment.center, spacing: 18, runSpacing: 8, children: [
+            for (final (icon, text) in facts)
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 170),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(icon, size: 16, color: AppColors.navy),
+                  const SizedBox(width: 5),
+                  Flexible(child: Text(text, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12.5, color: Color(0xFF47566A)))),
+                ]),
+              ),
+          ]),
+        ],
+        if (about.isNotEmpty) ...[
+          const SizedBox(height: 14),
+          Tx(about, textAlign: TextAlign.center, maxLines: 5, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13.5, height: 1.6, color: Color(0xFF3D4B5C))),
+        ],
+        if (tags.isNotEmpty) ...[
+          const SizedBox(height: 14),
+          Wrap(alignment: WrapAlignment.center, spacing: 8, runSpacing: 8, children: [
+            for (final tag in tags)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
+                decoration: BoxDecoration(color: const Color(0xFFF3E9D6), borderRadius: BorderRadius.circular(20), border: Border.all(color: const Color(0xFFE6D6B5))),
+                child: Text(tr(tag), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF6B5427))),
+              ),
+          ]),
+        ],
+        const SizedBox(height: 20),
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          _RoundAction(icon: Icons.close_rounded, label: 'Back to proposals', background: Colors.white, foreground: AppColors.muted, size: 58, onTap: () => Navigator.of(context).maybePop()),
+          const SizedBox(width: 28),
+          _RoundAction(icon: saved ? Icons.favorite_rounded : Icons.favorite_border_rounded, label: saved ? 'Remove from saved' : 'Save profile', background: AppColors.gold, foreground: Colors.white, size: 68, onTap: busy ? null : _save),
+        ]),
+      ]),
+    );
+  }
+}
+
+class _RoundAction extends StatelessWidget {
+  const _RoundAction({required this.icon, required this.label, required this.background, required this.foreground, required this.size, required this.onTap});
+  final IconData icon;
+  final String label;
+  final Color background;
+  final Color foreground;
+  final double size;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => Tooltip(
+        message: tr(label),
+        child: Material(
+          color: background,
+          shape: CircleBorder(side: BorderSide(color: background == Colors.white ? AppColors.line : background)),
+          elevation: 4,
+          shadowColor: const Color(0x4003223F),
+          child: InkWell(customBorder: const CircleBorder(), onTap: onTap, child: SizedBox(width: size, height: size, child: Icon(icon, color: foreground, size: size * 0.42, semanticLabel: tr(label)))),
+        ),
+      );
+}
+
+/// Two gold laurel branches curving up either side of the portrait.
+class _LaurelPainter extends CustomPainter {
+  _LaurelPainter({required this.radius});
+  final double radius;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final leaf = Paint()..color = const Color(0xFFC9A55A).withValues(alpha: 0.75);
+    final stem = Paint()
+      ..color = const Color(0xFFC9A55A).withValues(alpha: 0.75)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.6;
+    for (final side in [-1.0, 1.0]) {
+      // From the bottom of the portrait up its side, about a third of the way round.
+      const start = 0.62;
+      const end = 0.08;
+      final path = Path();
+      for (var i = 0; i <= 20; i++) {
+        final t = start + (end - start) * i / 20;
+        final angle = math.pi / 2 + side * t * math.pi;
+        final point = center + Offset(math.cos(angle), math.sin(angle)) * radius;
+        i == 0 ? path.moveTo(point.dx, point.dy) : path.lineTo(point.dx, point.dy);
+      }
+      canvas.drawPath(path, stem);
+      for (var i = 0; i < 7; i++) {
+        final t = start + (end - start) * (i + 0.5) / 7;
+        final angle = math.pi / 2 + side * t * math.pi;
+        final point = center + Offset(math.cos(angle), math.sin(angle)) * radius;
+        for (final outward in [true, false]) {
+          canvas.save();
+          canvas.translate(point.dx, point.dy);
+          final tangent = angle + side * math.pi / 2;
+          canvas.rotate(tangent + (outward ? -0.65 : 0.65) * side + math.pi);
+          canvas.drawOval(Rect.fromCenter(center: Offset(0, outward ? -7 : 7), width: 6, height: 14 - i * 0.6), leaf);
+          canvas.restore();
+        }
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_LaurelPainter oldDelegate) => oldDelegate.radius != radius;
 }

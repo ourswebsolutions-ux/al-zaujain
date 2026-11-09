@@ -7,11 +7,20 @@ import 'account_screen.dart';
 import 'home_screen.dart';
 import 'messages_screen.dart';
 import 'proposals_screen.dart';
-import 'saved_screen.dart';
+import 'member_screens.dart';
 
 final shellKey = GlobalKey<ShellState>();
 
-/// The bottom navigation: Home, Proposals, Messages, Saved and Account.
+/// The tabs of the bottom bar, in order.
+abstract final class Tabs {
+  static const home = 0;
+  static const search = 1;
+  static const matches = 2;
+  static const messages = 3;
+  static const account = 4;
+}
+
+/// The bottom navigation from the app design: Home, Search, Matches, Messages and Profile.
 class Shell extends StatefulWidget {
   Shell() : super(key: shellKey);
 
@@ -24,9 +33,9 @@ class ShellState extends State<Shell> {
   final proposals = GlobalKey<ProposalsScreenState>();
   final _visited = <int>{0};
 
-  /// Opens the Proposals tab with a search, as the website's search boxes do.
+  /// Opens the Search tab with a search, as the website's search boxes do.
   void showProposals({Map<String, String> filters = const {}, String path = ''}) {
-    setState(() { index = 1; _visited.add(1); });
+    setState(() { index = Tabs.search; _visited.add(Tabs.search); });
     WidgetsBinding.instance.addPostFrameCallback((_) => proposals.currentState?.search(filters: filters, path: path));
   }
 
@@ -46,8 +55,8 @@ class ShellState extends State<Shell> {
     final pages = [
       const HomeScreen(),
       ProposalsScreen(key: proposals),
+      const MatchesTab(),
       const MessagesScreen(),
-      const SavedScreen(),
       const AccountScreen(),
     ];
     return PopScope(
@@ -59,34 +68,39 @@ class ShellState extends State<Shell> {
         body: IndexedStack(index: index, children: [for (var i = 0; i < pages.length; i++) _visited.contains(i) ? pages[i] : const SizedBox.shrink()]),
         bottomNavigationBar: ListenableBuilder(
           listenable: app,
-          builder: (context, _) => NavigationBarTheme(
-            data: NavigationBarThemeData(
-              backgroundColor: Colors.white,
-              indicatorColor: AppColors.cream,
-              labelTextStyle: WidgetStateProperty.resolveWith((states) => TextStyle(fontSize: 11.5, fontWeight: states.contains(WidgetState.selected) ? FontWeight.w700 : FontWeight.w500, color: AppColors.navy)),
-              iconTheme: WidgetStateProperty.resolveWith((states) => IconThemeData(color: states.contains(WidgetState.selected) ? AppColors.gold : AppColors.navy)),
-            ),
-            child: NavigationBar(
-              selectedIndex: index,
-              onDestinationSelected: select,
-              height: 66,
-              destinations: [
-                NavigationDestination(icon: const Icon(Icons.home_outlined), selectedIcon: const Icon(Icons.home_rounded), label: tr('Home')),
-                NavigationDestination(icon: const Icon(Icons.search_rounded), selectedIcon: const Icon(Icons.manage_search_rounded), label: tr('Proposals')),
-                NavigationDestination(
-                  icon: Badge(isLabelVisible: app.unreadMessages > 0, label: Text('${app.unreadMessages}'), backgroundColor: AppColors.gold, textColor: AppColors.dark, child: const Icon(Icons.chat_bubble_outline_rounded)),
-                  selectedIcon: const Icon(Icons.chat_bubble_rounded),
-                  label: tr('Messages'),
+          builder: (context, _) {
+            Widget badge(int count, IconData icon) => Badge(isLabelVisible: count > 0, label: Text('$count'), backgroundColor: AppColors.gold, textColor: AppColors.dark, child: Icon(icon));
+            return Container(
+              decoration: const BoxDecoration(
+                color: AppColors.navy,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+                boxShadow: [BoxShadow(color: Color(0x3303223F), blurRadius: 18, offset: Offset(0, -4))],
+              ),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+                child: NavigationBarTheme(
+                  data: NavigationBarThemeData(
+                    backgroundColor: AppColors.navy,
+                    indicatorColor: Colors.white.withValues(alpha: 0.08),
+                    labelTextStyle: WidgetStateProperty.resolveWith((states) => TextStyle(fontSize: 11.5, fontWeight: states.contains(WidgetState.selected) ? FontWeight.w700 : FontWeight.w500, color: states.contains(WidgetState.selected) ? AppColors.goldSoft : const Color(0xFFC7D3DD))),
+                    iconTheme: WidgetStateProperty.resolveWith((states) => IconThemeData(color: states.contains(WidgetState.selected) ? AppColors.goldSoft : const Color(0xFFC7D3DD))),
+                  ),
+                  child: NavigationBar(
+                    selectedIndex: index,
+                    onDestinationSelected: select,
+                    height: 68,
+                    destinations: [
+                      NavigationDestination(icon: const Icon(Icons.home_outlined), selectedIcon: const Icon(Icons.home_rounded), label: tr('Home')),
+                      NavigationDestination(icon: const Icon(Icons.search_rounded), selectedIcon: const Icon(Icons.manage_search_rounded), label: tr('Search')),
+                      NavigationDestination(icon: const Icon(Icons.favorite_border_rounded), selectedIcon: const Icon(Icons.favorite_rounded), label: tr('Matches')),
+                      NavigationDestination(icon: badge(app.unreadMessages, Icons.chat_bubble_outline_rounded), selectedIcon: badge(app.unreadMessages, Icons.chat_bubble_rounded), label: tr('Messages')),
+                      NavigationDestination(icon: badge(app.unreadNotifications, Icons.person_outline_rounded), selectedIcon: badge(app.unreadNotifications, Icons.person_rounded), label: tr('Profile')),
+                    ],
+                  ),
                 ),
-                NavigationDestination(icon: const Icon(Icons.favorite_border_rounded), selectedIcon: const Icon(Icons.favorite_rounded), label: tr('Saved')),
-                NavigationDestination(
-                  icon: Badge(isLabelVisible: app.unreadNotifications > 0, label: Text('${app.unreadNotifications}'), backgroundColor: AppColors.gold, textColor: AppColors.dark, child: const Icon(Icons.person_outline_rounded)),
-                  selectedIcon: const Icon(Icons.person_rounded),
-                  label: tr('Account'),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );

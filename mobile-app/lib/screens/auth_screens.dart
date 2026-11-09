@@ -48,7 +48,7 @@ void _afterSignIn(BuildContext context, Widget? then, bool replace) {
     }
   } else {
     navigator.popUntil((route) => route.isFirst);
-    shellKey.currentState?.select(4);
+    shellKey.currentState?.select(Tabs.account);
   }
 }
 

@@ -16,7 +16,9 @@ import 'my_profile_screen.dart';
 import 'payments_screen.dart';
 import 'preferences_screen.dart';
 import 'profile_form_screen.dart';
+import 'saved_screen.dart';
 import 'shell.dart';
+import 'staff_panel_screen.dart';
 
 /// The Account tab: the member dashboard and every member page, or sign-in for visitors.
 class AccountScreen extends StatelessWidget {
@@ -111,27 +113,42 @@ class _InfoMenu extends StatelessWidget {
       ]);
 }
 
-/// Administrators and consultants run the bureau from the website's panels.
+/// Administrators run the whole bureau from the app; consultants get their own panel.
 class _StaffView extends StatelessWidget {
   const _StaffView();
   @override
   Widget build(BuildContext context) {
-    final role = app.user?['role'];
+    final admin = app.user?['role'] == 'admin';
+    final menu = _Menu(items: [
+      (Icons.chat_bubble_rounded, 'Messages', () => shellKey.currentState?.select(Tabs.messages), app.unreadMessages),
+      (Icons.notifications_rounded, 'Notifications', () => push(context, const NotificationsScreen()), app.unreadNotifications),
+      (Icons.manage_accounts_rounded, 'Account settings', () => push(context, const AccountSettingsScreen()), 0),
+    ]);
+    final signOut = AppButton('Sign out', tone: Tone.outline, icon: Icons.logout_rounded, expand: true, onPressed: () => app.signOut());
+    if (admin) {
+      return Column(children: [
+        const Expanded(child: AdminHome()),
+        Padding(padding: const EdgeInsets.fromLTRB(16, 8, 16, 12), child: Row(children: [
+          Expanded(child: AppButton('My account', tone: Tone.outline, icon: Icons.person_rounded, onPressed: () => push(context, Scaffold(appBar: AppBar(title: Text(tr('My account'))), body: ListView(padding: const EdgeInsets.all(16), children: [menu, const SizedBox(height: 16), signOut]))))),
+        ])),
+      ]);
+    }
     return ListView(padding: const EdgeInsets.all(16), children: [
-      EmptyState(
-        icon: Icons.admin_panel_settings_rounded,
-        title: tr('Welcome back, {name}', {'name': '${app.user?['name']}'.split(' ').first}),
-        text: 'Staff panels are available on the website.',
-        action: AppButton('Open the website', icon: Icons.open_in_new_rounded, onPressed: () => openLink(context, '${app.domain}${role == 'admin' ? '/admin' : '/consultant'}')),
+      Container(
+        padding: const EdgeInsets.all(22),
+        decoration: BoxDecoration(gradient: const LinearGradient(colors: [AppColors.navy, AppColors.dark]), borderRadius: BorderRadius.circular(22)),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(tr('Welcome back, {name}', {'name': '${app.user?['name']}'.split(' ').first}), style: const TextStyle(color: Colors.white, fontFamily: 'Playfair', fontSize: 24, fontVariations: [FontVariation('wght', 600)])),
+          const SizedBox(height: 6),
+          Tx(tr('Your assigned profiles, proposals and account, exactly as on the website.'), style: const TextStyle(color: Color(0xFFC7D3DD), fontSize: 13, height: 1.5)),
+          const SizedBox(height: 16),
+          AppButton('Open the consultant panel', tone: Tone.gold, icon: Icons.dashboard_customize_rounded, expand: true, onPressed: () => push(context, const StaffPanelScreen())),
+        ]),
       ),
       const SizedBox(height: 16),
-      _Menu(items: [
-        (Icons.chat_bubble_rounded, 'Messages', () => shellKey.currentState?.select(2), app.unreadMessages),
-        (Icons.notifications_rounded, 'Notifications', () => push(context, const NotificationsScreen()), app.unreadNotifications),
-        (Icons.manage_accounts_rounded, 'Account settings', () => push(context, const AccountSettingsScreen()), 0),
-      ]),
+      menu,
       const SizedBox(height: 16),
-      AppButton('Sign out', tone: Tone.outline, icon: Icons.logout_rounded, expand: true, onPressed: () => app.signOut()),
+      signOut,
     ]);
   }
 }
@@ -210,8 +227,8 @@ class DashboardView extends StatelessWidget {
             children: [
               _Stat(icon: Icons.visibility_rounded, label: 'Profile views', value: '${views['total'] ?? 0}', note: tr('{count} in the last 7 days', {'count': views['lastWeek'] ?? 0}), onTap: () => open(const ViewsScreen())),
               _Stat(icon: Icons.favorite_rounded, label: 'Matching proposals', value: '${data['matchCount'] ?? 0}', note: tr((data['profileCount'] ?? 0) == 0 ? 'After your profile is live' : 'Ranked for your profile'), onTap: () => open(const MatchesScreen())),
-              _Stat(icon: Icons.bookmark_rounded, label: 'Saved profiles', value: '${data['savedCount'] ?? 0}', note: tr('Your shortlist'), onTap: () => shellKey.currentState?.select(3)),
-              _Stat(icon: Icons.chat_bubble_rounded, label: 'Unread messages', value: '${data['unreadMessages'] ?? 0}', note: tr('In your inbox'), onTap: () => shellKey.currentState?.select(2)),
+              _Stat(icon: Icons.bookmark_rounded, label: 'Saved profiles', value: '${data['savedCount'] ?? 0}', note: tr('Your shortlist'), onTap: () => push(context, const SavedScreen())),
+              _Stat(icon: Icons.chat_bubble_rounded, label: 'Unread messages', value: '${data['unreadMessages'] ?? 0}', note: tr('In your inbox'), onTap: () => shellKey.currentState?.select(Tabs.messages)),
             ],
           ),
           const SizedBox(height: 18),
@@ -264,7 +281,8 @@ class DashboardView extends StatelessWidget {
             (Icons.badge_rounded, 'My matrimonial profile', () => open(const MyProfilesScreen()), 0),
             (Icons.edit_rounded, 'Edit profile', () => open(primary == null ? const ProfileFormScreen() : MyProfileScreen(code: '${primary['code']}')), 0),
             (Icons.tune_rounded, 'Partner preferences', () => open(const PreferencesScreen()), 0),
-            (Icons.favorite_rounded, 'Recommended matches', () => open(const MatchesScreen()), 0),
+            (Icons.favorite_rounded, 'Recommended matches', () => shellKey.currentState?.select(Tabs.matches), 0),
+            (Icons.bookmark_rounded, 'Saved profiles', () => open(const SavedScreen()), 0),
             (Icons.visibility_rounded, 'Profile views', () => open(const ViewsScreen()), 0),
             (Icons.notifications_rounded, 'Notifications', () => open(const NotificationsScreen()), app.unreadNotifications),
             (Icons.toll_rounded, '${tr('Premium Credits')} · ${app.credits}', () => open(const CreditsScreen()), 0),
