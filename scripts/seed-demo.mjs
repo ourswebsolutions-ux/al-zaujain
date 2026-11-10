@@ -101,14 +101,31 @@ const password = crypto.randomBytes(9).toString('base64url');
 const hash = hashPassword(password);
 const addUser = async (email, name, role = 'user', extra = {}) => (await db.user.create({ data: { email, password_hash: hash, name, role, match_emails: false, ...extra } })).id;
 
+// Demo consultants with everything their homepage card shows: specialities, rating, working days and
+// hours (Online/Offline follows them), and a simple initials portrait.
+const { consultantsDir } = await import('../lib/uploads.js');
+const portrait = async (name, hue) => {
+  const initials = name.split(' ').map((part) => part[0]).join('').slice(0, 2);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640"><defs><radialGradient id="g" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="${hue}"/><stop offset="1" stop-color="#062b4e"/></radialGradient></defs><rect width="640" height="640" fill="url(#g)"/><text x="320" y="372" font-family="Arial, Helvetica, sans-serif" font-size="190" font-weight="700" text-anchor="middle" fill="#f4d889">${initials}</text></svg>`;
+  fs.mkdirSync(consultantsDir(), { recursive: true });
+  const file = `${crypto.randomUUID()}.webp`;
+  await sharp(Buffer.from(svg)).webp({ quality: 85 }).toFile(path.join(consultantsDir(), file));
+  return file;
+};
+
 const consultants = [];
-for (const [name, title, city, languages, years, bio] of [
-  ['Saima Rehman', 'Senior Marriage Consultant', 'Multan', 'Urdu, Punjabi, Saraiki, English', 12, 'For twelve years Saima has guided families across South Punjab and the Gulf with care and discretion, and she remains personally involved from first conversation to nikah.'],
-  ['Tariq Mehmood', 'Overseas Proposals Consultant', 'London', 'English, Urdu, Punjabi', 9, 'Based in London, Tariq helps British Pakistani families and those in Europe find proposals that honour both their roots and their life abroad.'],
-  ['Nadia Farooq', 'Family Consultant', 'Dubai', 'Urdu, English, Arabic', 7, 'Nadia works with families across the Gulf, bringing together professionals who value faith, education and family life.'],
+for (const [name, title, city, languages, years, bio, specialties, rating, workDays, from, to, hue] of [
+  ['Saima Rehman', 'Senior Marriage Consultant', 'Multan', 'Urdu, Punjabi, Saraiki, English', 12, 'For twelve years Saima has guided families across South Punjab and the Gulf with care and discretion, and she remains personally involved from first conversation to nikah.', 'Middle Class, Upper-Middle Class, 2nd Marriage', 4.9, 'mon-sat', '10:00', '19:00', '#9b2c47'],
+  ['Tariq Mehmood', 'Overseas Proposals Consultant', 'London', 'English, Urdu, Punjabi', 9, 'Based in London, Tariq helps British Pakistani families and those in Europe find proposals that honour both their roots and their life abroad.', 'Overseas, UK & Europe, Professionals', 4.8, 'mon-fri', '13:00', '22:00', '#0d4a80'],
+  ['Nadia Farooq', 'Family Consultant', 'Dubai', 'Urdu, English, Arabic', 7, 'Nadia works with families across the Gulf, bringing together professionals who value faith, education and family life.', 'Gulf Proposals, Doctors, Engineers', 4.7, 'mon-sat', '11:00', '20:00', '#1f8a6f'],
+  ['Amna Siddiqui', 'Rishta Consultant', 'Lahore', 'Urdu, Punjabi, English', 5, 'Amna helps Lahore families with educated, middle-class proposals and keeps both sides informed at every step.', 'Middle Class, Lower-Middle Class, First Marriage', 4.6, 'everyday', '09:00', '21:00', '#a8834f'],
 ]) {
   const userId = await addUser(`${slug(name)}${DOMAIN}`, name, 'consultant');
-  consultants.push(await db.consultant.create({ data: { user_id: userId, slug: name.toLowerCase().replace(/\s+/g, '-'), display_name: name, title, city, languages, experience_years: years, bio, phone: phone(900 + consultants.length), whatsapp: `9230055509${consultants.length}`, public_email: `${slug(name)}${DOMAIN}`, perm_edit: true } }));
+  consultants.push(await db.consultant.create({ data: {
+    user_id: userId, slug: name.toLowerCase().replace(/\s+/g, '-'), display_name: name, title, city, languages, experience_years: years, bio,
+    phone: phone(900 + consultants.length), whatsapp: `9230055509${consultants.length}`, public_email: `${slug(name)}${DOMAIN}`, perm_edit: true,
+    specialties, rating, work_days: workDays, hours_from: from, hours_to: to, photo: await portrait(name, hue),
+  } }));
 }
 
 const ids = [];

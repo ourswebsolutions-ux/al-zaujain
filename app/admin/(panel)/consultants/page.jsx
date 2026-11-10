@@ -13,7 +13,7 @@ export default async function Consultants() {
   });
   return (
     <>
-      <Title actions={<ButtonLink size="md" href="/admin/users/new">{t('Add consultant')}</ButtonLink>}>{t('Consultants')}</Title>
+      <Title actions={<ButtonLink size="md" href="/admin/consultants/new">{t('Add consultant')}</ButtonLink>}>{t('Consultants')}</Title>
       <Table head={['Consultant', 'City', 'Assigned', 'Shown to', 'Status']} empty={rows.length === 0 ? 'No consultants yet.' : null}>
         {rows.map((row) => (
           <tr key={row.id}>

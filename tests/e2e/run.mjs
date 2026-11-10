@@ -700,6 +700,11 @@ await step('admin creates a consultant; the consultant sees only assigned work',
   const created = await db.consultant.findFirst({ where: { display_name: 'Nasreen Akhtar' } });
   await adminPage.goto(`/admin/consultants/${created.id}`);
   await adminPage.fill('[name=bio]', 'Twenty years helping families.');
+  await adminPage.fill('[name=specialties]', 'Middle Class, Zzspecial Tag');
+  await adminPage.fill('[name=rating]', '4.7');
+  await adminPage.fill('[name=hours_from]', '00:00');
+  await adminPage.fill('[name=hours_to]', '23:59');
+  await adminPage.selectOption('[name=work_days]', 'everyday');
   await adminPage.setInputFiles('[name=photo]', photoPath);
   await adminPage.click('button:has-text("Save consultant")');
   await adminPage.waitForSelector('text=Consultant saved');
@@ -711,8 +716,11 @@ await step('admin creates a consultant; the consultant sees only assigned work',
 
   const listing = await newPage();
   await listing.goto('/consultants');
-  await listing.waitForSelector('text=Nasreen Akhtar');
-  await listing.click('text=View consultant');
+  const card = listing.locator('article', { hasText: 'Nasreen Akhtar' });
+  await card.waitFor();
+  for (const text of ['Zzspecial Tag', '4.7', 'Every Day | 12 AM - 11:59 PM', 'Online']) assert.ok(await card.getByText(text).first().isVisible(), text);
+  assert.match(await card.getByRole('link', { name: /Connect with Nasreen Akhtar/ }).getAttribute('href'), /^https:\/\/wa\.me\//);
+  await listing.goto(`/consultants/${created.slug}`);
   await listing.waitForSelector('text=Twenty years helping families.');
   await listing.context().close();
 

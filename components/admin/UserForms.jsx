@@ -29,6 +29,11 @@ export function NewUserForm() {
       <Field label="Email" name="email" type="email" required />
       <Field label="Phone" name="phone" type="tel" placeholder="0300 1234567" />
       {role === 'consultant' && <Field label="City" name="city" maxLength={80} />}
+      {role === 'consultant' && (
+        <p className="col-span-2 rounded-lg bg-[#fcf4e1] px-3 py-2.5 text-[12.5px] leading-5 text-[#806126] max-m:col-auto">
+          {t('For the full consultant card (photo, specialities, rating, working hours and WhatsApp), use')} <Link href="/admin/consultants/new" className="font-semibold text-navy underline">{t('Consultants → Add consultant')}</Link>.
+        </p>
+      )}
       <Field label="Password" name="password" type="text" hint="Leave blank to generate one." autoComplete="new-password" />
       <div className="col-span-2 flex items-center gap-4 max-m:col-auto">
         <Submit className="cursor-pointer">{t('Create account')}</Submit>
