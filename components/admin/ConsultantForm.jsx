@@ -40,6 +40,21 @@ export function ConsultantForm({ action, consultant, cities = [] }) {
       <Field label={t('Languages')} name="languages" defaultValue={value('languages')} />
       <Field label={t('Years of experience')} name="experience_years" type="number" min="0" max="70" defaultValue={value('experience_years')} />
       <Field label={t('Photograph')} name="photo" type="file" accept="image/jpeg,image/png,image/webp" />
+      <fieldset className="col-span-2 grid grid-cols-2 gap-3 rounded-xl border border-line p-4 max-m:col-auto max-m:grid-cols-1">
+        <legend className="px-1 text-xs font-bold">{t('Homepage card')}</legend>
+        <label className={`${labelClass} col-span-2 max-m:col-auto`}>{t('Specialities (separated by commas)')}<input name="specialties" maxLength={255} defaultValue={value('specialties')} placeholder={t('e.g. Middle Class, Overseas, 2nd Marriage')} className={inputClass} /></label>
+        <label className={labelClass}>{t('Rating out of 5 (optional)')}<input name="rating" type="number" min="1" max="5" step="0.1" defaultValue={consultant?.rating != null ? String(consultant.rating) : ''} placeholder="4.8" className={inputClass} /></label>
+        <label className={labelClass}>{t('Working days')}
+          <select name="work_days" defaultValue={value('work_days') || 'mon-sat'} className={inputClass}>
+            <option value="mon-sat">{t('Mon to Sat')}</option>
+            <option value="mon-fri">{t('Mon to Fri')}</option>
+            <option value="everyday">{t('Every Day')}</option>
+          </select>
+        </label>
+        <label className={labelClass}>{t('Starts at')}<input name="hours_from" type="time" defaultValue={value('hours_from')} className={inputClass} /></label>
+        <label className={labelClass}>{t('Ends at')}<input name="hours_to" type="time" defaultValue={value('hours_to')} className={inputClass} /></label>
+        <p className="col-span-2 text-[12px] text-muted max-m:col-auto">{t('With working hours, the card shows Online during them and Offline outside them (Pakistan time). The rating is shown only when you enter one.')}</p>
+      </fieldset>
       <label className={`${labelClass} col-span-2 max-m:col-auto`}>{t('Biography')}<textarea name="bio" rows={4} defaultValue={value('bio')} maxLength={2000} className={inputClass} /></label>
       <fieldset className="col-span-2 grid gap-2 rounded-xl border border-line p-4 max-m:col-auto">
         <legend className="px-1 text-xs font-bold">{t('Who is this consultant for?')}</legend>

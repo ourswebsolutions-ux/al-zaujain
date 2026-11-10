@@ -933,7 +933,7 @@ await step('homepage: one search box, second marriage lists, consultants on What
   const wifeTab = await second.locator('[role=tabpanel]').innerText();
   assert.ok(wifeTab.includes('Zzwilling') && !wifeTab.includes('Zzdivorcee'), 'only an explicit "Yes" counts as willing to be a second wife');
 
-  const contact = page.locator('#consultants a', { hasText: 'Contact Consultant' }).first();
+  const contact = page.locator('#consultants a', { hasText: 'Connect Now' }).first();
   assert.match(await contact.getAttribute('href'), /^https:\/\/wa\.me\/\d+\?text=Hello%2C%20I%20would%20like%20to%20consult/);
 
   await page.fill('#home-search', profileCode(seeking).toLowerCase());

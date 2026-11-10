@@ -385,6 +385,12 @@ model Consultant {
   // Who the consultant is shown to: everyone, the team only, or families of one city.
   audience         String   @default("everyone") @db.VarChar(12)
   audience_city    String?  @db.VarChar(80)
+  // Shown on the homepage consultant cards. Online/offline follows the working days and hours (Pakistan time).
+  specialties      String?  @db.VarChar(255)
+  rating           Decimal? @db.Decimal(2, 1)
+  work_days        String   @default("mon-sat") @db.VarChar(10)
+  hours_from       String?  @db.VarChar(5)
+  hours_to         String?  @db.VarChar(5)
   perm_edit        Boolean  @default(false)
   perm_review      Boolean  @default(true)
   perm_contact     Boolean  @default(true)

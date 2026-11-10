@@ -19,7 +19,7 @@ export default async function EditConsultant({ params }) {
   return (
     <div className="max-w-[760px]">
       <Title actions={<ActionButton action={deleteConsultant} fields={{ id: consultant.id }} tone="danger">{t('Delete consultant')}</ActionButton>}>{consultant.display_name}</Title>
-      <Panel><ConsultantForm action={saveConsultant} consultant={consultant} cities={(await citiesWithCountry()).map((city) => city.name)} /></Panel>
+      <Panel><ConsultantForm action={saveConsultant} consultant={{ ...consultant, rating: consultant.rating == null ? null : Number(consultant.rating) }} cities={(await citiesWithCountry()).map((city) => city.name)} /></Panel>
       <Panel title={`Assigned profiles (${assigned.length})`}>
         <p className="mb-2 text-xs text-muted">{t('Assign profiles from each profile’s page.')}</p>
         <ul className="grid gap-1 text-[13px]">
