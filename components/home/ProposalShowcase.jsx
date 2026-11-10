@@ -62,7 +62,7 @@ function HomeProfileCard({ profile }) {
             <li className="flex min-w-0 items-center gap-2.5"><FaBriefcase aria-hidden="true" className="w-3.5 shrink-0 text-[#c8c8c8]" /><span className="truncate">{profile.profession ? t(profile.profession) : t('Profession')}</span></li>
             <li className="flex min-w-0 items-center gap-2.5"><FaLocationDot aria-hidden="true" className="w-3.5 shrink-0 text-[#c8c8c8]" /><span className="truncate">{[t(profile.city), t(profile.country)].filter(Boolean).join(', ') || '—'}</span></li>
           </ul>
-          <Link href={href} className="mt-3 inline-flex min-h-9 items-center rounded-md bg-navy px-3.5 text-[14px] font-medium text-white no-underline shadow-[0_4px_10px_#062b4e40] transition-colors hover:bg-[#a17a33] hover:text-white">{t('Profile Detail')}</Link>
+          <Link href={href} className="mt-3 inline-flex min-h-9 items-center rounded-md bg-[linear-gradient(0deg,#062b4e,#0d4a80)] px-3.5 text-[14px] font-medium text-white no-underline transition-opacity hover:text-white hover:opacity-80 relative isolate overflow-hidden shadow-[inset_2px_2px_2px_0_#ffffff80,7px_7px_20px_0_#0000001a,4px_4px_5px_0_#0000001a] before:pointer-events-none before:absolute before:-top-[180px] before:start-0 before:-z-[1] before:h-full before:w-[30px] before:bg-white before:content-[''] before:animate-shine motion-reduce:before:animate-none">{t('Profile Detail')}</Link>
         </div>
       </div>
     </article>

@@ -55,6 +55,28 @@
   --animate-preloader: preloader 0.3s ease 1s forwards;
   --animate-marquee: marquee 48s linear infinite;
   --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-shine: shine 3s ease-in-out infinite;
+
+  /* A white flash that sweeps across a button every few seconds. */
+  @keyframes shine {
+    0% {
+      transform: scale(0) rotate(45deg);
+      opacity: 0;
+    }
+    80% {
+      transform: scale(0) rotate(45deg);
+      opacity: 0.5;
+    }
+    81% {
+      transform: scale(4) rotate(45deg);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(50) rotate(45deg);
+      opacity: 0;
+    }
+  }
+
   --animate-pop-in: pop-in 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
   @keyframes fade-in {

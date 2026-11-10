@@ -106,7 +106,7 @@ export function ProposalCard({ profile, tag, matchScore, saved }) {
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-2 max-sm:mx-3 max-sm:mb-3 sm:mt-auto sm:pt-4">
-        <Link href={href} className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-navy px-4 text-[13px] font-bold text-white no-underline shadow-[0_6px_14px_#062b4e33] transition-colors hover:bg-dark hover:text-white max-sm:min-h-[50px] max-sm:basis-full max-sm:justify-between max-sm:rounded-xl max-sm:bg-cream max-sm:px-[15px] max-sm:text-navy max-sm:shadow-none max-sm:hover:bg-[#efe6d3] max-sm:hover:text-navy">
+        <Link href={href} className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-navy px-4 text-[13px] font-bold text-white no-underline transition-colors hover:bg-dark hover:text-white relative isolate overflow-hidden shadow-[inset_2px_2px_2px_0_#ffffff80,7px_7px_20px_0_#0000001a,4px_4px_5px_0_#0000001a] before:pointer-events-none before:absolute before:-top-[180px] before:start-0 before:-z-[1] before:h-full before:w-[30px] before:bg-white before:content-[''] before:animate-shine motion-reduce:before:animate-none max-sm:before:bg-[#e4b653] max-sm:min-h-[50px] max-sm:basis-full max-sm:justify-between max-sm:rounded-xl max-sm:bg-cream max-sm:px-[15px] max-sm:text-navy max-sm:shadow-none max-sm:hover:bg-[#efe6d3] max-sm:hover:text-navy">
           {t('View Profile')} <FaArrowRight aria-hidden="true" className="text-[13px] sm:hidden rtl:-scale-x-100" />
         </Link>
         {locked && (
