@@ -35,7 +35,7 @@ export function BannerText({ banner, preview = false }) {
   return (
     <div
       style={{ left: `${banner.textX}%`, top: `${banner.textY}%`, transform: `translate(-${banner.textX}%, -${banner.textY}%)` }}
-      className={`absolute z-[2] flex w-max max-w-[min(640px,88%)] flex-col ${align} ${dark ? 'text-navy' : 'text-white'} ${preview ? '' : 'max-sm:!bottom-12 max-sm:!left-5 max-sm:!right-5 max-sm:!top-auto max-sm:!w-auto max-sm:!max-w-none max-sm:!transform-none'}`}
+      className={`absolute z-[2] flex w-max max-w-[min(640px,88%)] flex-col ${align} ${dark ? 'text-navy' : 'text-white'} ${preview ? '' : 'max-sm:!bottom-12 max-sm:group-data-[search]/hero:!bottom-[96px] max-sm:!left-5 max-sm:!right-5 max-sm:!top-auto max-sm:!w-auto max-sm:!max-w-none max-sm:!transform-none'}`}
     >
       {banner.eyebrow && <p className={`mb-3 text-[15px] font-semibold capitalize tracking-[.5px] max-sm:mb-2 max-sm:text-[13px] ${dark ? 'text-[#a17a33]' : 'text-champagne'}`}>{tr(banner.eyebrow)}</p>}
       {banner.heading && <h2 className={`${size.heading} font-bold leading-[1.15] tracking-[-0.5px] max-p:text-[38px] max-sm:!text-[26px] max-sm:leading-[1.25] ${dark ? '' : '[text-shadow:0_2px_18px_#03223f80]'}`}>{tr(banner.heading)}</h2>}

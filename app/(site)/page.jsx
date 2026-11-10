@@ -67,15 +67,14 @@ export default async function HomePage() {
   return (
     <main>
       <Preloader />
-      <HomeSearch />
-      <HeroBanner banners={banners.length > 0 ? banners : [DEFAULT_BANNER]} />
+      <HeroBanner banners={banners.length > 0 ? banners : [DEFAULT_BANNER]} search={<HomeSearch />} />
       {pakistan.length > 0 && <ProposalShowcase id="pakistan-proposals" title="Pakistan" highlight="Proposals" tabs={pakistan} intro="See the newest {place} proposals (rishtay). Find your life partner with Al Zaujain." />}
       <ProposalShowcase id="overseas-proposals" title="Overseas" highlight="Proposals" tabs={overseas} intro="See the newest {place} proposals (rishtay) from Pakistani families abroad." />
       {gulf.length > 0 && <ProposalShowcase id="gulf-proposals" title="Gulf" highlight="Proposals" tabs={gulf} intro="See the newest {place} proposals (rishtay) from UAE, Saudi Arabia, Qatar, Oman and the Gulf." />}
       <ProposalShowcase id="second-marriage-proposals" title="Second Marriage" highlight="Proposals" tabs={second} intro="" />
+      <DirectorSection director={{ ...director, photoSrc: imageSrc(director.photo, 900) }} whatsapp={settings.site_whatsapp} />
       <HomeConsultants consultants={consultants} whatsapp={settings.site_whatsapp} />
       <GovRegistered fees={fees} />
-      <DirectorSection director={{ ...director, photoSrc: imageSrc(director.photo, 900) }} whatsapp={settings.site_whatsapp} />
     </main>
   );
 }

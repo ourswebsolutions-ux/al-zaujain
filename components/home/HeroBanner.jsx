@@ -28,7 +28,7 @@ function Slide({ banner, first, active }) {
       {words && (
         <>
           <BannerShade banner={banner} />
-          <div className="absolute inset-x-[6%] inset-y-[8%] max-sm:inset-0"><BannerText banner={banner} /></div>
+          <div className="absolute inset-x-[6%] inset-y-[8%] group-data-[search]/hero:bottom-[130px] max-sm:inset-0 max-sm:group-data-[search]/hero:bottom-0"><BannerText banner={banner} /></div>
         </>
       )}
     </div>
@@ -39,7 +39,7 @@ function Slide({ banner, first, active }) {
  * The homepage banner. One banner stands still; two or more cross-fade every few seconds, pause
  * while the visitor points at them or the tab is hidden, and can be changed with arrows, dots or a swipe.
  */
-export function HeroBanner({ banners }) {
+export function HeroBanner({ banners, search = null }) {
   const t = useT();
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -70,7 +70,8 @@ export function HeroBanner({ banners }) {
         if (Math.abs(delta) > 45) go((current) => current + (delta < 0 ? 1 : -1));
         setTouch(null);
       }}
-      className="relative h-[clamp(420px,36vw,560px)] w-full overflow-hidden bg-dark max-sm:h-[min(118vw,520px)]"
+      data-search={search ? '' : undefined}
+      className="group/hero relative h-[clamp(420px,36vw,560px)] w-full overflow-hidden bg-dark max-sm:h-[min(118vw,520px)]"
     >
       <h1 className="sr-only">{t('Al Zaujain Marriage Bureau')} · {t('Government Registered Marriage Bureau')}</h1>
       {banners.map((banner, i) => <Slide key={banner.id} banner={banner} first={i === 0} active={i === index} />)}
@@ -83,7 +84,7 @@ export function HeroBanner({ banners }) {
           <button type="button" onClick={() => go((current) => current + 1)} aria-label={t('Next banner')} className="absolute end-4 top-1/2 z-10 grid size-11 -translate-y-1/2 cursor-pointer place-items-center rounded-full bg-white/85 text-navy shadow-[0_6px_18px_#0000002e] transition hover:bg-white max-sm:hidden">
             <FaChevronRight aria-hidden="true" className="rtl:-scale-x-100" />
           </button>
-          <div className="absolute inset-x-0 bottom-5 z-10 flex justify-center gap-2 max-sm:bottom-4">
+          <div className="absolute inset-x-0 bottom-5 z-10 flex justify-center gap-2 group-data-[search]/hero:bottom-[104px] max-sm:bottom-4 max-sm:group-data-[search]/hero:bottom-[84px]">
             {banners.map((banner, i) => (
               <button
                 key={banner.id}
@@ -95,6 +96,12 @@ export function HeroBanner({ banners }) {
               />
             ))}
           </div>
+        </>
+      )}
+      {search && (
+        <>
+          <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] h-40 bg-[linear-gradient(180deg,transparent,#03223f80)]" />
+          <div className="absolute inset-x-0 bottom-8 z-20 max-sm:bottom-5">{search}</div>
         </>
       )}
     </section>
