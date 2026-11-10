@@ -933,3 +933,16 @@ describe('card photo chosen like a WhatsApp picture', () => {
     assert.equal(await colour(again), 'blue');
   });
 });
+
+describe('WhatsApp numbers', () => {
+  it('accept the ways people write them', async () => {
+    const { whatsappNumber } = await import('../lib/format.js');
+    for (const typed of ['923001234567', '+92 300 1234567', '+92-300-1234567', '0300 1234567', '0300-1234567', '03001234567', '3001234567', '0092 300 1234567', ' (0300) 123 4567 ']) {
+      assert.equal(whatsappNumber(typed), '923001234567', typed);
+    }
+    assert.equal(whatsappNumber('+44 7700 900123'), '447700900123');
+    assert.equal(whatsappNumber(''), '');
+    assert.equal(whatsappNumber('12345'), null);
+    assert.equal(whatsappNumber('abc'), '');
+  });
+});

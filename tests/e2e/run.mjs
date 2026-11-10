@@ -700,6 +700,7 @@ await step('admin creates a consultant; the consultant sees only assigned work',
   const created = await db.consultant.findFirst({ where: { display_name: 'Nasreen Akhtar' } });
   await adminPage.goto(`/admin/consultants/${created.id}`);
   await adminPage.fill('[name=bio]', 'Twenty years helping families.');
+  await adminPage.fill('[name=whatsapp]', '+92 300 765-4321');
   await adminPage.fill('[name=specialties]', 'Middle Class, Zzspecial Tag');
   await adminPage.fill('[name=rating]', '4.7');
   await adminPage.fill('[name=hours_from]', '00:00');
@@ -708,6 +709,7 @@ await step('admin creates a consultant; the consultant sees only assigned work',
   await adminPage.setInputFiles('[name=photo]', photoPath);
   await adminPage.click('button:has-text("Save consultant")');
   await adminPage.waitForSelector('text=Consultant saved');
+  assert.equal((await db.consultant.findUnique({ where: { id: created.id } })).whatsapp, '923007654321', 'a WhatsApp number typed with + and spaces is accepted and stored for wa.me');
 
   await adminPage.goto(`/admin/profiles/${code}`);
   await adminPage.selectOption('[name=consultant_id]', { label: 'Nasreen Akhtar' });

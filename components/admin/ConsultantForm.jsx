@@ -35,7 +35,7 @@ export function ConsultantForm({ action, consultant, cities = [] }) {
       <Field label={t('Title')} name="title" defaultValue={value('title')} placeholder={t('Senior marriage consultant')} />
       <Field label={t('City')} name="city" defaultValue={value('city')} />
       <Field label={t('Phone')} name="phone" defaultValue={value('phone')} />
-      <Field label={t('WhatsApp (digits, international format)')} name="whatsapp" defaultValue={value('whatsapp')} placeholder="923001234567" />
+      <Field label={t('WhatsApp number')} name="whatsapp" type="tel" defaultValue={value('whatsapp')} placeholder="0300 1234567" hint={t('Any format: 0300 1234567, +92 300 1234567 or an overseas number with its country code.')} />
       <Field label={t('Public email')} name="public_email" type="email" defaultValue={value('public_email')} />
       <Field label={t('Languages')} name="languages" defaultValue={value('languages')} />
       <Field label={t('Years of experience')} name="experience_years" type="number" min="0" max="70" defaultValue={value('experience_years')} />

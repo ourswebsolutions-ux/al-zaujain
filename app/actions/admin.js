@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { requireAdmin } from '@/lib/auth.js';
 import { getDb } from '@/lib/db.js';
-import { idFromCode, profileCode, slugify } from '@/lib/format.js';
+import { idFromCode, profileCode, slugify, whatsappNumber } from '@/lib/format.js';
 import { sendMatchEmails, sendTemplate, testSmtp } from '@/lib/mail.js';
 import { deleteProfile, getProfile, rebuildSearchText, rebuildSearchTextForCountry, setVerification } from '@/lib/profiles.js';
 import { notify } from '@/lib/notifications.js';
@@ -209,7 +209,7 @@ const consultantSchema = z.object({
   title: z.string().max(120),
   bio: z.string().max(2000),
   phone: z.string().max(30),
-  whatsapp: z.string().regex(/^\d{0,20}$/, 'WhatsApp must be digits only, in international format, e.g. 923001234567'),
+  whatsapp: z.string().nullable().refine((value) => value !== null, 'Enter a valid WhatsApp number, for example 0300 1234567 or +92 300 1234567.'),
   public_email: z.string().max(160),
   city: z.string().max(80),
   languages: z.string().max(160),
@@ -219,7 +219,7 @@ const consultantSchema = z.object({
 function readConsultant(form) {
   const years = text(form, 'experience_years');
   return consultantSchema.safeParse({
-    display_name: text(form, 'display_name'), title: text(form, 'title'), bio: text(form, 'bio'), phone: text(form, 'phone'), whatsapp: text(form, 'whatsapp'),
+    display_name: text(form, 'display_name'), title: text(form, 'title'), bio: text(form, 'bio'), phone: text(form, 'phone'), whatsapp: whatsappNumber(text(form, 'whatsapp')),
     public_email: text(form, 'public_email'), city: text(form, 'city'), languages: text(form, 'languages'), experience_years: years ? Number(years) : null,
   });
 }

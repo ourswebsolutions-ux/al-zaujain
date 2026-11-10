@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
+import { whatsappNumber } from '@/lib/format.js';
 import { requireConsultant } from '@/lib/auth.js';
 import { chatBlockReason, openConversation } from '@/lib/chat.js';
 import { getDb } from '@/lib/db.js';
@@ -64,9 +65,10 @@ export async function saveOwnProfile(_previous, form) {
   const { consultant } = await requireConsultant();
   const schema = z.object({
     title: z.string().trim().max(120), bio: z.string().trim().max(2000), phone: z.string().trim().max(30),
-    whatsapp: z.string().trim().regex(/^\d{0,20}$/, 'WhatsApp must be digits only'), city: z.string().trim().max(80), languages: z.string().trim().max(160),
+    whatsapp: z.string().nullable().refine((value) => value !== null, 'Enter a valid WhatsApp number, for example 0300 1234567 or +92 300 1234567.'), city: z.string().trim().max(80), languages: z.string().trim().max(160),
   });
-  const parsed = schema.safeParse(Object.fromEntries(['title', 'bio', 'phone', 'whatsapp', 'city', 'languages'].map((key) => [key, form.get(key) ?? ''])));
+  const values = Object.fromEntries(['title', 'bio', 'phone', 'whatsapp', 'city', 'languages'].map((key) => [key, String(form.get(key) ?? '')]));
+  const parsed = schema.safeParse({ ...values, whatsapp: whatsappNumber(values.whatsapp) });
   if (!parsed.success) return { ok: false, message: parsed.error.issues[0].message };
   let photo = consultant.photo;
   const file = form.get('photo');
