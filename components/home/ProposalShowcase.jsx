@@ -54,10 +54,10 @@ function HomeProfileCard({ profile }) {
         </Link>
         <div className="min-w-0 py-2 pe-1">
           <h3 className="mb-1.5 flex min-w-0 items-center gap-1.5 pe-12 text-[20px] font-semibold leading-tight text-navy max-sm:text-[18px]">
-            <Link href={href} className="min-w-0 truncate text-inherit no-underline hover:text-[#a17a33]">{profile.name}</Link>
+            <Link href={href} className="min-w-0 truncate capitalize text-inherit no-underline hover:text-[#a17a33]">{profile.name}</Link>
             {profile.verified && <VerifiedBadge className="shrink-0 text-[15px]" />}
           </h3>
-          <ul className="grid gap-0.5 text-[15px] font-medium text-[#343434] max-sm:text-[14px]">
+          <ul className="grid gap-0.5 text-[15px] font-medium capitalize text-[#343434] max-sm:text-[14px]">
             <li className="flex min-w-0 items-center gap-2.5"><FaUser aria-hidden="true" className="w-3.5 shrink-0 text-[#c8c8c8]" /><span className="truncate">{t('{count} Years', { count: profile.age })}</span></li>
             <li className="flex min-w-0 items-center gap-2.5"><FaBriefcase aria-hidden="true" className="w-3.5 shrink-0 text-[#c8c8c8]" /><span className="truncate">{profile.profession ? t(profile.profession) : t('Profession')}</span></li>
             <li className="flex min-w-0 items-center gap-2.5"><FaLocationDot aria-hidden="true" className="w-3.5 shrink-0 text-[#c8c8c8]" /><span className="truncate">{[t(profile.city), t(profile.country)].filter(Boolean).join(', ') || '—'}</span></li>
@@ -80,6 +80,9 @@ export function ProposalShowcase({ id, title, highlight, tabs, intro }) {
   const tab = tabs[active];
   const name = t(tab.label);
   const link = (gender) => `${tab.href}${tab.href.includes('?') ? '&' : '?'}gender=${gender}`;
+  // A tab may name itself ("Willing To Be A Second Wife"); otherwise it reads "{place} Proposals".
+  const tabName = (item) => (item.tabLabel ? t(item.tabLabel) : t('{place} Proposals', { place: t(item.label) }));
+  const links = tab.links ?? [{ label: 'View Female Proposals', href: link('female') }, { label: 'View Male Proposals', href: link('male') }];
   return (
     <section id={id} className="scroll-mt-[90px] bg-[linear-gradient(180deg,#fdf8f0,#f8f1e4)] px-[5%] py-[60px] font-sans text-navy max-sm:px-3.5 max-sm:py-11">
       <div className="mx-auto w-full max-w-[1296px]">
@@ -102,14 +105,14 @@ export function ProposalShowcase({ id, title, highlight, tabs, intro }) {
                   aria-selected={index === active}
                   aria-controls={panelId}
                   onClick={() => setActive(index)}
-                  className={`min-h-11 cursor-pointer rounded-full px-[25px] text-[13px] font-semibold uppercase transition-all duration-300 ${index === active ? 'bg-[linear-gradient(135deg,#062b4e,#0d3d6b)] text-white shadow-[0_10px_20px_#062b4e40]' : 'border border-[#e0aa3e4d] bg-white text-[#535e74] shadow-[0_4px_10px_#0000000d] hover:-translate-y-0.5 hover:border-gold hover:text-navy'}`}
+                  className={`min-h-11 cursor-pointer rounded-full px-[25px] text-[14px] font-semibold capitalize transition-all duration-300 ${index === active ? 'bg-[linear-gradient(135deg,#062b4e,#0d3d6b)] text-white shadow-[0_10px_20px_#062b4e40]' : 'border border-[#e0aa3e4d] bg-white text-[#535e74] shadow-[0_4px_10px_#0000000d] hover:-translate-y-0.5 hover:border-gold hover:text-navy'}`}
                 >
-                  {t('{place} Proposals', { place: t(item.label) })}
+                  {tabName(item)}
                 </button>
               ))}
             </div>
             <div className="mb-6 hidden rounded-[20px] bg-white p-3 shadow-[0_8px_24px_#062b4e12] max-sm:block">
-              <p className="mb-2 text-center text-[11px] font-bold uppercase tracking-[1px] text-[#a17a33]">{t('Tap to switch')}</p>
+              <p className="mb-2 text-center text-[12px] font-semibold capitalize text-[#a17a33]">{t('Tap to switch')}</p>
               <div role="tablist" aria-label={t(`${title} ${highlight}`)} className="grid gap-2">
                 {tabs.map((item, index) => (
                   <button
@@ -119,9 +122,9 @@ export function ProposalShowcase({ id, title, highlight, tabs, intro }) {
                     aria-selected={index === active}
                     aria-controls={panelId}
                     onClick={() => setActive(index)}
-                    className={`flex min-h-11 cursor-pointer items-center justify-between rounded-[10px] px-4 text-start text-[13px] font-bold uppercase transition-colors ${index === active ? 'bg-[linear-gradient(135deg,#062b4e,#0d3d6b)] text-white shadow-[0_6px_14px_#062b4e40]' : 'border border-[#e9dcc0] bg-[#fdfaf4] text-navy'}`}
+                    className={`flex min-h-11 cursor-pointer items-center justify-between rounded-[10px] px-4 text-start text-[14px] font-semibold capitalize transition-colors ${index === active ? 'bg-[linear-gradient(135deg,#062b4e,#0d3d6b)] text-white shadow-[0_6px_14px_#062b4e40]' : 'border border-[#e9dcc0] bg-[#fdfaf4] text-navy'}`}
                   >
-                    <span>{t('{place} Proposals', { place: t(item.label) })}</span>
+                    <span>{tabName(item)}</span>
                     {index === active ? <FaCheck aria-hidden="true" /> : <FaChevronRight aria-hidden="true" className="text-[11px] rtl:-scale-x-100" />}
                   </button>
                 ))}
@@ -133,10 +136,10 @@ export function ProposalShowcase({ id, title, highlight, tabs, intro }) {
         <div id={panelId} role="tabpanel" className="rounded-[20px] bg-white px-10 py-10 shadow-[0_15px_40px_#062b4e12] max-p:px-6 max-sm:px-3 max-sm:py-7">
           <div className="mb-8 text-center max-sm:mb-6">
             <h3 className="text-[30px] font-bold leading-tight max-sm:text-[22px]">
-              <span className="text-navy">{name}</span> <GradientHeading as="span">{t('Proposals')}</GradientHeading>
+              {tab.tabLabel ? <GradientHeading as="span">{t(tab.tabLabel)}</GradientHeading> : <><span className="text-navy">{name}</span> <GradientHeading as="span">{t('Proposals')}</GradientHeading></>}
             </h3>
             <Ornament className="mb-3 mt-3" />
-            <p className="mx-auto max-w-[640px] text-[16px] font-medium text-[#343434] max-sm:text-[14px]">{t(intro, { place: name })}</p>
+            <p className="mx-auto max-w-[640px] text-[16px] font-medium text-[#343434] max-sm:text-[14px]">{t(tab.intro ?? intro, { place: name })}</p>
           </div>
 
           {tab.profiles.length > 0 ? (
@@ -151,14 +154,13 @@ export function ProposalShowcase({ id, title, highlight, tabs, intro }) {
             </ul>
           ) : (
             <div className="mx-auto max-w-[520px] rounded-2xl border border-dashed border-[#e2d3b3] bg-[#fdfaf4] px-6 py-10 text-center">
-              <p className="mb-4 text-[15px] text-muted">{t('New {place} proposals will appear here soon.', { place: name })}</p>
+              <p className="mb-4 text-[15px] text-muted">{tab.tabLabel ? t('New proposals will appear here soon.') : t('New {place} proposals will appear here soon.', { place: name })}</p>
               <Link href="/submit-profile" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-navy px-5 text-sm font-bold text-white no-underline hover:bg-dark hover:text-white">{t('Submit a profile')} <FaArrowRight aria-hidden="true" className="rtl:-scale-x-100" /></Link>
             </div>
           )}
 
           <div className="mt-10 flex flex-wrap justify-center gap-x-5 gap-y-4 max-sm:mt-8">
-            <GlowButton href={link('female')}><span>{t('View Female Proposals')}</span> <FaArrowRight aria-hidden="true" className="text-gold rtl:-scale-x-100" /></GlowButton>
-            <GlowButton href={link('male')}><span>{t('View Male Proposals')}</span> <FaArrowRight aria-hidden="true" className="text-gold rtl:-scale-x-100" /></GlowButton>
+            {links.map((item) => <GlowButton key={item.href} href={item.href}><span>{t(item.label)}</span> <FaArrowRight aria-hidden="true" className="text-gold rtl:-scale-x-100" /></GlowButton>)}
           </div>
         </div>
       </div>

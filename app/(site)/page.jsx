@@ -1,15 +1,17 @@
-import { AppSection } from '@/components/home/AppSection';
 import { DirectorSection } from '@/components/home/DirectorSection';
+import { HomeConsultants } from '@/components/home/HomeConsultants';
+import { HomeSearch } from '@/components/home/HomeSearch';
 import { GovRegistered } from '@/components/home/GovRegistered';
 import { HeroBanner } from '@/components/home/HeroBanner';
 import { ProposalShowcase } from '@/components/home/ProposalShowcase';
-import { RishtaServices } from '@/components/home/RishtaServices';
 import { Preloader } from '@/components/layout/Preloader';
 import { getFees } from '@/lib/fees.js';
 import { slugify } from '@/lib/format.js';
 import { getBanners, getDirector, imageSrc, proposalTab } from '@/lib/homepage.js';
 import { activeCategories, featuredCities } from '@/lib/places.js';
 import { getSettings } from '@/lib/settings.js';
+import { publicConsultants } from '@/lib/consultants.js';
+import { SECOND_MARRIAGE } from '@/lib/search.js';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +20,7 @@ const GULF = [['United Arab Emirates', 'UAE'], ['Saudi Arabia', 'Saudi Arabia'],
 
 // Each tab: its profiles and the full list it opens. Tabs without proposals are left out, except the first.
 async function buildTabs(specs) {
-  const tabs = await Promise.all(specs.map(async (spec) => ({ key: spec.key, label: spec.label, href: spec.href, profiles: await proposalTab(spec.where) })));
+  const tabs = await Promise.all(specs.map(async ({ where, ...spec }) => ({ ...spec, profiles: await proposalTab(where) })));
   return tabs.filter((tab, index) => index === 0 || tab.profiles.length > 0);
 }
 
@@ -26,7 +28,7 @@ async function buildTabs(specs) {
 const DEFAULT_BANNER = { id: 'default', src: '/images/pakistani-couple.png', position: 'object-[60%_35%] max-sm:object-[72%_0%]', showText: false };
 
 export default async function HomePage() {
-  const [settings, fees, director, categories, cities] = await Promise.all([getSettings(), getFees(), getDirector(), activeCategories(), featuredCities()]);
+  const [settings, fees, director, categories, cities, consultants] = await Promise.all([getSettings(), getFees(), getDirector(), activeCategories(), featuredCities(), publicConsultants()]);
   const banners = (await getBanners({ activeOnly: true })).map((banner) => ({
     ...banner,
     src: imageSrc(banner.image, 2200),
@@ -56,17 +58,24 @@ export default async function HomePage() {
     ]) : [],
   ]);
 
+  // Second marriage: both tabs always show, so families know where to look.
+  const second = await Promise.all([
+    { key: 'seeking', label: 'Seeking', tabLabel: 'Looking For A Second Marriage', intro: 'Divorced, widowed or separated women looking for a second marriage.', href: '/proposals?second=seeking', where: SECOND_MARRIAGE.seeking, links: [{ label: 'View All', href: '/proposals?second=seeking' }] },
+    { key: 'wife', label: 'Second wife', tabLabel: 'Willing To Be A Second Wife', intro: 'Women who have said in their profile that they are willing to be a second wife.', href: '/proposals?second=wife', where: SECOND_MARRIAGE.wife, links: [{ label: 'View All', href: '/proposals?second=wife' }] },
+  ].map(async ({ where, ...tab }) => ({ ...tab, profiles: await proposalTab(where) })));
+
   return (
     <main>
       <Preloader />
+      <HomeSearch />
       <HeroBanner banners={banners.length > 0 ? banners : [DEFAULT_BANNER]} />
-      <GovRegistered fees={fees} />
-      <RishtaServices fees={fees} />
       {pakistan.length > 0 && <ProposalShowcase id="pakistan-proposals" title="Pakistan" highlight="Proposals" tabs={pakistan} intro="See the newest {place} proposals (rishtay). Find your life partner with Al Zaujain." />}
       <ProposalShowcase id="overseas-proposals" title="Overseas" highlight="Proposals" tabs={overseas} intro="See the newest {place} proposals (rishtay) from Pakistani families abroad." />
       {gulf.length > 0 && <ProposalShowcase id="gulf-proposals" title="Gulf" highlight="Proposals" tabs={gulf} intro="See the newest {place} proposals (rishtay) from UAE, Saudi Arabia, Qatar, Oman and the Gulf." />}
+      <ProposalShowcase id="second-marriage-proposals" title="Second Marriage" highlight="Proposals" tabs={second} intro="" />
+      <HomeConsultants consultants={consultants} whatsapp={settings.site_whatsapp} />
+      <GovRegistered fees={fees} />
       <DirectorSection director={{ ...director, photoSrc: imageSrc(director.photo, 900) }} whatsapp={settings.site_whatsapp} />
-      <AppSection whatsapp={settings.site_whatsapp} />
     </main>
   );
 }

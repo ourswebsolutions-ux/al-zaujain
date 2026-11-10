@@ -1,13 +1,14 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { FaBullhorn, FaEnvelope, FaLocationDot, FaPhone, FaWhatsapp } from 'react-icons/fa6';
+import { FaAndroid, FaBullhorn, FaDownload, FaEnvelope, FaLocationDot, FaPhone, FaWhatsapp } from 'react-icons/fa6';
+import { appRelease } from '@/lib/app-release.js';
 import { Urdu } from '@/components/ui/Text';
 import { WHATSAPP_CHANNEL } from '@/lib/content.js';
 import { getFees } from '@/lib/fees.js';
 import { getT } from '@/lib/i18n/server.js';
 
-const heading = 'mb-5 text-[14px] font-bold uppercase tracking-[1.5px] text-navy max-sm:mb-3';
-const linkClass = 'mb-3 block w-fit text-[15px] font-medium text-[#525252] no-underline transition-colors hover:text-[#a17a33]';
+const heading = 'mb-5 text-[17px] font-bold capitalize text-navy max-sm:mb-3';
+const linkClass = 'mb-3 block w-fit text-[15px] font-medium capitalize text-[#525252] no-underline transition-colors hover:text-[#a17a33]';
 const social = 'grid size-10 place-items-center rounded-full bg-navy text-[17px] text-white no-underline transition-[transform,background-color] hover:-translate-y-0.5 hover:bg-[#a17a33] hover:text-white';
 
 // The site footer: a light panel with the brand, the site's links, legal pages and every way to reach
@@ -17,6 +18,7 @@ export async function Footer({ settings }) {
   const fees = await getFees();
   const whatsapp = `https://wa.me/${settings.site_whatsapp}`;
   const email = fees.email;
+  const release = appRelease();
   return (
     <footer className="border-t border-[#062b4e14] bg-[linear-gradient(180deg,#fbf7ef,#f6efe2)] px-[5%] pb-5 pt-12 font-sans max-m:pb-[76px] text-[#525252] shadow-[0_-10px_20px_#062b4e0a] max-sm:px-4 max-sm:pt-9">
       <div className="mx-auto w-full max-w-[1296px]">
@@ -46,7 +48,8 @@ export async function Footer({ settings }) {
           <div>
             <h3 className={heading}>{t('Company')}</h3>
             <Link className={linkClass} href="/proposals">{t('Browse proposals')}</Link>
-            <Link className={linkClass} href="/consultants">{t('Marriage consultants')}</Link>
+            <Link className={linkClass} href="/packages">{t('Packages')}</Link>
+            <Link className={linkClass} href="/#consultants">{t('Marriage consultants')}</Link>
             <Link className={linkClass} href="/submit-profile">{t('Submit a profile')}</Link>
             <Link className={linkClass} href="/#registration">{t('Registration information')}</Link>
             <Link className={linkClass} href="/#android-app">{t('Android app')}</Link>
@@ -69,6 +72,21 @@ export async function Footer({ settings }) {
             {email && <a href={`mailto:${email}`} className="mb-3 flex items-center gap-2.5 break-all text-[15px] font-medium text-navy no-underline hover:text-[#a17a33]"><FaEnvelope aria-hidden="true" className="shrink-0 text-[#a17a33]" /> {email}</a>}
           </div>
         </div>
+
+        {release && (
+          <div id="android-app" className="mt-9 flex scroll-mt-[90px] flex-wrap items-center justify-between gap-4 rounded-2xl bg-navy px-6 py-5 text-white max-sm:flex-col max-sm:items-start max-sm:px-5">
+            <div className="flex items-center gap-4">
+              <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-white/10 text-[26px] text-[#a4c639]"><FaAndroid aria-hidden="true" /></span>
+              <div>
+                <p className="text-[17px] font-semibold">{t('Al Zaujain Android App')}</p>
+                <p className="text-[13.5px] text-[#c7d3dd]">{t('Browse proposals, your matches and messages on your phone, with the same account.')}</p>
+              </div>
+            </div>
+            <a href={release.url} download className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[linear-gradient(135deg,#f4d889,#c99432)] px-6 text-[14.5px] font-bold text-dark no-underline hover:text-dark max-sm:w-full max-sm:justify-center">
+              <FaDownload aria-hidden="true" /> {t('Download for Android')} <span className="font-medium opacity-75">· v{release.version}</span>
+            </a>
+          </div>
+        )}
 
         <div className="mt-9 grid grid-cols-[auto_1fr] items-center gap-x-8 gap-y-3 border-y border-[#062b4e1f] px-3 py-4 max-sm:grid-cols-1 max-sm:text-center">
           <p className="text-[17px] font-semibold text-navy">{t('Helpline')}</p>

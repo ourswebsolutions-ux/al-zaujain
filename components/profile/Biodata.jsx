@@ -23,9 +23,9 @@ async function InfoGrid({ rows, columns = 'grid-cols-3 max-p:grid-cols-2 max-m:g
   return (
     <dl className={`grid gap-x-7 ${columns}`}>
       {rows.map((row) => (
-        <div key={row.label} className="flex items-baseline justify-between gap-3 border-b border-dashed border-[#e9e2d4] py-2.5">
-          <dt className="shrink-0 text-xs text-muted">{t(row.label)}</dt>
-          <dd className="min-w-0 break-words text-end text-sm font-semibold text-navy">{t(row.value)}</dd>
+        <div key={row.label} className="flex items-baseline justify-between gap-3 border-b border-dashed border-[#e9e2d4] py-2.5 max-sm:flex-col max-sm:items-start max-sm:gap-1 max-sm:py-3">
+          <dt className="shrink-0 text-xs capitalize text-muted max-sm:text-[12.5px] max-sm:font-semibold max-sm:text-[#8a6a2c]">{t(row.label)}</dt>
+          <dd className={`min-w-0 break-words text-end text-sm font-semibold text-navy ${/@|:\/\//.test(String(row.value)) ? '' : 'capitalize'} max-sm:w-full max-sm:text-start max-sm:text-[15px]`}>{t(row.value)}</dd>
         </div>
       ))}
     </dl>

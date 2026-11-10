@@ -21,7 +21,7 @@ function Ribbon({ type }) {
   const ribbon = RIBBONS[type] ?? RIBBONS.paid;
   return (
     <span className="absolute -end-1.5 top-4 z-10 max-sm:end-auto max-sm:start-[22px] max-sm:top-[22px]">
-      <span className={`block py-1 pe-3 ps-4 text-[10.5px] font-extrabold uppercase tracking-[.6px] shadow-[0_3px_8px_#03223f2e] [clip-path:polygon(9px_0,100%_0,100%_100%,9px_100%,0_50%)] rtl:[clip-path:polygon(0_0,calc(100%-9px)_0,100%_50%,calc(100%-9px)_100%,0_100%)] max-sm:rounded-full max-sm:px-3 max-sm:py-[7px] max-sm:text-[10px] max-sm:[clip-path:none] max-sm:rtl:[clip-path:none] ${ribbon.className}`}>{t(ribbon.label)}</span>
+      <span className={`block py-1 pe-3 ps-4 text-[11px] font-bold capitalize tracking-[.2px] shadow-[0_3px_8px_#03223f2e] [clip-path:polygon(9px_0,100%_0,100%_100%,9px_100%,0_50%)] rtl:[clip-path:polygon(0_0,calc(100%-9px)_0,100%_50%,calc(100%-9px)_100%,0_100%)] max-sm:rounded-full max-sm:px-3 max-sm:py-[7px] max-sm:text-[11.5px] max-sm:[clip-path:none] max-sm:rtl:[clip-path:none] ${ribbon.className}`}>{t(ribbon.label)}</span>
       <span aria-hidden="true" className={`absolute end-0 top-full block size-0 border-e-[6px] border-t-[6px] border-e-transparent max-sm:hidden ${ribbon.fold} rtl:border-e-0 rtl:border-s-[6px] rtl:border-s-transparent`} />
     </span>
   );
@@ -31,7 +31,7 @@ function Row({ icon: Icon, children }) {
   return (
     <li className="flex min-w-0 items-center gap-2 text-[13.5px] leading-[22px] text-[#47566a]">
       <Icon aria-hidden="true" className="w-3.5 shrink-0 text-[#a9b2bd]" />
-      <span className="min-w-0 truncate">{children}</span>
+      <span className="min-w-0 truncate capitalize">{children}</span>
     </li>
   );
 }
@@ -80,19 +80,19 @@ export function ProposalCard({ profile, tag, matchScore, saved }) {
         </Link>
 
         <div className="min-w-0 flex-1 pt-1 max-sm:px-3 max-sm:pt-[23px] sm:w-full sm:pt-0">
-          {label && <span className="mb-1.5 inline-block rounded-full bg-[#fcf4e1] px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-[.5px] text-[#806126]">{label}</span>}
+          {label && <span className="mb-1.5 inline-block rounded-full bg-[#fcf4e1] px-2.5 py-0.5 text-[11.5px] font-bold capitalize text-[#806126]">{label}</span>}
           <h3 className="flex min-w-0 items-center gap-1.5 pe-12 text-[21px] font-extrabold leading-tight text-[#062b4e] max-sm:pe-0 max-sm:text-[23px] sm:pe-0">
-            <Link href={href} className="min-w-0 truncate text-inherit no-underline">{profile.name}</Link>
+            <Link href={href} className="min-w-0 truncate capitalize text-inherit no-underline">{profile.name}</Link>
             {profile.age && <span className="shrink-0 text-[19px] font-semibold text-muted sm:hidden">· {profile.age}</span>}
             {profile.verified && <VerifiedBadge className="shrink-0 text-[17px]" />}
           </h3>
           <p className="text-[11px] font-bold tracking-[.6px] text-muted max-sm:hidden">{profile.code}</p>
-          <p className="mt-1 flex items-center gap-1.5 text-[13px] text-muted sm:hidden"><FaLocationDot aria-hidden="true" className="text-[#b18433]" /> {[t(profile.city), t(profile.country)].filter(Boolean).join(', ') || '—'}</p>
+          <p className="mt-1 flex items-center gap-1.5 text-[14px] capitalize text-muted sm:hidden"><FaLocationDot aria-hidden="true" className="text-[#b18433]" /> {[t(profile.city), t(profile.country)].filter(Boolean).join(', ') || '—'}</p>
           <dl className="mt-4 grid gap-2.5 border-t border-[#efe7d6] pt-4 sm:hidden">
             {[['Education', profile.education], ['Profession', profile.profession], ['Marital status', profile.maritalStatus]].map(([label, value]) => (
               <div key={label}>
-                <dt className="text-[11px] font-semibold uppercase tracking-[.7px] text-muted">{t(label)}</dt>
-                <dd className="text-[14px] font-semibold text-navy">{value ? t(value) : '—'}</dd>
+                <dt className="text-[12.5px] font-semibold capitalize text-[#8a6a2c]">{t(label)}</dt>
+                <dd className="mt-0.5 break-words text-[15px] font-semibold capitalize leading-snug text-navy">{value ? t(value) : '—'}</dd>
               </div>
             ))}
           </dl>

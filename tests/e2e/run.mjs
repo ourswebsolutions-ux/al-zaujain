@@ -158,14 +158,15 @@ let manageUrl; let code;
 await step('homepage renders the new sections in order', async () => {
   const page = await newPage();
   await page.goto('/');
-  for (const name of ['Government Registered Marriage Bureau', 'Offering Rishta Services', 'Pakistan Proposals', 'Overseas Proposals', 'Gulf Proposals']) {
+  for (const name of ['Pakistan Proposals', 'Overseas Proposals', 'Gulf Proposals', 'Second Marriage Proposals', 'Government Registered Marriage Bureau']) {
     assert.ok(await page.getByRole('heading', { name, level: 2 }).first().isVisible(), name);
   }
-  const order = await page.evaluate(() => ['registration', 'how-it-works', 'overseas-proposals', 'why-choose', 'android-app'].map((id) => document.getElementById(id)?.getBoundingClientRect().top ?? -1));
+  assert.equal(await page.getByText('Offering Rishta Services').count(), 0, 'packages are not on the homepage');
+  assert.equal(await page.getByText('A registered and trusted marriage bureau', { exact: false }).count(), 0);
+  const order = await page.evaluate(() => ['home-search', 'pakistan-proposals', 'overseas-proposals', 'gulf-proposals', 'second-marriage-proposals', 'registration', 'why-choose', 'android-app'].map((id) => document.getElementById(id)?.getBoundingClientRect().top ?? -1));
   assert.ok(order.every((top, index) => top > 0 && (index === 0 || top > order[index - 1])), `sections in order: ${order}`);
+  assert.equal(await page.locator('#home-search').evaluate((input) => input.form.querySelectorAll('input:not([type=hidden]), select').length), 1, 'the search bar has one field only');
   for (const old of ['From a first conversation', 'A personal approach.', 'Your questions.']) assert.equal(await page.getByText(old).count(), 0, `${old} is gone`);
-  const plans = page.locator('#how-it-works');
-  assert.ok(await plans.getByText('5,000', { exact: true }).first().isVisible() && await plans.getByText('Rs 50,000').first().isVisible(), 'the plans show the official fees');
   assert.ok(await page.locator('#registration img[alt="FBR Pakistan"]').isVisible(), 'the FBR logo is shown');
   assert.ok(await page.locator('#contact').isVisible(), 'Contact us lands on the footer contacts');
   await page.context().close();
@@ -853,7 +854,8 @@ await step('homepage banners: image only by default, optional text placed by dra
   await add.locator('button:has-text("Add banner")').click();
   await adminPage.waitForSelector('text=Banner added to the homepage');
   let home = await (await fetch(`${BASE}/`)).text();
-  assert.ok(!home.includes('aria-roledescription="carousel"'), 'one banner stands still');
+  const heroRotates = (html) => /aria-roledescription="carousel" aria-label="Al Zaujain highlights"/.test(html);
+  assert.ok(!heroRotates(home), 'one banner stands still');
   assert.ok(!home.includes('pakistani-couple'), 'the uploaded banner replaces the standard one');
 
   await adminPage.reload({ waitUntil: 'networkidle' });
@@ -873,7 +875,7 @@ await step('homepage banners: image only by default, optional text placed by dra
   await add.locator('button:has-text("Add banner")').click();
   await adminPage.waitForSelector('text=Banner added to the homepage');
   home = await (await fetch(`${BASE}/`)).text();
-  assert.ok(home.includes('aria-roledescription="carousel"'), 'two banners rotate');
+  assert.ok(heroRotates(home), 'two banners rotate');
   assert.ok(home.includes('Rishtay across the world') && home.includes('left:' + x.toString().replace(/\.0$/, '')) , 'the text sits where it was dragged');
   const stored = JSON.parse((await db.setting.findUnique({ where: { key: 'home_banners' } })).value);
   assert.deepEqual(stored.map((item) => item.showText), [false, true]);
@@ -912,6 +914,49 @@ await step('consultants can be for everyone, the team only, or one city', async 
   await page.context().close();
   await adminPage.goto('/admin/consultants', { waitUntil: 'networkidle' });
   await adminPage.waitForSelector('text=Multan only');
+});
+
+await step('homepage: one search box, second marriage lists, consultants on WhatsApp, packages on their own page', async () => {
+  const pk = (await db.country.findFirst({ where: { name: 'Pakistan' } })).id;
+  const seeking = await createProfile({ ...sampleProfile({ full_name: 'Zzdivorcee Khan', gender: 'female', marital_status: 'Divorced', city: 'Lahore' }), country_id: pk }, { status: 'approved' });
+  const willing = await createProfile({ ...sampleProfile({ full_name: 'Zzwilling Bibi', gender: 'female', marital_status: 'Widowed', city: 'Multan' }), country_id: pk }, { status: 'approved' });
+  await db.profile.update({ where: { id: willing }, data: { second_wife: 'Yes' } });
+  const plain = await createProfile({ ...sampleProfile({ full_name: 'Zznever Married', gender: 'female', marital_status: 'Never married' }), country_id: pk }, { status: 'approved' });
+
+  const page = await newPage({ viewport: { width: 1366, height: 900 } });
+  await page.goto('/', { waitUntil: 'networkidle' });
+  const second = page.locator('#second-marriage-proposals');
+  const firstTab = await second.locator('[role=tabpanel]').innerText();
+  assert.ok(firstTab.includes('Zzdivorcee') && !firstTab.includes('Zznever'), 'divorced and widowed women look for a second marriage');
+  await second.locator('[role=tab]:visible', { hasText: 'Willing To Be A Second Wife' }).click();
+  const wifeTab = await second.locator('[role=tabpanel]').innerText();
+  assert.ok(wifeTab.includes('Zzwilling') && !wifeTab.includes('Zzdivorcee'), 'only an explicit "Yes" counts as willing to be a second wife');
+
+  const contact = page.locator('#consultants a', { hasText: 'Contact Consultant' }).first();
+  assert.match(await contact.getAttribute('href'), /^https:\/\/wa\.me\/\d+\?text=Hello%2C%20I%20would%20like%20to%20consult/);
+
+  await page.fill('#home-search', profileCode(seeking).toLowerCase());
+  await page.locator('#home-search').press('Enter');
+  await page.waitForURL('**/proposals?q=**');
+  await page.waitForSelector('text=1 proposal found');
+  assert.ok((await page.content()).includes('Zzdivorcee'), 'a profile ID finds that profile');
+  await page.goto('/proposals?q=Lahore&second=seeking', { waitUntil: 'networkidle' });
+  assert.ok((await page.content()).includes('Zzdivorcee'));
+
+  await page.goto('/packages', { waitUntil: 'networkidle' });
+  const consultancy = page.locator('#consultancy');
+  assert.ok(await consultancy.getByText('5,000', { exact: true }).first().isVisible(), 'the registration fee is the price');
+  assert.ok(await consultancy.getByText('Rs. 50,000').first().isVisible(), 'the finalization fee is listed');
+  await page.context().close();
+
+  const phone = await newPage({ viewport: { width: 375, height: 800 } });
+  await phone.goto('/packages', { waitUntil: 'networkidle' });
+  const slides = phone.locator('#consultancy [aria-roledescription=slide]');
+  const box = await slides.first().boundingBox();
+  assert.ok(box.width > 260 && box.width < 375, `one package at a time on a phone (${box.width}px)`);
+  assert.ok(await phone.evaluate(() => document.documentElement.scrollWidth) <= 375, 'no sideways scrolling');
+  await phone.context().close();
+  await db.profile.deleteMany({ where: { id: { in: [seeking, willing, plain] } } });
 });
 
 await step('the caste field takes a caste that is not in the list', async () => {
@@ -983,8 +1028,9 @@ await step('mobile navigation opens', async () => {
     await page.click('[aria-label="Open navigation"]');
     const menu = page.locator('#mobile-navigation');
     assert.ok(await menu.getByRole('button', { name: 'اردو' }).isVisible(), 'the language choice is in the menu');
-    await menu.getByText('Consultants').click();
-    await page.waitForURL('**/consultants');
+    assert.equal(await menu.getByText('Consultants', { exact: true }).count(), 0, 'Consultants left the menu');
+    await menu.getByText('Packages').click();
+    await page.waitForURL('**/packages');
     await menu.waitFor({ state: 'detached' });
     await page.context().close();
   }

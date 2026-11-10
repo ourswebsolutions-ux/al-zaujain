@@ -4,6 +4,17 @@
 /* Urdu mode keeps the same layout; only type metrics differ. */
 @custom-variant ur (&:where(.lang-ur, .lang-ur *));
 
+/* Headings, navigation, buttons and labels use the heading font (Poppins; Nastaliq in Urdu). */
+@layer base {
+  h1, h2, h3, h4, h5, h6, button, nav, label, th, dt, legend {
+    font-family: var(--heading-font, var(--ui-font)), sans-serif;
+  }
+  /* Nastaliq is tall: give Urdu text room so no line is clipped. */
+  :where(.lang-ur) :where(p, li, dd, dt, td, th, span, a, label, button, h1, h2, h3, h4, h5, h6, small, strong) {
+    line-height: 2;
+  }
+}
+
 /* "Towards the end of the line": right in English, left in Urdu. Used by gradients that follow the layout. */
 :root { --to-end: 90deg; color-scheme: only light; }
 [dir='rtl'] { --to-end: 270deg; }

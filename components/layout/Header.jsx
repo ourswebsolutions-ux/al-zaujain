@@ -12,9 +12,8 @@ import { Arrow, ButtonLink } from '@/components/ui/Button';
 
 const NAV = [
   { href: '/', label: 'Home' },
-  { href: '/#how-it-works', label: 'How it works' },
   { href: '/proposals', label: 'Proposals', menu: true },
-  { href: '/consultants', label: 'Consultants' },
+  { href: '/packages', label: 'Packages' },
   { href: '/fees', label: 'Fees' },
   { href: '/#why-choose', label: 'Why Al Zaujain' },
   { href: '/#registration', label: 'Registration' },
@@ -23,7 +22,7 @@ const NAV = [
   { href: '/#contact', label: 'Contact us' },
 ];
 
-const navLink = "relative whitespace-nowrap py-2 text-xs font-medium leading-[18px] no-underline transition-colors duration-200 after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:origin-left rtl:after:origin-right after:scale-x-0 after:bg-gold after:transition-transform after:duration-200 after:content-[''] hover:text-[#9b712b] hover:after:scale-x-100 focus-visible:text-[#9b712b] focus-visible:after:scale-x-100";
+const navLink = "relative whitespace-nowrap py-2 text-xs font-medium capitalize leading-[18px] no-underline transition-colors duration-200 after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:origin-left rtl:after:origin-right after:scale-x-0 after:bg-gold after:transition-transform after:duration-200 after:content-[''] hover:text-[#9b712b] hover:after:scale-x-100 focus-visible:text-[#9b712b] focus-visible:after:scale-x-100";
 
 export function Header({ phone, phoneIntl, user, unread = 0, categories = [], announcements = [] }) {
   const t = useT();
@@ -104,7 +103,7 @@ export function Header({ phone, phoneIntl, user, unread = 0, categories = [], an
           <ul className="grid">
             {NAV.map((item) => (
               <li key={item.href} className="border-b border-[#f0ece2] last:border-0">
-                <Link href={item.href} onClick={() => setOpen(false)} className="flex min-h-12 items-center justify-between px-1 text-[15px] font-medium text-navy no-underline hover:text-[#90691f]">
+                <Link href={item.href} onClick={() => setOpen(false)} className="flex min-h-12 items-center justify-between px-1 text-[15px] font-medium capitalize text-navy no-underline hover:text-[#90691f]">
                   {t(item.label)} <FaArrowRight aria-hidden="true" className="text-[11px] text-[#c9b48a] rtl:-scale-x-100" />
                 </Link>
               </li>

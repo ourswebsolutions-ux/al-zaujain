@@ -1,4 +1,4 @@
-import { Cormorant_Garamond, Jost, Noto_Naskh_Arabic, Noto_Nastaliq_Urdu, Nunito, Poppins, Quicksand } from 'next/font/google';
+import { Inter, Noto_Naskh_Arabic, Noto_Nastaliq_Urdu, Poppins } from 'next/font/google';
 import { Providers } from '@/components/ui/Providers';
 import { currentUser } from '@/lib/auth.js';
 import { unlockCost, unlockedCodes } from '@/lib/credits.js';
@@ -7,10 +7,8 @@ import { getRestrictions, viewerIsPaid } from '@/lib/restrictions.js';
 import './globals.css';
 
 const poppins = Poppins({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'], variable: '--font-poppins', display: 'swap' });
-const nunito = Nunito({ subsets: ['latin'], weight: ['400', '600', '700', '800', '900'], variable: '--font-nunito-src', display: 'swap' });
-const quicksand = Quicksand({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-quicksand-src', display: 'swap' });
-const jost = Jost({ subsets: ['latin'], weight: ['300', '400', '500', '600'], variable: '--font-jost', display: 'swap' });
-const cormorant = Cormorant_Garamond({ subsets: ['latin'], weight: ['300', '400', '500', '600'], style: ['normal', 'italic'], variable: '--font-cormorant', display: 'swap' });
+// Headings, navigation, buttons and labels: Poppins. Body text: Inter. Urdu: Noto Nastaliq Urdu.
+const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-inter', display: 'swap' });
 const naskh = Noto_Naskh_Arabic({ subsets: ['arabic'], weight: ['400', '500', '600', '700'], variable: '--font-naskh', display: 'swap' });
 const nastaliq = Noto_Nastaliq_Urdu({ subsets: ['arabic'], weight: ['400', '500', '600', '700'], variable: '--font-nastaliq', display: 'swap' });
 
@@ -27,10 +25,10 @@ export const metadata = {
 };
 
 const FONT_SETS = {
-  en: '[--ui-font:var(--font-poppins)] [--ui-nunito:var(--font-nunito-src)] [--ui-quicksand:var(--font-quicksand-src)] [--display-font:var(--font-cormorant)] [--dash-font:var(--font-jost)]',
+  en: '[--ui-font:var(--font-inter)] [--heading-font:var(--font-poppins)] [--ui-nunito:var(--font-poppins)] [--ui-quicksand:var(--font-poppins)] [--display-font:var(--font-poppins)] [--dash-font:var(--font-inter)]',
   // Urdu pages are right-to-left (dir="rtl" on <html>). plaintext lets an English sentence inside still read correctly,
   // and tracking is cleared because letter spacing breaks joined Urdu letters.
-  ur: 'lang-ur [--ui-font:var(--font-naskh)] [--ui-nunito:var(--font-naskh)] [--ui-quicksand:var(--font-naskh)] [--display-font:var(--font-nastaliq)] [--dash-font:var(--font-naskh)] [&_:is(p,h1,h2,h3,h4,h5,h6,dt,dd,td,th,small,strong)]:[unicode-bidi:plaintext] **:tracking-normal!',
+  ur: 'lang-ur [--ui-font:var(--font-nastaliq),var(--font-inter)] [--heading-font:var(--font-nastaliq),var(--font-poppins)] [--ui-nunito:var(--font-nastaliq),var(--font-poppins)] [--ui-quicksand:var(--font-nastaliq),var(--font-poppins)] [--display-font:var(--font-nastaliq),var(--font-poppins)] [--dash-font:var(--font-nastaliq),var(--font-inter)] [&_:is(p,h1,h2,h3,h4,h5,h6,dt,dd,td,th,small,strong)]:[unicode-bidi:plaintext] **:tracking-normal!',
 };
 
 export default async function RootLayout({ children }) {
@@ -39,7 +37,7 @@ export default async function RootLayout({ children }) {
   const member = user?.role === 'user';
   const [restrictions, paid, cost, unlocked] = await Promise.all([getRestrictions(), viewerIsPaid(user), unlockCost(), member ? unlockedCodes(user.id) : new Set()]);
   return (
-    <html lang={lang} dir={lang === 'ur' ? 'rtl' : 'ltr'} className={`scroll-smooth ${poppins.variable} ${nunito.variable} ${quicksand.variable} ${jost.variable} ${cormorant.variable} ${naskh.variable} ${nastaliq.variable} ${FONT_SETS[lang]}`}>
+    <html lang={lang} dir={lang === 'ur' ? 'rtl' : 'ltr'} className={`scroll-smooth ${poppins.variable} ${inter.variable} ${naskh.variable} ${nastaliq.variable} ${FONT_SETS[lang]}`}>
       <body id="top" className="bg-paper font-sans leading-6 text-ink antialiased [&_svg]:w-auto">
         <Providers lang={lang} photoLocked={restrictions.photo && !paid} signedIn={!!user} member={member} unlockCost={cost} unlocked={[...unlocked]}>{children}</Providers>
       </body>

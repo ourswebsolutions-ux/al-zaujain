@@ -34,6 +34,7 @@ export async function FilterPanel({ action, filters, cities, countries, castes, 
   return (
     <form id="filters" action={action} className="h-fit scroll-mt-5 rounded-[20px] border border-line bg-white p-6">
       <h2 className="mb-4 font-quicksand text-lg font-bold">{t('Search and filter')}</h2>
+      {filters.second && <input type="hidden" name="second" value={filters.second} />}
       <div className="grid gap-4">
         <label className={labelClass}>
           {t('Name, caste, city or profession')}

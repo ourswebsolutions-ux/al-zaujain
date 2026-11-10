@@ -43,10 +43,10 @@ export async function FeePlans({ fees }) {
           <Reveal key={category} y={24} delay={Math.min(index, 3) * 0.08} className="h-full">
             <article className={`relative flex h-full flex-col overflow-hidden rounded-[24px] border p-6 transition-[transform,box-shadow] duration-300 hover:-translate-y-1 max-sm:p-5 ${featured ? 'border-[#c99432] bg-[linear-gradient(160deg,#0a3a66_0%,#062b4e_55%,#03223f_100%)] text-white shadow-[0_22px_50px_#062b4e40] hover:shadow-[0_28px_60px_#062b4e59]' : 'border-[#e8dfcc] bg-white text-navy shadow-[0_12px_32px_#062b4e10] hover:shadow-[0_20px_44px_#062b4e1f]'}`}>
               <span aria-hidden="true" className={`absolute inset-x-0 top-0 h-1 ${featured ? 'bg-[linear-gradient(90deg,#f4d889,#c99432)]' : 'bg-[linear-gradient(90deg,#062b4e,#c99432)]'}`} />
-              {featured && <span className="absolute end-6 top-1 rounded-b-xl bg-[linear-gradient(135deg,#f4d889,#c99432)] px-3 pb-1 pt-0.5 text-[10px] font-extrabold uppercase tracking-[.8px] text-dark">{t('International')}</span>}
+              {featured && <span className="absolute end-6 top-1 rounded-b-xl bg-[linear-gradient(135deg,#f4d889,#c99432)] px-3 pb-1 pt-0.5 text-[10px] font-bold capitalize text-dark">{t('International')}</span>}
 
               <div className="mb-5">
-                <p className={`flex items-center gap-2 text-[11px] font-bold uppercase tracking-[1.5px] ${featured ? 'text-champagne/80' : 'text-[#a17a33]'}`}>
+                <p className={`flex items-center gap-2 text-[12.5px] font-semibold capitalize ${featured ? 'text-champagne/80' : 'text-[#a17a33]'}`}>
                   <span className={`grid size-8 shrink-0 place-items-center rounded-xl text-[14px] ${featured ? 'bg-white/10 text-champagne' : 'bg-[#f6efe1] text-[#a17a33]'}`}><Icon aria-hidden="true" /></span>
                   {t('Plan {number}', { number })}
                 </p>
@@ -56,7 +56,7 @@ export async function FeePlans({ fees }) {
               <p className={`mb-6 min-h-[90px] text-[14px] leading-[1.6] max-n:min-h-[68px] max-sm:min-h-0 ${featured ? 'text-[#c7d3dd]' : 'text-[#55606e]'}`}>{t(category)}</p>
 
               <div className={`border-t pt-5 ${featured ? 'border-white/15' : 'border-[#efe7d6]'}`}>
-                <p className={`text-[12px] font-semibold uppercase tracking-[1px] ${featured ? 'text-[#c7d3dd]' : 'text-muted'}`}>{t('Registration fee')}</p>
+                <p className={`text-[13px] font-semibold capitalize ${featured ? 'text-[#c7d3dd]' : 'text-muted'}`}>{t('Registration fee')}</p>
                 <p className="mt-1 flex items-baseline gap-1.5" dir="ltr">
                   {currency && <span className={`text-[16px] font-bold ${featured ? 'text-champagne' : 'text-[#a17a33]'}`}>{currency}</span>}
                   <span className="text-[38px] font-extrabold leading-none tracking-[-1px] max-sm:text-[34px]">{amount}</span>
@@ -66,7 +66,7 @@ export async function FeePlans({ fees }) {
 
               {finalization && (
                 <div className={`mt-5 rounded-2xl px-4 py-3.5 ${featured ? 'bg-white/[.07] ring-1 ring-white/10' : 'bg-[#faf6ee] ring-1 ring-[#efe5d0]'}`}>
-                  <p className={`text-[12px] font-semibold uppercase tracking-[1px] ${featured ? 'text-[#c7d3dd]' : 'text-muted'}`}>{t('Finalization fee')}</p>
+                  <p className={`text-[13px] font-semibold capitalize ${featured ? 'text-[#c7d3dd]' : 'text-muted'}`}>{t('Finalization fee')}</p>
                   <p className={`mt-0.5 text-[21px] font-extrabold leading-tight ${featured ? 'text-champagne' : 'text-[#a17a33]'}`} dir="ltr">{finCurrency} {finAmount}</p>
                   <p className={`mt-1 flex items-center gap-1.5 text-[12px] ${featured ? 'text-[#c7d3dd]' : 'text-muted'}`}><FaCircleCheck aria-hidden="true" className="shrink-0 text-[#2f9a55]" /> {t('Paid only after the rishta is finalized')}</p>
                 </div>

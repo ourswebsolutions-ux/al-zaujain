@@ -24,11 +24,6 @@ export async function GovRegistered({ fees }) {
 
         <div className="mt-12 grid grid-cols-2 items-center gap-12 max-b:grid-cols-1 max-b:gap-9 max-sm:mt-8">
           <Reveal x={-20}>
-            <div className="mb-5 flex items-center gap-3 max-sm:justify-center">
-              <span aria-hidden="true" className="h-[3px] w-10 shrink-0 rounded bg-gold max-sm:hidden" />
-              <span className="rounded-full bg-[#062b4e0f] px-4 py-1.5 text-center text-[13px] font-semibold text-navy max-sm:text-[12px]">{t('A registered and trusted marriage bureau')}</span>
-              <span aria-hidden="true" className="h-[3px] w-10 rounded bg-gold max-sm:hidden" />
-            </div>
             <p className="mb-4 text-[17px] leading-[1.65] text-[#2f3b4a] max-sm:text-[15px]">
               {t('{company} is a registered matrimonial service based in {city}, serving Pakistani families at home and overseas.', { company: 'Al Zaujain Marriage Bureau', city: t('Multan, Pakistan') })}
             </p>

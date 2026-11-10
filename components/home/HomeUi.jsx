@@ -26,7 +26,7 @@ export function Ornament({ className = '' }) {
 
 export function Label({ children, className = '' }) {
   return (
-    <p className={`flex items-center justify-center gap-3 text-[13px] font-semibold uppercase tracking-[3px] text-[#a17a33] max-sm:text-[10.5px] max-sm:tracking-[2px] ${className}`}>
+    <p className={`flex items-center justify-center gap-3 text-[15px] font-semibold capitalize tracking-[.5px] text-[#a17a33] max-sm:text-[13px] ${className}`}>
       <span aria-hidden="true" className="h-px w-10 shrink-0 bg-[#c99432] max-sm:hidden" />
       <span className="text-center">{children}</span>
       <span aria-hidden="true" className="h-px w-10 shrink-0 bg-[#c99432] max-sm:hidden" />

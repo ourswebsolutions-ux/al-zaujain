@@ -239,6 +239,8 @@ model Profile {
   height_cm          Int?
   marital_status     String   @db.VarChar(60)
   children_details   String?  @db.VarChar(60)
+  // Set only when a female candidate explicitly says she is willing to be a second wife.
+  second_wife        String?  @db.VarChar(10)
   mother_tongue      String?  @db.VarChar(40)
   caste              String?  @db.VarChar(60)
   nationality        String?  @db.VarChar(60)
