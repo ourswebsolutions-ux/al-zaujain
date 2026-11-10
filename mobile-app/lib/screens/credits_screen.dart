@@ -180,6 +180,12 @@ class _PackageCard extends StatelessWidget {
     final featured = pack['featured'] == true;
     final credits = (pack['credits'] as num).toInt();
     final profiles = credits ~/ cost;
+    final boost = pack['kind'] == 'boost';
+    final was = (pack['wasPrice'] as num?) ?? 0;
+    final kind = boost ? (pack['superBoost'] == true ? 'Super Boost' : 'Boost my Proposal') : pack['scope'] == 'foreign' ? 'International (Foreign + Pakistan)' : 'Local (Pakistan)';
+    final lines = boost
+        ? [tr('Your proposal at the top of search results'), tr('Needs a complete profile with a visible photo')]
+        : [tr('Unlock {count} Premium profiles', {'count': profiles}), tr('Real photos and contact details'), tr('Unlocked profiles stay open'), if (pack['scope'] == 'foreign') tr('Overseas profiles included')];
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(18),
@@ -189,17 +195,21 @@ class _PackageCard extends StatelessWidget {
           Expanded(child: Text('${pack['name']}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700))),
           if (featured) Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFFF4D889), Color(0xFFC99432)]), borderRadius: BorderRadius.circular(20)), child: Text(tr('Most popular'), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.dark))),
         ]),
+        Text(titleCase(tr(kind)), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.deepGold, letterSpacing: 0.4)),
         const SizedBox(height: 8),
         Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-          Text('$credits', style: const TextStyle(fontSize: 38, fontWeight: FontWeight.w800, height: 1)),
+          Text(boost ? '${pack['days']}' : '$credits', style: const TextStyle(fontSize: 38, fontWeight: FontWeight.w800, height: 1)),
           const SizedBox(width: 6),
-          Text(tr(credits == 1 ? 'profile' : 'profiles'), style: const TextStyle(fontSize: 14, color: AppColors.muted, fontWeight: FontWeight.w600)),
+          Text(tr(boost ? 'days' : credits == 1 ? 'profile' : 'profiles'), style: const TextStyle(fontSize: 14, color: AppColors.muted, fontWeight: FontWeight.w600)),
           const Spacer(),
-          Text('Rs ${money(pack['price'])}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.deepGold)),
+          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+            if (was > 0) Text('Rs ${money(was)}', style: const TextStyle(fontSize: 13, color: AppColors.muted, decoration: TextDecoration.lineThrough)),
+            Text('Rs ${money(pack['price'])}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.deepGold)),
+          ]),
         ]),
         if (pack['description'] != null && '${pack['description']}'.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 8), child: Tx('${pack['description']}', style: const TextStyle(fontSize: 13, color: AppColors.muted, height: 1.5))),
         const SizedBox(height: 10),
-        for (final line in [tr('Unlock {count} Premium profiles', {'count': profiles}), tr('Real photos and contact details'), tr('Unlocked profiles stay open')])
+        for (final line in lines)
           Padding(padding: const EdgeInsets.symmetric(vertical: 2), child: Row(children: [const Icon(Icons.check_rounded, size: 16, color: Color(0xFF1F8A3A)), const SizedBox(width: 6), Expanded(child: Text(line, style: const TextStyle(fontSize: 13)))])),
         const SizedBox(height: 12),
         AppButton(tr('Choose {name}', {'name': pack['name']}), tone: featured ? Tone.gold : Tone.navy, expand: true, onPressed: onChoose),

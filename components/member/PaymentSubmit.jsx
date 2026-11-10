@@ -47,7 +47,7 @@ export function PaymentSubmit({ methods, price, pack = null }) {
         <Card title="1. Choose how you will pay">
           {pack ? (
             <div className="mb-3 rounded-lg bg-[var(--d-gold-bg,#fcf4e1)] px-3 py-2.5 text-[13px] text-[var(--d-gold,#806126)]">
-              <p className="font-semibold">{pack.name} · {t('{count} profile credits', { count: pack.credits })}</p>
+              <p className="font-semibold">{pack.name} · {pack.kind === 'boost' ? t('Boost for {days} days', { days: pack.days }) : t('{count} profile credits', { count: pack.credits })}{pack.scope === 'foreign' ? ` · ${t('International')}` : ''}</p>
               <p className="mt-0.5 font-medium">{t('Amount to pay: {price}', { price: `Rs ${Number(pack.price).toLocaleString('en-PK')}` })}</p>
             </div>
           ) : price && <p className="mb-3 rounded-lg bg-[var(--d-gold-bg,#fcf4e1)] px-3 py-2 text-[13px] font-medium text-[var(--d-gold,#806126)]">{t('Amount to pay: {price}', { price })}</p>}
@@ -88,7 +88,7 @@ export function PaymentSubmit({ methods, price, pack = null }) {
           </label>
           {message && <p role="alert" className="border-s-[3px] border-[#a33a2c] bg-[var(--d-red-bg,#fbeeec)] p-3 text-xs">{t(message)}</p>}
           <Button type="submit" tone="gold" disabled={busy || !method} className="cursor-pointer">{t(busy ? 'Sending…' : 'Submit payment')}</Button>
-          <p className="text-xs leading-5 text-muted">{t(pack ? 'Our team checks every payment. Your credits are added once it is approved.' : 'Our team checks every payment. Your access unlocks once it is approved.')}</p>
+          <p className="text-xs leading-5 text-muted">{t(pack ? (pack.kind === 'boost' ? 'Our team checks every payment. Your proposal is boosted once it is approved.' : 'Our team checks every payment. Your credits are added once it is approved.') : 'Our team checks every payment. Your access unlocks once it is approved.')}</p>
         </form>
       </Card>
     </div>

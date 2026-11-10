@@ -16,7 +16,7 @@ export const TIERS = [
  * One package, in the style of the reference packages page: a coloured name tag, the price, a column
  * of facts (each with its Urdu line) and a full-width button. `rows` are { label, value, ur }.
  */
-export function PackageCard({ tier = 0, name, price, priceNote, rows, cta, href, ribbon, t }) {
+export function PackageCard({ tier = 0, name, price, was = null, discount = 0, priceNote, rows, cta, href, ribbon, t }) {
   const colour = TIERS[tier % TIERS.length];
   return (
     <article className="relative flex h-full flex-col overflow-hidden rounded-[24px] bg-white px-5 pb-6 pt-7 text-center shadow-[0_10px_30px_#062b4e14] transition-[transform,box-shadow] duration-300 hover:-translate-y-1.5 hover:shadow-[0_22px_48px_#062b4e26]">
@@ -26,8 +26,10 @@ export function PackageCard({ tier = 0, name, price, priceNote, rows, cta, href,
           <span className="relative">{t(ribbon)}</span>
         </span>
       )}
+      {discount > 0 && <span className="mx-auto mb-3 inline-block rounded-md bg-[#c0392b] px-3 py-1 text-[13px] font-extrabold tracking-[0.5px] text-white shadow-[0_4px_10px_#c0392b40]" dir="ltr">{discount}% {t('OFF')}</span>}
       <span className={`mx-auto inline-block rounded-full px-5 py-1.5 text-[14px] font-bold capitalize tracking-[1px] text-white shadow-[0_6px_14px_#00000026] ${colour.tag}`}>{t(name)}</span>
-      <p className="mt-6 flex items-baseline justify-center gap-1.5" dir="ltr">
+      {was > 0 && <p className="mt-5 text-[15px] text-[#777]" dir="ltr">{t('Was')} <s className="decoration-[#c0392b] decoration-2">Rs. {Number(was).toLocaleString('en-PK')}</s></p>}
+      <p className={`${was > 0 ? 'mt-1.5' : 'mt-6'} flex items-baseline justify-center gap-1.5`} dir="ltr">
         <span className="text-[17px] font-medium text-[#222]">Rs.</span>
         <span className={`font-[family-name:var(--font-poppins)] text-[38px] font-extrabold leading-none ${colour.price}`}>{Number(price).toLocaleString('en-PK')}</span>
       </p>

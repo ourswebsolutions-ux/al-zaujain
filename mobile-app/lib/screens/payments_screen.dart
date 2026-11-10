@@ -220,7 +220,7 @@ class _PaymentFormState extends State<_PaymentForm> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(8)),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('${widget.pack!['name']} · ${tr('{count} profile credits', {'count': widget.pack!['credits']})}', style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.goldText)),
+                Text('${widget.pack!['name']} · ${widget.pack!['kind'] == 'boost' ? tr('Boost for {days} days', {'days': widget.pack!['days']}) : tr('{count} profile credits', {'count': widget.pack!['credits']})}${widget.pack!['scope'] == 'foreign' ? ' · ${tr('International')}' : ''}', style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.goldText)),
                 Text(tr('Amount to pay: {price}', {'price': 'Rs ${money(widget.pack!['price'])}'}), style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.goldText)),
               ]),
             )

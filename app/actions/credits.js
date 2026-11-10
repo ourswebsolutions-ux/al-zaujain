@@ -35,24 +35,36 @@ export async function unlockProfileAction(_previous, formData) {
 export async function savePackage(_previous, form) {
   const admin = await requireAdmin();
   const id = Number(form.get('id')) || null;
-  const credits = Math.trunc(Number(text(form, 'credits')));
+  const kind = form.get('kind') === 'boost' ? 'boost' : 'credits';
+  const boost = kind === 'boost';
+  const credits = boost ? 0 : Math.trunc(Number(text(form, 'credits')));
   const price = Number(text(form, 'price').replace(/,/g, ''));
+  const wasText = text(form, 'was_price').replace(/,/g, '');
+  const was = wasText ? Number(wasText) : null;
+  const days = boost ? Math.trunc(Number(text(form, 'days'))) : null;
   const values = {
     name: text(form, 'name').slice(0, 100),
+    kind,
+    scope: !boost && form.get('scope') === 'foreign' ? 'foreign' : 'local',
     credits,
     price: Number.isFinite(price) ? price.toFixed(2) : '0',
+    was_price: was !== null && Number.isFinite(was) ? was.toFixed(2) : null,
+    days,
+    super_boost: boost && !!form.get('super_boost'),
     description: text(form, 'description').slice(0, 500) || null,
     sort: Math.max(0, Math.min(999, Math.trunc(Number(text(form, 'sort')) || 100))),
     active: !!form.get('active'),
     featured: !!form.get('featured'),
   };
   if (values.name.length < 2) return { ok: false, message: 'Please enter a package name.' };
-  if (!(credits >= 1 && credits <= 10000)) return { ok: false, message: 'Profile credits must be a whole number from 1 to 10,000.' };
+  if (!boost && !(credits >= 1 && credits <= 10000)) return { ok: false, message: 'Profile connects must be a whole number from 1 to 10,000.' };
+  if (boost && !(days >= 1 && days <= 365)) return { ok: false, message: 'Boost days must be a whole number from 1 to 365.' };
   if (!(price >= 0 && price <= 100000000)) return { ok: false, message: 'Please enter the price in PKR.' };
+  if (was !== null && !(was >= price && was <= 100000000)) return { ok: false, message: 'The price before discount must be higher than the price, or left empty.' };
   const db = getDb();
   if (id) await db.creditPackage.update({ where: { id }, data: values });
   else await db.creditPackage.create({ data: values });
-  await logActivity(admin.id, id ? 'credit_package_updated' : 'credit_package_created', values.name, `${credits} credits, Rs ${values.price}`);
+  await logActivity(admin.id, id ? 'credit_package_updated' : 'credit_package_created', values.name, boost ? `Boost ${days} days, Rs ${values.price}` : `${credits} credits (${values.scope}), Rs ${values.price}`);
   refresh();
   return { ok: true, message: id ? 'Package saved.' : 'Package created.' };
 }

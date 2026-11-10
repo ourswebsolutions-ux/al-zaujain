@@ -2,13 +2,14 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../core/api.dart';
 import '../core/app_state.dart';
 import '../core/theme.dart';
 import '../widgets/cards.dart';
 import '../widgets/common.dart';
 import '../widgets/site.dart';
 import 'auth_screens.dart';
-import 'credits_screen.dart';
+import 'payments_screen.dart';
 
 // The tier colours of the website's package cards, in order.
 const tiers = <(List<Color>, Color)>[
@@ -35,10 +36,12 @@ String rupees(num value) => value.round().toString().replaceAllMapped(RegExp(r'\
 /// One package card as on the website: a coloured name tag, the price, facts with their Urdu lines,
 /// and a full-width button.
 class PackageCard extends StatelessWidget {
-  const PackageCard({super.key, required this.tier, required this.name, required this.price, required this.note, required this.rows, required this.cta, required this.onPressed, this.ribbon});
+  const PackageCard({super.key, required this.tier, required this.name, required this.price, this.note = '', required this.rows, required this.cta, required this.onPressed, this.ribbon, this.was = 0, this.discount = 0});
   final int tier;
   final String name;
   final num price;
+  final num was;
+  final num discount;
   final String note;
   final List<(String, String, String?)> rows;
   final String cta;
@@ -55,18 +58,32 @@ class PackageCard extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 28, 20, 22),
           child: Column(children: [
+            if (discount > 0)
+              Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(color: const Color(0xFFC0392B), borderRadius: BorderRadius.circular(6)),
+                child: Text('$discount% ${tr('OFF')}', textDirection: TextDirection.ltr, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: Colors.white)),
+              ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
               decoration: BoxDecoration(gradient: LinearGradient(colors: tag), borderRadius: BorderRadius.circular(30), boxShadow: const [BoxShadow(color: Color(0x26000000), blurRadius: 14, offset: Offset(0, 6))]),
               child: Text(titleCase(tr(name)), style: TextStyle(fontFamily: headFont, fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: 1)),
             ),
-            const SizedBox(height: 22),
+            SizedBox(height: was > 0 ? 18 : 22),
+            if (was > 0)
+              Row(mainAxisAlignment: MainAxisAlignment.center, textDirection: TextDirection.ltr, children: [
+                Text('${tr('Was')} ', style: const TextStyle(fontSize: 15, color: Color(0xFF777777))),
+                Text('Rs. ${rupees(was)}', style: const TextStyle(fontSize: 15, color: Color(0xFF777777), decoration: TextDecoration.lineThrough, decorationColor: Color(0xFFC0392B), decorationThickness: 2)),
+              ]),
             Row(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.baseline, textBaseline: TextBaseline.alphabetic, textDirection: TextDirection.ltr, children: [
               const Text('Rs. ', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500, color: Color(0xFF222222))),
               Text(rupees(price), style: TextStyle(fontFamily: 'Poppins', fontSize: 38, fontWeight: FontWeight.w800, color: colour)),
             ]),
-            const SizedBox(height: 6),
-            Text(titleCase(tr(note)), textAlign: TextAlign.center, style: const TextStyle(fontSize: 13, color: AppColors.muted)),
+            if (note.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Text(titleCase(tr(note)), textAlign: TextAlign.center, style: const TextStyle(fontSize: 13, color: AppColors.muted)),
+            ],
             const SizedBox(height: 18),
             const Divider(height: 1, color: Color(0xFFEEE6DA)),
             for (final (label, value, ur) in rows)
@@ -118,7 +135,10 @@ class PackagesScreen extends StatefulWidget {
 
 class _PackagesScreenState extends State<PackagesScreen> {
   final scroll = ScrollController();
-  final creditsKey = GlobalKey();
+  final webKey = GlobalKey();
+  final consultancyKey = GlobalKey();
+
+  void _buy(Json pack) => push(context, app.signedIn ? PaymentSubmitScreen(pack: pack) : LoginScreen(then: PaymentSubmitScreen(pack: pack)));
 
   @override
   Widget build(BuildContext context) {
@@ -126,15 +146,40 @@ class _PackagesScreenState extends State<PackagesScreen> {
     final registration = ((fees['registration'] as List?) ?? const []).cast<Map>();
     final finalization = ((fees['finalization'] as List?) ?? const []).cast<Map>();
     final packages = app.packages;
-    final cost = app.unlockCost;
-    Widget heading(String title, String urdu, String text) => Padding(
+    final local = packages.where((pack) => pack['kind'] != 'boost' && pack['scope'] != 'foreign').toList();
+    final foreign = packages.where((pack) => pack['kind'] != 'boost' && pack['scope'] == 'foreign').toList();
+    final boosts = packages.where((pack) => pack['kind'] == 'boost').toList();
+    final urdu = !app.t.isUrdu;
+    // A section title like the website's: ❝ Title ❞, the Urdu line, then a note in both languages.
+    Widget heading(String title, String ur, String text, [String? textUr]) => Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 22),
           child: Column(children: [
-            Text('“\u00A0${tr(title)}\u00A0”', textAlign: TextAlign.center, style: TextStyle(fontFamily: headFont, fontSize: 23, fontWeight: FontWeight.w700, color: const Color(0xFF111111))),
-            if (!app.t.isUrdu) const SizedBox(height: 10),
-            if (!app.t.isUrdu) Text(urdu, textAlign: TextAlign.center, textDirection: TextDirection.rtl, style: urduStyle.copyWith(fontSize: 21, color: const Color(0xFF111111))),
-            const SizedBox(height: 8),
-            Text(tr(text), textAlign: TextAlign.center, style: TextStyle(fontFamily: headFont, fontSize: 15, fontWeight: FontWeight.w600, color: const Color(0xFF9B712B), height: 1.5)),
+            Text('❝ ${tr(title)} ❞', textAlign: TextAlign.center, style: TextStyle(fontFamily: headFont, fontSize: 22, fontWeight: FontWeight.w700, color: const Color(0xFF111111))),
+            if (urdu) ...[const SizedBox(height: 10), Text('❞ $ur ❝', textAlign: TextAlign.center, textDirection: TextDirection.rtl, style: urduStyle.copyWith(fontSize: 20, color: const Color(0xFF111111)))],
+            if (text.isNotEmpty) ...[const SizedBox(height: 8), Text(tr(text), textAlign: TextAlign.center, style: TextStyle(fontFamily: headFont, fontSize: 14.5, fontWeight: FontWeight.w600, color: const Color(0xFF9B712B), height: 1.5))],
+            if (urdu && textUr != null) ...[const SizedBox(height: 6), Text(textUr, textAlign: TextAlign.center, textDirection: TextDirection.rtl, style: urduStyle.copyWith(fontSize: 15, color: const Color(0xFF9B712B), height: 2.1))],
+          ]),
+        );
+    List<(String, String, String?)> connectRows(Json pack) => [
+          ('Profile Connect', '${pack['credits']}', 'پروفائل کنیکٹ: ${pack['credits']}'),
+          ('Duration', 'Unlimited', 'مدت: لا محدود'),
+          if ('${pack['description'] ?? ''}'.isNotEmpty) ('Details', '${pack['description']}', null),
+        ];
+    Widget connectCards(List<Json> list, int offset) => Padding(
+          padding: const EdgeInsetsDirectional.only(start: 16),
+          child: SwipeCards(height: 560, children: [
+            for (var i = 0; i < list.length; i++)
+              PackageCard(
+                tier: i + offset,
+                name: '${list[i]['name']}',
+                price: (list[i]['price'] as num?) ?? 0,
+                was: (list[i]['wasPrice'] as num?) ?? 0,
+                discount: (list[i]['discount'] as num?) ?? 0,
+                ribbon: list[i]['featured'] == true ? 'Featured' : null,
+                rows: connectRows(list[i]),
+                cta: 'Register Now',
+                onPressed: () => _buy(list[i]),
+              ),
           ]),
         );
     return Scaffold(
@@ -147,23 +192,71 @@ class _PackagesScreenState extends State<PackagesScreen> {
             SiteLabel(tr('Welcome to {company}', {'company': 'Al Zaujain Marriage Bureau'})),
             const SizedBox(height: 6),
             GradientText(tr('Rishta Packages'), size: 34),
-            if (!app.t.isUrdu) Text('رشتہ پیکجز', textDirection: TextDirection.rtl, style: urduStyle.copyWith(fontSize: 26)),
+            if (urdu) Text('رشتہ پیکجز', textDirection: TextDirection.rtl, style: urduStyle.copyWith(fontSize: 26)),
             const SizedBox(height: 8),
             const Ornament(),
             const SizedBox(height: 18),
-            Text(tr('Al Zaujain offers two kinds of packages. Consultancy packages, where our consultants personally find and present suitable proposals for your family, and Premium Profile Credits, to open premium profiles on this website yourself.'), style: const TextStyle(fontSize: 15, height: 1.7, color: Color(0xFF2F3B4A))),
-            if (packages.isNotEmpty) ...[
-              const SizedBox(height: 20),
-              Row(children: [
-                Expanded(child: _TypeButton(label: 'Consultancy Packages', urdu: 'کنسلٹنسی پیکجز', colors: const [AppColors.navy, Color(0xFF0D3D6B)], onTap: () {})),
+            for (final line in [
+              'Al Zaujain offers mainly two types of rishta services: Web & App Based Packages and Personalized Matchmaking.',
+              'In Web & App Based Packages you use our matrimonial website and app to find proposals yourself, on a self-service basis.',
+              'In Personalized Matchmaking, our office-based marriage consultants show you proposals as per your requirements.',
+            ])
+              Padding(padding: const EdgeInsets.only(bottom: 10), child: Text(tr(line), style: const TextStyle(fontSize: 15, height: 1.7, color: Color(0xFF2F3B4A)))),
+            const SizedBox(height: 14),
+            Text(tr('Which Type of Rishta Service Do You Need?'), textAlign: TextAlign.center, style: TextStyle(fontFamily: headFont, fontSize: 19, fontWeight: FontWeight.w700, color: const Color(0xFF111111))),
+            if (urdu) Text('آپ کو کس قسم کی رشتہ سروس کی ضرورت ہے؟', textAlign: TextAlign.center, textDirection: TextDirection.rtl, style: urduStyle.copyWith(fontSize: 17, color: const Color(0xFF333333))),
+            const SizedBox(height: 16),
+            Row(children: [
+              if (local.isNotEmpty || foreign.isNotEmpty) ...[
+                Expanded(child: _TypeButton(label: 'Web & App Based Packages', urdu: 'ویب اور ایپ پر مبنی پیکجز', colors: const [AppColors.navy, Color(0xFF0D3D6B)], onTap: () => Scrollable.ensureVisible(webKey.currentContext!, duration: const Duration(milliseconds: 500)))),
                 const SizedBox(width: 12),
-                Expanded(child: _TypeButton(label: 'Premium Profile Credits', urdu: 'پریمیم پروفائل کریڈٹس', colors: const [Color(0xFF9B712B), AppColors.gold], onTap: () => Scrollable.ensureVisible(creditsKey.currentContext!, duration: const Duration(milliseconds: 500)))),
-              ]),
-            ],
+              ],
+              Expanded(child: _TypeButton(label: 'Personalized Matchmaking', urdu: 'ذاتی نوعیت کی میچ میکنگ', colors: const [Color(0xFF9B712B), AppColors.gold], onTap: () => Scrollable.ensureVisible(consultancyKey.currentContext!, duration: const Duration(milliseconds: 500)))),
+            ]),
           ]),
         ),
-        const SizedBox(height: 30),
-        heading('Rishta Consultancy Packages', 'رشتہ کنسلٹنسی پیکجز', 'The registration fee is paid when you register and is non-refundable. The finalization fee is paid only after the rishta is finalized.'),
+        SizedBox(key: webKey, height: 30),
+        if (local.isNotEmpty) ...[
+          heading('Local Rishta Packages (Pakistan)', 'لوکل رشتہ پیکجز (پاکستان)', 'With these packages you can connect with all members in this category. Overseas (Foreign) profiles are not included: to contact overseas members, please buy the International package.', 'ان پیکجز کے ذریعے آپ اس کیٹیگری کے تمام ممبرز سے رابطہ کر سکتے ہیں۔ بیرونِ ملک (فارن) پروفائلز اس میں شامل نہیں؛ ان سے رابطے کے لیے انٹرنیشنل پیکج خریدیں۔'),
+          connectCards(local, 0),
+          const SizedBox(height: 40),
+        ],
+        if (foreign.isNotEmpty) ...[
+          heading('International Rishta Packages (Foreign)', 'انٹرنیشنل رشتہ پیکجز (بیرونِ ملک)', 'Connect with overseas members as well as members in Pakistan.'),
+          connectCards(foreign, 3),
+          const SizedBox(height: 40),
+        ],
+        if (local.isNotEmpty || foreign.isNotEmpty) ...[
+          heading('Web & App Based Packages Comparison', 'ویب اور ایپ پر مبنی پیکجز کا موازنہ', ''),
+          Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: _Comparison(groups: [if (local.isNotEmpty) ('Local Rishta Packages (Pakistan)', local), if (foreign.isNotEmpty) ('International Rishta Packages (Foreign)', foreign)])),
+          const SizedBox(height: 40),
+        ],
+        if (boosts.isNotEmpty) ...[
+          heading('Boost my Proposal', 'اپنی پروپوزل بوسٹ کریں', 'To boost your proposal, your profile information must be complete and your profile photo must be visible.', 'پروپوزل بوسٹ کرنے کے لیے ضروری ہے کہ آپ کی پروفائل کی معلومات مکمل ہوں اور آپ کی پروفائل تصویر نظر آ رہی ہو۔'),
+          Padding(
+            padding: const EdgeInsetsDirectional.only(start: 16),
+            child: SwipeCards(height: 560, children: [
+              for (var i = 0; i < boosts.length; i++)
+                PackageCard(
+                  tier: i + 2,
+                  name: '${boosts[i]['name']}',
+                  price: (boosts[i]['price'] as num?) ?? 0,
+                  was: (boosts[i]['wasPrice'] as num?) ?? 0,
+                  discount: (boosts[i]['discount'] as num?) ?? 0,
+                  rows: [
+                    ('Duration', '${boosts[i]['days']} Days', 'مدت: ${boosts[i]['days']} دن'),
+                    ('Proposal Status', boosts[i]['superBoost'] == true ? 'Super Boosted' : 'Boosted', 'پروپوزل کی حیثیت: ${boosts[i]['superBoost'] == true ? 'سپر بوسٹ شدہ' : 'بوسٹ شدہ'}'),
+                    ('Visibility', '${boosts[i]['description'] ?? ''}'.isNotEmpty ? '${boosts[i]['description']}' : 'Top of search results', 'بوسٹڈ پروپوزلز تلاش کے نتائج میں سب سے اوپر دکھائی جاتی ہیں۔'),
+                  ],
+                  cta: 'Register Now',
+                  onPressed: () => _buy(boosts[i]),
+                ),
+            ]),
+          ),
+          const SizedBox(height: 40),
+        ],
+        SizedBox(key: consultancyKey, height: 0),
+        heading('Personalized Matchmaking', 'ذاتی نوعیت کی میچ میکنگ', 'In Personalized Matchmaking, our office-based marriage consultants show you proposals as per your requirements. The registration fee is paid when you register and is non-refundable; the finalization fee is paid only after the rishta is finalized.'),
         Padding(
           padding: const EdgeInsetsDirectional.only(start: 16),
           child: SwipeCards(height: 620, children: [
@@ -185,36 +278,44 @@ class _PackagesScreenState extends State<PackagesScreen> {
               ),
           ]),
         ),
-        if (packages.isNotEmpty) ...[
-          const SizedBox(height: 40),
-          Container(key: creditsKey, child: heading('Premium Profile Credits', 'پریمیم پروفائل کریڈٹس', 'Each credit opens one Premium profile’s photo and contact details. An opened profile stays open for you.')),
-          Padding(
-            padding: const EdgeInsetsDirectional.only(start: 16),
-            child: SwipeCards(height: 560, children: [
-              for (var i = 0; i < packages.length; i++)
-                PackageCard(
-                  tier: i,
-                  name: '${packages[i]['name']}',
-                  price: (packages[i]['price'] as num?) ?? 0,
-                  note: 'One-Time Payment',
-                  ribbon: packages[i]['featured'] == true ? 'Featured' : null,
-                  rows: [
-                    ('Premium Credits', '${packages[i]['credits']}', 'پریمیم کریڈٹس: ${packages[i]['credits']}'),
-                    ('Premium Profiles You Can Open', '${((packages[i]['credits'] as num?) ?? 0) ~/ cost}', 'کھلنے والی پریمیم پروفائلز: ${((packages[i]['credits'] as num?) ?? 0) ~/ cost}'),
-                    ('Opened Profiles', 'Stay Open For You', 'کھلی پروفائل ہمیشہ کھلی رہتی ہے'),
-                    if ('${packages[i]['description'] ?? ''}'.isNotEmpty) ('Details', '${packages[i]['description']}', null),
-                  ],
-                  cta: 'Buy Now',
-                  onPressed: () => push(context, app.signedIn ? const BuyCreditsScreen() : const LoginScreen(then: BuyCreditsScreen())),
-                ),
-            ]),
-          ),
-        ],
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 30, 16, 0),
-          child: Notice(tr('Consultancy fees are separate from Premium Profile Credits. Our team will tell you which package fits your family; contact us on WhatsApp any time.')),
+          child: Notice(tr('Web & App Based Packages are separate from the Personalized Matchmaking fees. Our team will tell you which package fits your family; contact us on WhatsApp any time.')),
         ),
       ]),
+    );
+  }
+}
+
+/// The website's comparison table: each package's connects, duration and prices before and after discount.
+class _Comparison extends StatelessWidget {
+  const _Comparison({required this.groups});
+  final List<(String, List<Json>)> groups;
+
+  @override
+  Widget build(BuildContext context) {
+    const head = TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.white);
+    Widget cell(String text, {TextStyle? style, TextDecoration? decoration}) => Padding(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 11), child: Text(text, textAlign: TextAlign.center, style: (style ?? const TextStyle(fontSize: 13, color: Color(0xFF1F2A37))).copyWith(decoration: decoration)));
+    return Container(
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: const [BoxShadow(color: Color(0x14062B4E), blurRadius: 30, offset: Offset(0, 10))]),
+      clipBehavior: Clip.antiAlias,
+      child: Table(
+        columnWidths: const {0: FlexColumnWidth(1.25), 1: FlexColumnWidth(1), 2: FlexColumnWidth(1.15), 3: FlexColumnWidth(1.15)},
+        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+        children: [
+          TableRow(decoration: const BoxDecoration(color: AppColors.navy), children: [for (final title in ['Packages', 'Profile Connect', 'Before Discount', 'After Discount']) cell(titleCase(tr(title)), style: head)]),
+          for (final (title, list) in groups) ...[
+            TableRow(decoration: const BoxDecoration(color: Color(0xFFF6EFE2)), children: [cell(tr(title), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF9B712B))), const SizedBox(), const SizedBox(), const SizedBox()]),
+            for (final pack in list)
+              TableRow(decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Color(0xFFF1EBE1)))), children: [
+                cell(titleCase(tr('${pack['name']}')), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.navy)),
+                cell('${pack['credits']}'),
+                cell(((pack['wasPrice'] as num?) ?? 0) > 0 ? 'Rs. ${rupees(pack['wasPrice'] as num)}' : '—', style: const TextStyle(fontSize: 13, color: Color(0xFF777777)), decoration: ((pack['wasPrice'] as num?) ?? 0) > 0 ? TextDecoration.lineThrough : null),
+                cell('Rs. ${rupees((pack['price'] as num?) ?? 0)}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF1F8A4C))),
+              ]),
+          ],
+        ],
+      ),
     );
   }
 }

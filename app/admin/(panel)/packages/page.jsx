@@ -21,16 +21,34 @@ async function PackageFields({ pack }) {
   return (
     <>
       {pack && <input type="hidden" name="id" value={pack.id} />}
-      <div className="grid grid-cols-[2fr_1fr_1fr_90px] gap-3 max-p:grid-cols-2 max-m:grid-cols-1">
-        <label className={label}>{t('Package name')}<input name="name" required maxLength={100} defaultValue={pack?.name ?? ''} placeholder={t('e.g. Starter')} className={inputSm} /></label>
-        <label className={label}>{t('Profile credits')}<input name="credits" type="number" min="1" max="10000" required defaultValue={pack?.credits ?? ''} placeholder="5" className={inputSm} /></label>
-        <label className={label}>{t('Price (PKR)')}<input name="price" inputMode="decimal" required defaultValue={pack ? Number(pack.price) : ''} placeholder="1000" className={inputSm} /></label>
+      <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-3 max-p:grid-cols-2 max-m:grid-cols-1">
+        <label className={label}>{t('Package name')}<input name="name" required maxLength={100} defaultValue={pack?.name ?? ''} placeholder={t('e.g. Bronze')} className={inputSm} /></label>
+        <label className={label}>{t('Type')}
+          <select name="kind" defaultValue={pack?.kind ?? 'credits'} className={inputSm}>
+            <option value="credits">{t('Profile connects')}</option>
+            <option value="boost">{t('Boost my proposal')}</option>
+          </select>
+        </label>
+        <label className={label}>{t('Profiles (connects)')}
+          <select name="scope" defaultValue={pack?.scope ?? 'local'} className={inputSm}>
+            <option value="local">{t('Local (Pakistan)')}</option>
+            <option value="foreign">{t('International (Foreign + Pakistan)')}</option>
+          </select>
+        </label>
         <label className={label}>{t('Order')}<input name="sort" type="number" min="0" max="999" defaultValue={pack?.sort ?? 100} className={inputSm} /></label>
       </div>
+      <div className="grid grid-cols-4 gap-3 max-p:grid-cols-2 max-m:grid-cols-1">
+        <label className={label}>{t('Profile connects (credits)')}<input name="credits" type="number" min="0" max="10000" defaultValue={pack?.credits ?? ''} placeholder="30" className={inputSm} /></label>
+        <label className={label}>{t('Boost days')}<input name="days" type="number" min="1" max="365" defaultValue={pack?.days ?? ''} placeholder="15" className={inputSm} /></label>
+        <label className={label}>{t('Price (PKR)')}<input name="price" inputMode="decimal" required defaultValue={pack ? Number(pack.price) : ''} placeholder="1500" className={inputSm} /></label>
+        <label className={label}>{t('Price before discount (optional)')}<input name="was_price" inputMode="decimal" defaultValue={pack?.was_price != null ? Number(pack.was_price) : ''} placeholder="3000" className={inputSm} /></label>
+      </div>
+      <p className="text-[12px] leading-5 text-muted">{t('Profile connect packages fill "Profile connects"; Boost packages fill "Boost days". Local packages open Pakistan profiles; an International package also opens overseas profiles. The price before discount shows as "50% OFF".')}</p>
       <label className={label}>{t('Description')}<textarea name="description" rows={2} maxLength={500} defaultValue={pack?.description ?? ''} placeholder={t('Shown to members under the package')} className={inputSm} /></label>
       <div className="flex flex-wrap items-center gap-5">
         <label className={check}><input type="checkbox" name="active" defaultChecked={pack ? pack.active : true} className="accent-navy" /> {t('Active (members can buy it)')}</label>
         <label className={check}><input type="checkbox" name="featured" defaultChecked={pack?.featured ?? false} className="accent-navy" /> {t('Featured (shown first, highlighted)')}</label>
+        <label className={check}><input type="checkbox" name="super_boost" defaultChecked={pack?.super_boost ?? false} className="accent-navy" /> {t('Super Boost (above Boost)')}</label>
       </div>
     </>
   );
@@ -47,7 +65,7 @@ export default async function Packages() {
   const cost = await unlockCost();
   return (
     <>
-      <Title text="Members buy these packages to unlock Premium profiles. Separate from the official consultancy fees.">{t('Premium Profile Packages')}</Title>
+      <Title text="Members buy these packages: profile connects (Local or International) to unlock Premium profiles, and Boosts to put their proposal at the top of search. Separate from the official consultancy fees.">{t('Rishta Packages')}</Title>
 
       <div className="grid grid-cols-[minmax(0,1fr)_320px] items-start gap-6 max-p:grid-cols-1 [&>*]:min-w-0">
         <Panel title="Create a package">
@@ -74,7 +92,7 @@ export default async function Packages() {
           {packages.map((pack) => {
             const stats = soldBy.get(pack.id);
             return (
-              <Panel key={pack.id} title={`${pack.name} · ${t('{count} credits', { count: pack.credits })} · Rs ${Number(pack.price).toLocaleString('en-PK')}`}>
+              <Panel key={pack.id} title={`${pack.name} · ${pack.kind === 'boost' ? t('Boost · {days} days', { days: pack.days }) : `${t('{count} credits', { count: pack.credits })} · ${t(pack.scope === 'foreign' ? 'International' : 'Local')}`} · Rs ${Number(pack.price).toLocaleString('en-PK')}`}>
                 <div className="-mt-2 mb-4 flex flex-wrap items-center gap-2">
                   <Badge value={pack.active ? 'active' : 'inactive'} label={pack.active ? 'Active' : 'Hidden'} />
                   {pack.featured && <span className="inline-flex items-center gap-1 rounded-md bg-[#fcf4e1] px-2.5 py-1 text-xs font-medium text-[#806126]"><FaStar aria-hidden="true" /> {t('Featured')}</span>}

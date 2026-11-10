@@ -40,19 +40,31 @@ export default async function BuyCredits({ searchParams }) {
     <>
       {header}
       <ul className="grid grid-cols-4 gap-5 max-[1280px]:grid-cols-3 max-p:grid-cols-2 max-m:grid-cols-1">
-        {packages.map((item) => (
+        {packages.map(packageView).map((item) => (
           <li key={item.id} className={`${cardClass} relative flex flex-col p-6 ${item.featured ? 'border-gold! ring-2 ring-gold/30' : ''}`}>
             {item.featured && <span className="absolute -top-3 start-5 inline-flex items-center gap-1.5 rounded-full bg-[linear-gradient(135deg,#f4d889,#c99432)] px-3 py-1 text-[11px] font-bold text-dark"><FaStar aria-hidden="true" /> {t('Most popular')}</span>}
             <h2 className="text-lg font-semibold text-navy">{item.name}</h2>
-            <p className="mt-3 font-nunito text-[40px] font-extrabold leading-none text-navy">{item.credits}<span className="ms-1.5 text-sm font-semibold text-muted">{t(item.credits === 1 ? 'profile' : 'profiles')}</span></p>
-            <p className="mt-2 text-xl font-bold text-[var(--d-gold,#9b712b)]">Rs {Number(item.price).toLocaleString('en-PK')}</p>
+            <p className="mt-1 text-[12px] font-semibold uppercase tracking-wide text-[var(--d-gold,#9b712b)]">{t(item.kind === 'boost' ? (item.superBoost ? 'Super Boost' : 'Boost my Proposal') : item.scope === 'foreign' ? 'International (Foreign + Pakistan)' : 'Local (Pakistan)')}</p>
+            {item.kind === 'boost'
+              ? <p className="mt-3 font-nunito text-[40px] font-extrabold leading-none text-navy">{item.days}<span className="ms-1.5 text-sm font-semibold text-muted">{t('days')}</span></p>
+              : <p className="mt-3 font-nunito text-[40px] font-extrabold leading-none text-navy">{item.credits}<span className="ms-1.5 text-sm font-semibold text-muted">{t(item.credits === 1 ? 'profile' : 'profiles')}</span></p>}
+            {item.wasPrice > 0 && <p className="mt-2 text-sm text-muted"><s>Rs {item.wasPrice.toLocaleString('en-PK')}</s> <span className="ms-1 rounded bg-[#c0392b] px-1.5 py-0.5 text-[11px] font-bold text-white">{item.discount}% {t('OFF')}</span></p>}
+            <p className={`${item.wasPrice > 0 ? 'mt-1' : 'mt-2'} text-xl font-bold text-[var(--d-gold,#9b712b)]`}>Rs {Number(item.price).toLocaleString('en-PK')}</p>
             {item.credits > 0 && <p className="text-xs text-muted">{t('Rs {price} per profile', { price: Math.round(Number(item.price) / Math.max(1, Math.floor(item.credits / cost))).toLocaleString('en-PK') })}</p>}
             {item.description && <p className="mt-3 text-[13px] leading-6 text-muted">{item.description}</p>}
+            {item.kind === 'boost' ? (
+              <ul className="mt-4 grid gap-1.5 text-[13px] text-navy">
+                <li className="flex items-center gap-2"><FaCheck aria-hidden="true" className="text-[var(--d-green,#1f8a3a)]" /> {t('Your proposal at the top of search results')}</li>
+                <li className="flex items-center gap-2"><FaCheck aria-hidden="true" className="text-[var(--d-green,#1f8a3a)]" /> {t('Needs a complete profile with a visible photo')}</li>
+              </ul>
+            ) : (
             <ul className="mt-4 grid gap-1.5 text-[13px] text-navy">
               <li className="flex items-center gap-2"><FaCheck aria-hidden="true" className="text-[var(--d-green,#1f8a3a)]" /> {t('Unlock {count} Premium profiles', { count: Math.floor(item.credits / cost) })}</li>
               <li className="flex items-center gap-2"><FaCheck aria-hidden="true" className="text-[var(--d-green,#1f8a3a)]" /> {t('Real photos and contact details')}</li>
               <li className="flex items-center gap-2"><FaCheck aria-hidden="true" className="text-[var(--d-green,#1f8a3a)]" /> {t('Unlocked profiles stay open')}</li>
+              {item.scope === 'foreign' && <li className="flex items-center gap-2"><FaCheck aria-hidden="true" className="text-[var(--d-green,#1f8a3a)]" /> {t('Overseas profiles included')}</li>}
             </ul>
+            )}
             <div className="mt-auto pt-5"><ButtonLink tone={item.featured ? 'gold' : 'navy'} href={`/dashboard/credits/buy?package=${item.id}`} className="w-full">{t('Choose {name}', { name: item.name })}</ButtonLink></div>
           </li>
         ))}
