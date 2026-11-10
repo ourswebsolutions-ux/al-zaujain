@@ -105,3 +105,17 @@
     }
   }
 }
+
+/* The packages page's service buttons: a navy split gradient with gold lines running round the edge,
+   like the reference's animated buttons. */
+.az-run-button { position: relative; overflow: hidden; }
+.az-run-button > i { position: absolute; display: block; background: linear-gradient(90deg, #d5ad6d 0%, #e2ba78 35%, #caaa75 45%, #b38f56 61%, #d5ad6d 100%); }
+.az-run-button > i:nth-child(1) { top: 0; left: 0; width: 100%; height: 4px; animation: az-run-top 2s linear infinite; }
+.az-run-button > i:nth-child(2) { top: 0; right: 0; width: 4px; height: 100%; animation: az-run-right 2s linear -1s infinite; }
+.az-run-button > i:nth-child(3) { bottom: 0; left: 0; width: 100%; height: 4px; animation: az-run-bottom 2s linear infinite; }
+.az-run-button > i:nth-child(4) { top: 0; left: 0; width: 4px; height: 100%; animation: az-run-left 2s linear -1s infinite; }
+@keyframes az-run-top { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+@keyframes az-run-right { 0% { transform: translateY(100%); } 100% { transform: translateY(-100%); } }
+@keyframes az-run-bottom { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+@keyframes az-run-left { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+@media (prefers-reduced-motion: reduce) { .az-run-button > i { animation: none; } }

@@ -720,6 +720,11 @@ model CreditPackage {
   was_price   Decimal?     @db.Decimal(12, 2)
   days        Int?
   super_boost Boolean      @default(false)
+  // The card's colour (badge, price, ribbon and button), e.g. #b08d57; empty uses the default order.
+  color       String?      @db.VarChar(20)
+  // Shown on the card as Available / Not Available.
+  audio_call  Boolean      @default(false)
+  video_call  Boolean      @default(false)
   description String?      @db.VarChar(500)
   active      Boolean      @default(true)
   featured    Boolean      @default(false)

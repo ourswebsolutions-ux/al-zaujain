@@ -49,6 +49,9 @@ async function PackageFields({ pack }) {
         <label className={check}><input type="checkbox" name="active" defaultChecked={pack ? pack.active : true} className="accent-navy" /> {t('Active (members can buy it)')}</label>
         <label className={check}><input type="checkbox" name="featured" defaultChecked={pack?.featured ?? false} className="accent-navy" /> {t('Featured (shown first, highlighted)')}</label>
         <label className={check}><input type="checkbox" name="super_boost" defaultChecked={pack?.super_boost ?? false} className="accent-navy" /> {t('Super Boost (above Boost)')}</label>
+        <label className={check}><input type="checkbox" name="audio_call" defaultChecked={pack?.audio_call ?? false} className="accent-navy" /> {t('Audio call available')}</label>
+        <label className={check}><input type="checkbox" name="video_call" defaultChecked={pack?.video_call ?? false} className="accent-navy" /> {t('Video call available')}</label>
+        <label className={check}>{t('Card colour')} <input type="color" name="color" defaultValue={pack?.color ?? '#b08d57'} className="h-7 w-10 cursor-pointer rounded border border-[var(--d-line,#e7e9ee)]" /></label>
       </div>
     </>
   );

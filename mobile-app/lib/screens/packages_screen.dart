@@ -36,12 +36,14 @@ String rupees(num value) => value.round().toString().replaceAllMapped(RegExp(r'\
 /// One package card as on the website: a coloured name tag, the price, facts with their Urdu lines,
 /// and a full-width button.
 class PackageCard extends StatelessWidget {
-  const PackageCard({super.key, required this.tier, required this.name, required this.price, this.note = '', required this.rows, required this.cta, required this.onPressed, this.ribbon, this.was = 0, this.discount = 0});
+  const PackageCard({super.key, required this.tier, required this.name, required this.price, this.note = '', required this.rows, required this.cta, required this.onPressed, this.ribbon, this.was = 0, this.discount = 0, this.color});
   final int tier;
   final String name;
   final num price;
   final num was;
   final num discount;
+  // The package's own colour from the admin panel (#b08d57); otherwise the tier colour.
+  final String? color;
   final String note;
   final List<(String, String, String?)> rows;
   final String cta;
@@ -50,7 +52,12 @@ class PackageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (tag, colour) = tiers[tier % tiers.length];
+    var (tag, colour) = tiers[tier % tiers.length];
+    final custom = int.tryParse((color ?? '').replaceFirst('#', ''), radix: 16);
+    if (custom != null && (color ?? '').length == 7) {
+      colour = Color(0xFF000000 | custom);
+      tag = [colour, Color.lerp(colour, Colors.black, 0.1)!];
+    }
     return Container(
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: const [BoxShadow(color: Color(0x14062B4E), blurRadius: 30, offset: Offset(0, 10))]),
       clipBehavior: Clip.antiAlias,
@@ -58,17 +65,10 @@ class PackageCard extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 28, 20, 22),
           child: Column(children: [
-            if (discount > 0)
-              Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(color: const Color(0xFFC0392B), borderRadius: BorderRadius.circular(6)),
-                child: Text('$discount% ${tr('OFF')}', textDirection: TextDirection.ltr, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: Colors.white)),
-              ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
               decoration: BoxDecoration(gradient: LinearGradient(colors: tag), borderRadius: BorderRadius.circular(30), boxShadow: const [BoxShadow(color: Color(0x26000000), blurRadius: 14, offset: Offset(0, 6))]),
-              child: Text(titleCase(tr(name)), style: TextStyle(fontFamily: headFont, fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: 1)),
+              child: Text(tr(name).toUpperCase(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 2)),
             ),
             SizedBox(height: was > 0 ? 18 : 22),
             if (was > 0)
@@ -110,13 +110,13 @@ class PackageCard extends StatelessWidget {
             ),
           ]),
         ),
-        if (ribbon != null)
+        if (discount > 0 || ribbon != null)
           Positioned(
             right: -48,
             top: 22,
             child: Transform.rotate(
               angle: math.pi / 4,
-              child: Container(width: 170, padding: const EdgeInsets.symmetric(vertical: 4), color: colour, alignment: Alignment.center, child: Text(tr(ribbon!), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white))),
+              child: Container(width: 170, padding: const EdgeInsets.symmetric(vertical: 5), color: colour, alignment: Alignment.center, child: Text(discount > 0 ? '$discount% ${tr('OFF')}' : tr(ribbon!), textDirection: TextDirection.ltr, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white))),
             ),
           ),
       ]),
@@ -163,13 +163,16 @@ class _PackagesScreenState extends State<PackagesScreen> {
     List<(String, String, String?)> connectRows(Json pack) => [
           ('Profile Connect', '${pack['credits']}', 'پروفائل کنیکٹ: ${pack['credits']}'),
           ('Duration', 'Unlimited', 'مدت: لا محدود'),
-          if ('${pack['description'] ?? ''}'.isNotEmpty) ('Details', '${pack['description']}', null),
+          ('Audio Call', pack['audioCall'] == true ? 'Available' : 'Not Available', 'آڈیو کال: ${pack['audioCall'] == true ? 'دستیاب ہے' : 'دستیاب نہیں'}'),
+          ('Video Call', pack['videoCall'] == true ? 'Available' : 'Not Available', 'ویڈیو کال: ${pack['videoCall'] == true ? 'دستیاب ہے' : 'دستیاب نہیں'}'),
         ];
+    // Stacked one under another, as on the website's phone view.
     Widget connectCards(List<Json> list, int offset) => Padding(
-          padding: const EdgeInsetsDirectional.only(start: 16),
-          child: SwipeCards(height: 560, children: [
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(children: [
             for (var i = 0; i < list.length; i++)
-              PackageCard(
+              Padding(padding: const EdgeInsets.only(bottom: 28), child: PackageCard(
+                color: list[i]['color'] as String?,
                 tier: i + offset,
                 name: '${list[i]['name']}',
                 price: (list[i]['price'] as num?) ?? 0,
@@ -179,7 +182,7 @@ class _PackagesScreenState extends State<PackagesScreen> {
                 rows: connectRows(list[i]),
                 cta: 'Register Now',
                 onPressed: () => _buy(list[i]),
-              ),
+              )),
           ]),
         );
     return Scaffold(
@@ -234,10 +237,11 @@ class _PackagesScreenState extends State<PackagesScreen> {
         if (boosts.isNotEmpty) ...[
           heading('Boost my Proposal', 'اپنی پروپوزل بوسٹ کریں', 'To boost your proposal, your profile information must be complete and your profile photo must be visible.', 'پروپوزل بوسٹ کرنے کے لیے ضروری ہے کہ آپ کی پروفائل کی معلومات مکمل ہوں اور آپ کی پروفائل تصویر نظر آ رہی ہو۔'),
           Padding(
-            padding: const EdgeInsetsDirectional.only(start: 16),
-            child: SwipeCards(height: 560, children: [
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(children: [
               for (var i = 0; i < boosts.length; i++)
-                PackageCard(
+                Padding(padding: const EdgeInsets.only(bottom: 28), child: PackageCard(
+                  color: boosts[i]['color'] as String?,
                   tier: i + 2,
                   name: '${boosts[i]['name']}',
                   price: (boosts[i]['price'] as num?) ?? 0,
@@ -246,11 +250,11 @@ class _PackagesScreenState extends State<PackagesScreen> {
                   rows: [
                     ('Duration', '${boosts[i]['days']} Days', 'مدت: ${boosts[i]['days']} دن'),
                     ('Proposal Status', boosts[i]['superBoost'] == true ? 'Super Boosted' : 'Boosted', 'پروپوزل کی حیثیت: ${boosts[i]['superBoost'] == true ? 'سپر بوسٹ شدہ' : 'بوسٹ شدہ'}'),
-                    ('Visibility', '${boosts[i]['description'] ?? ''}'.isNotEmpty ? '${boosts[i]['description']}' : 'Top of search results', 'بوسٹڈ پروپوزلز تلاش کے نتائج میں سب سے اوپر دکھائی جاتی ہیں۔'),
+                    ('Visibility', '${boosts[i]['description'] ?? ''}'.isNotEmpty ? '${boosts[i]['description']}' : 'Top of search results', 'بوسٹڈ پروپوزلز تلاش کے نتائج میں سب سے اوپر دکھائے جاتے ہیں۔'),
                   ],
                   cta: 'Register Now',
                   onPressed: () => _buy(boosts[i]),
-                ),
+                )),
             ]),
           ),
           const SizedBox(height: 40),
