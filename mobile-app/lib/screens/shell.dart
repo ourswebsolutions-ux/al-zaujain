@@ -4,7 +4,7 @@ import '../core/app_state.dart';
 import '../core/updater.dart';
 import '../core/theme.dart';
 import 'account_screen.dart';
-import 'home_screen.dart';
+import 'site_home.dart';
 import 'messages_screen.dart';
 import 'proposals_screen.dart';
 import 'member_screens.dart';
@@ -53,7 +53,7 @@ class ShellState extends State<Shell> {
   @override
   Widget build(BuildContext context) {
     final pages = [
-      const HomeScreen(),
+      const SiteHomeScreen(),
       ProposalsScreen(key: proposals),
       const MatchesTab(),
       const MessagesScreen(),

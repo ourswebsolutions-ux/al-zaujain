@@ -4,6 +4,7 @@ import '../core/app_state.dart';
 import '../core/theme.dart';
 import '../widgets/biodata.dart';
 import '../widgets/common.dart';
+import '../widgets/site.dart';
 
 /// "Professional marriage consultants", as on the website.
 /// Some consultants serve one city only: they appear once the family chooses that city
@@ -30,13 +31,15 @@ class _ConsultantsScreenState extends State<ConsultantsScreen> {
           final cities = ((data['cities'] as List?) ?? []).map((item) => '$item').toList();
           final chosen = data['city'] as String?;
           return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            const SectionTag('A REAL CONVERSATION'),
-            const SizedBox(height: 4),
-            const PageIntro('Professional marriage consultants', urdu: 'ہمارے مشیر', text: 'Work with an experienced consultant, in Pakistan or overseas, who will understand your family and guide every step.'),
+            const Padding(padding: EdgeInsets.only(top: 18), child: SectionHeading(label: 'Expert Team', title: 'Hire Personal Matchmaking Consultant', size: 25)),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 14, 4, 20),
+              child: Text(tr('Our consultants work with you personally: they understand your family’s requirements, suggest suitable proposals and stay with you until the rishta is settled.'), textAlign: TextAlign.center, style: const TextStyle(fontSize: 15, height: 1.6, color: Color(0xFF3D4A5A))),
+            ),
             if (cities.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.only(bottom: 14),
-                child: Wrap(spacing: 8, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                padding: const EdgeInsets.only(bottom: 18),
+                child: Wrap(alignment: WrapAlignment.center, spacing: 8, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
                   Text('${tr('Your city')}:', style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.muted)),
                   ChoiceChip(label: Text(tr('All cities')), selected: chosen == null, onSelected: (_) => setState(() => city = 'all')),
                   for (final name in cities) ChoiceChip(label: Text(tr(name)), selected: chosen == name, onSelected: (_) => setState(() => city = name)),
@@ -46,36 +49,10 @@ class _ConsultantsScreenState extends State<ConsultantsScreen> {
               const EmptyState(icon: Icons.support_agent_rounded, title: 'Our consultants will be listed here soon.')
             else
               LayoutBuilder(builder: (context, size) {
-                final columns = size.maxWidth > 560 ? 3 : 2;
-                final width = (size.maxWidth - 12 * (columns - 1)) / columns;
-                return Wrap(spacing: 12, runSpacing: 12, children: [
-                  for (final consultant in consultants)
-                    SizedBox(
-                      width: width,
-                      child: Material(
-                        color: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: const BorderSide(color: AppColors.line)),
-                        clipBehavior: Clip.antiAlias,
-                        child: InkWell(
-                          onTap: () => push(context, ConsultantScreen(slug: '${consultant['slug']}')),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                              AspectRatio(aspectRatio: 1, child: NetImage(consultant['photo'] as String?, radius: 14)),
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(4, 10, 4, 4),
-                                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                  Text('${consultant['display_name']}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-                                  if (consultant['title'] != null) Text(tr('${consultant['title']}'), maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.deepGold)),
-                                  if (consultant['city'] != null) Text(tr('${consultant['city']}'), style: const TextStyle(fontSize: 12, color: AppColors.muted)),
-                                  if (consultant['servesCity'] != null) Padding(padding: const EdgeInsets.only(top: 4), child: Pill(tr('For families in {city}', {'city': tr('${consultant['servesCity']}')}))),
-                                ]),
-                              ),
-                            ]),
-                          ),
-                        ),
-                      ),
-                    ),
+                final columns = size.maxWidth > 900 ? 3 : size.maxWidth > 560 ? 2 : 1;
+                final width = (size.maxWidth - 16 * (columns - 1)) / columns;
+                return Wrap(spacing: 16, runSpacing: 18, children: [
+                  for (final consultant in consultants) SizedBox(width: width, child: ConsultantTile(consultant: consultant)),
                 ]);
               }),
           ]);

@@ -51,6 +51,8 @@ const _appUrdu = <String, String>{
   'Settings': 'ترتیبات',
   'Language': 'زبان',
   'Change website': 'ویب سائٹ تبدیل کریں',
+  'Use the default website': 'ڈیفالٹ ویب سائٹ استعمال کریں',
+  'Open navigation': 'مینو کھولیں',
   'Connected website': 'منسلک ویب سائٹ',
   'Sign out': 'سائن آؤٹ',
   'Filters': 'فلٹرز',

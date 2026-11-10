@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'api.dart';
 import 'i18n.dart';
 
-const appVersion = '1.0.7';
+const appVersion = '1.0.8';
 
 /// The website this build opens by default, set when the APK is built (scripts/build-apk.mjs reads
 /// APP_SITE_URL). With it, families never see the address screen. Settings can still change it.
@@ -47,8 +47,10 @@ class AppState extends ChangeNotifier {
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
     t.lang = _prefs.getString('lang') ?? 'en';
-    // A built-in website always wins, so an old address saved on the phone can never strand the app.
-    domain = builtInSite.isNotEmpty ? normalise(builtInSite) : _prefs.getString('domain');
+    // A website chosen in Settings wins; otherwise the one built into this APK. A website that cannot
+    // be reached shows a screen with "Change website" and "Use the default website", so nobody is stranded.
+    final chosen = _prefs.getString('domain');
+    domain = chosen != null && chosen.isNotEmpty ? chosen : (builtInSite.isNotEmpty ? normalise(builtInSite) : null);
     if (domain != null && domain!.isEmpty) domain = null;
     if (domain != null) {
       _api = Api(domain!, token: _prefs.getString('token'), onSignedOut: _expired);
@@ -92,6 +94,18 @@ class AppState extends ChangeNotifier {
     await _loadDictionary();
     await refreshAccount();
     notifyListeners();
+  }
+
+  /// The website built into this APK, if any.
+  String? get defaultSite => builtInSite.isEmpty ? null : normalise(builtInSite);
+  bool get onDefaultSite => defaultSite != null && domain == defaultSite;
+
+  /// Goes back to the website built into the APK and forgets the one chosen in Settings.
+  Future<void> useDefaultSite() async {
+    final base = defaultSite;
+    if (base == null) return;
+    await connect(base);
+    await _prefs.remove('domain');
   }
 
   /// Loads the website's settings and lists. Called when the app opens.

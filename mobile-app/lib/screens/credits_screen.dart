@@ -5,6 +5,7 @@ import '../core/app_state.dart';
 import '../core/theme.dart';
 import '../widgets/biodata.dart';
 import '../widgets/common.dart';
+import 'packages_screen.dart';
 import 'payments_screen.dart';
 import 'profile_screen.dart';
 
@@ -214,31 +215,6 @@ class FeesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fees = ((app.config['fees'] as Map?) ?? const {}).cast<String, dynamic>();
-    Widget table(String title, String note, List<Json> rows) => Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18), border: Border.all(color: AppColors.line)),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(color: AppColors.navy, border: Border(bottom: BorderSide(color: AppColors.gold, width: 3))),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(tr(title), style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w700)),
-                Text(tr(note), style: const TextStyle(color: AppColors.champagne, fontSize: 12)),
-              ]),
-            ),
-            for (final row in rows)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-                decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.softLine))),
-                child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Expanded(child: Tx(tr('${row['category']}'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, height: 1.4))),
-                  const SizedBox(width: 12),
-                  Text('${row['fee']}', textDirection: TextDirection.ltr, style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800, color: AppColors.deepGold)),
-                ]),
-              ),
-          ]),
-        );
     final whatsapp = '${fees['whatsapp'] ?? ''}';
     final digits = whatsapp.replaceAll(RegExp(r'\D'), '');
     return Scaffold(
@@ -258,8 +234,16 @@ class FeesScreen extends StatelessWidget {
           ]),
         ),
         const SizedBox(height: 16),
-        table('Advance registration fees', 'Non-refundable · paid when you register', rowsOf(fees['registration'])),
-        table('Rishta finalization fees', 'Payable only after the rishta is finalized', rowsOf(fees['finalization'])),
+        for (var i = 0; i < rowsOf(fees['registration']).length; i++)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: FeePlanCard(
+              index: i,
+              category: '${rowsOf(fees['registration'])[i]['category']}',
+              registration: '${rowsOf(fees['registration'])[i]['fee']}',
+              finalization: i < rowsOf(fees['finalization']).length ? '${rowsOf(fees['finalization'])[i]['fee']}' : null,
+            ),
+          ),
         Panel(
           title: 'Please note',
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

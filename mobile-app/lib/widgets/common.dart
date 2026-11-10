@@ -55,6 +55,16 @@ class SectionTag extends StatelessWidget {
   Widget build(BuildContext context) => Text(tr(text), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: app.t.isUrdu ? 0 : 1.4, color: color));
 }
 
+/// The website's heading font: Poppins, or Noto Nastaliq Urdu in Urdu.
+String get headFont => app.t.isUrdu ? 'NotoNastaliqUrdu' : 'Poppins';
+
+/// "marital status" → "Marital Status", as the website shows labels and profile details.
+/// Emails, links and numbers are left exactly as they are.
+String titleCase(String text) {
+  if (app.t.isUrdu || text.contains('@') || text.contains('://')) return text;
+  return text.split(' ').map((word) => word.isEmpty ? word : word[0].toUpperCase() + word.substring(1)).join(' ');
+}
+
 enum Tone { navy, gold, outline, danger, whatsapp, light }
 
 class AppButton extends StatelessWidget {
@@ -87,7 +97,7 @@ class AppButton extends StatelessWidget {
         else if (icon != null)
           Icon(icon, size: small ? 15 : 18),
         if (busy || icon != null) const SizedBox(width: 8),
-        Flexible(child: Text(tr(label), overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w600, fontSize: small ? 12.5 : 14))),
+        Flexible(child: Text(tr(label), overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: headFont, fontWeight: FontWeight.w600, fontSize: small ? 12.5 : 14))),
         if (trailing != null) ...[const SizedBox(width: 8), Icon(trailing, size: small ? 14 : 16)],
       ],
     );
@@ -133,7 +143,7 @@ class Panel extends StatelessWidget {
       child: title == null
           ? child
           : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Row(children: [Expanded(child: Text(tr(title), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600))), ?trailing]),
+              Row(children: [Expanded(child: Text(tr(title), style: TextStyle(fontFamily: headFont, fontSize: 15, fontWeight: FontWeight.w600))), ?trailing]),
               const SizedBox(height: 12),
               child,
             ]),
@@ -340,6 +350,7 @@ class Pill extends StatelessWidget {
 }
 
 /// A label and value on one line, like the website's biodata rows.
+/// One profile detail as the website shows it: the heading above its value, never side by side.
 class InfoRow extends StatelessWidget {
   const InfoRow(this.label, this.value, {super.key});
   final String label;
@@ -348,12 +359,13 @@ class InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Color(0xFFE9E2D4)))),
-      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        SizedBox(width: 128, child: Tx(tr(label), style: const TextStyle(fontSize: 12.5, color: AppColors.muted))),
-        const SizedBox(width: 10),
-        Expanded(child: Tx(tr(value), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600), textAlign: Directionality.of(context) == TextDirection.rtl ? TextAlign.left : TextAlign.right)),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Tx(titleCase(tr(label)), style: TextStyle(fontFamily: headFont, fontSize: 12.5, fontWeight: FontWeight.w600, color: const Color(0xFF8A6A2C))),
+        const SizedBox(height: 3),
+        Tx(titleCase(tr(value)), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.navy, height: 1.35)),
       ]),
     );
   }

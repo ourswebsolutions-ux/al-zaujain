@@ -11,7 +11,9 @@ import 'credits_screen.dart';
 import 'home_screen.dart';
 import 'info_screens.dart';
 import 'member_screens.dart';
+import 'packages_screen.dart';
 import 'shell.dart';
+import 'site_home.dart';
 
 const _serif = 'Playfair';
 const _caps = 'Cinzel';
@@ -341,15 +343,19 @@ class HomeDrawer extends StatelessWidget {
       action();
     }
 
+    // The website's menu, then the app's own extras.
     final items = <(IconData, String, VoidCallback)>[
       (Icons.home_rounded, 'Home', () => shellKey.currentState?.select(Tabs.home)),
-      (Icons.travel_explore_rounded, 'Browse proposals', () => shellKey.currentState?.showProposals()),
-      (Icons.person_add_alt_1_rounded, 'Submit a profile', () => openProfileForm(context)),
+      (Icons.travel_explore_rounded, 'Proposals', () => shellKey.currentState?.showProposals()),
+      (Icons.inventory_2_rounded, 'Packages', () => push(context, const PackagesScreen())),
+      (Icons.request_quote_rounded, 'Fees', () => push(context, const FeesScreen())),
+      (Icons.workspace_premium_rounded, 'Why Al Zaujain', () => scrollHomeTo('why-choose')),
+      (Icons.verified_rounded, 'Registration', () => scrollHomeTo('registration')),
       (Icons.support_agent_rounded, 'Marriage consultants', () => push(context, const ConsultantsScreen())),
-      (Icons.request_quote_rounded, 'Consultancy fees', () => push(context, const FeesScreen())),
+      (Icons.headset_mic_rounded, 'Contact us', () => push(context, const ContactScreen())),
+      (Icons.person_add_alt_1_rounded, 'Submit a profile', () => openProfileForm(context)),
       (Icons.toll_rounded, 'Premium Credits', () => push(context, app.signedIn ? const CreditsScreen() : const LoginScreen(then: CreditsScreen()))),
       (Icons.smart_toy_rounded, 'Al Zaujain AI', () => showAssistant(context)),
-      (Icons.headset_mic_rounded, 'Contact us', () => push(context, const ContactScreen())),
       (Icons.translate_rounded, app.lang == 'ur' ? 'English' : 'اردو', () => app.setLanguage(app.lang == 'ur' ? 'en' : 'ur')),
       (Icons.settings_rounded, 'Settings', () => push(context, const AppSettingsScreen())),
     ];
@@ -373,7 +379,7 @@ class HomeDrawer extends StatelessWidget {
         for (final (icon, label, action) in items)
           ListTile(
             leading: Icon(icon, color: AppColors.gold),
-            title: Text(label == 'اردو' || label == 'English' ? label : tr(label), style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w500, fontFamily: label == 'اردو' ? 'NotoNaskhArabic' : null)),
+            title: Text(label == 'اردو' || label == 'English' ? label : titleCase(tr(label)), style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w500, fontFamily: label == 'اردو' ? 'NotoNaskhArabic' : null)),
             onTap: () => go(action),
           ),
       ]),

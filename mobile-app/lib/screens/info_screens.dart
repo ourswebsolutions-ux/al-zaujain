@@ -80,7 +80,6 @@ class AppSettingsScreen extends StatelessWidget {
             ]),
           ),
           const SizedBox(height: 14),
-          if (builtInSite.isEmpty) ...[
           Panel(
             title: 'Connected website',
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -91,10 +90,10 @@ class AppSettingsScreen extends StatelessWidget {
               Wrap(spacing: 10, runSpacing: 10, children: [
                 AppButton('Change website', icon: Icons.language_rounded, small: true, onPressed: () => push(context, const SetupScreen())),
                 AppButton('Open the website', tone: Tone.outline, icon: Icons.open_in_new_rounded, small: true, onPressed: () => openLink(context, '${app.domain}')),
+                if (app.defaultSite != null && !app.onDefaultSite) AppButton('Use the default website', tone: Tone.outline, icon: Icons.restart_alt_rounded, small: true, onPressed: () => _useDefault(context)),
               ]),
             ]),
           ),
-          ],
           const SizedBox(height: 14),
           Panel(
             title: 'App version',
@@ -118,6 +117,16 @@ class AppSettingsScreen extends StatelessWidget {
 
 /// Profiles submitted without an account are managed with the private link the bureau emails.
 /// The app remembers links from this phone, and any other link can be pasted here.
+/// Settings' "Use the default website": back to the website built into the APK.
+Future<void> _useDefault(BuildContext context) async {
+  try {
+    await app.useDefaultSite();
+    if (context.mounted) Navigator.of(context).popUntil((route) => route.isFirst);
+  } catch (caught) {
+    if (context.mounted) showMessage(context, tr('$caught'), error: true);
+  }
+}
+
 class ManageLinksScreen extends StatefulWidget {
   const ManageLinksScreen({super.key});
   @override

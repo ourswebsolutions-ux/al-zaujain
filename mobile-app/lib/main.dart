@@ -27,7 +27,7 @@ class AlZaujainApp extends StatelessWidget {
       builder: (context, _) => MaterialApp(
         title: 'Al Zaujain',
         debugShowCheckedModeBanner: false,
-        theme: buildTheme(),
+        theme: buildTheme(urdu: app.t.isUrdu),
         // Urdu turns the whole app right-to-left, as on the website. Switching language redraws every screen.
         builder: (context, child) => Directionality(textDirection: app.t.isUrdu ? TextDirection.rtl : TextDirection.ltr, child: KeyedSubtree(key: ValueKey(app.lang), child: child!)),
         home: const _Start(),
@@ -88,13 +88,24 @@ class _StartState extends State<_Start> {
                 Tx(tr(error.toString()), textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFFC7D3DD), height: 1.5)),
                 const SizedBox(height: 18),
                 AppButton('Try again', tone: Tone.gold, icon: Icons.refresh_rounded, onPressed: _load),
-                if (builtInSite.isEmpty) ...[
-                  const SizedBox(height: 8),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () => push(context, const SetupScreen()),
+                  child: Text(tr('Change website'), style: const TextStyle(color: AppColors.champagne)),
+                ),
+                if (app.defaultSite != null && !app.onDefaultSite)
                   TextButton(
-                    onPressed: () => push(context, const SetupScreen()),
-                    child: Text(tr('Change website'), style: const TextStyle(color: AppColors.champagne)),
+                    onPressed: () async {
+                      setState(() => loading = true);
+                      try {
+                        await app.useDefaultSite();
+                      } catch (caught) {
+                        error = caught;
+                      }
+                      if (mounted) setState(() => loading = false);
+                    },
+                    child: Text(tr('Use the default website'), style: const TextStyle(color: AppColors.champagne)),
                   ),
-                ],
               ],
             ]),
           ),

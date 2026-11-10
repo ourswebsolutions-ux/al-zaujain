@@ -149,6 +149,8 @@ async function scrollTo(locator, tries = 25) {
 const back = async () => { await page.getByRole('button', { name: 'Back' }).first().click(); await page.waitForTimeout(400); };
 const tab = async (name) => { await page.getByRole('tab', { name }).first().click().catch(async () => { await page.getByRole('button', { name }).last().click(); }); await page.waitForTimeout(600); };
 
+// The WhatsApp Channel welcome is tested on its own below; every other step starts with it answered.
+await context.addInitScript(() => { if (!localStorage.getItem('az_test_welcome')) { localStorage.setItem('flutter.channel_welcome', '"joined"'); } });
 await page.goto(`http://localhost:${APP_PORT}/`);
 await page.waitForTimeout(4000);
 
@@ -180,28 +182,30 @@ const pick = async (field, option, search) => {
   await page.waitForTimeout(400);
 };
 
+const SEARCH = 'Search name, ID, city or caste';
 await step('the app opens straight to the home page, never asking for a website address', async () => {
-  await visible('Featured Profiles', 30000);
-  await page.getByRole('textbox', { name: 'Find your life partner' }).first().waitFor();
-  for (const quick of ['Bride', 'Groom', 'By City', 'Values']) await button(quick).waitFor();
+  await visible('Tap To Switch', 30000);
+  await page.getByRole('textbox', { name: SEARCH }).first().waitFor();
+  await button('Open navigation').waitFor();
   assert.equal(await page.getByRole('textbox', { name: 'https://example.com' }).count(), 0);
   assert.equal(await button('Connect').count(), 0);
   await shot('03-home');
 });
 
 await step('the home page shows the website’s sections and featured proposals', async () => {
-  for (const heading of ['Featured Profiles', 'From a first conversation', 'Join Our Official WhatsApp Channel', 'A personal approach.', 'A clear identity.', 'Your questions.', 'A little about your enquiry']) {
-    await scrollTo(text(heading), 40);
-    if (heading === 'Featured Profiles') await shot('04-home-featured');
-    if (heading === 'A personal approach.') await shot('05-home-reasons');
+  // The website's order: proposal sections with their tabs and cards, then Director, Consultants, Government Registered.
+  for (const heading of [sana, 'View Profile', 'Overseas', 'Gulf', 'Second Marriage', 'Director', 'Government Registered Marriage Bureau']) {
+    await scrollTo(text(heading), 60);
+    if (heading === 'View Profile') await shot('04-home-cards');
+    if (heading === 'Director') await shot('05-home-director');
   }
-  await shot('06-home-contact');
+  await shot('06-home-registered');
 });
 
 await step('Urdu turns the app right to left', async () => {
   await page.mouse.move(200, 430); await page.mouse.wheel(0, -40000);
   await page.waitForTimeout(800);
-  await button('Menu').click();
+  await button('Open navigation').click();
   await page.waitForTimeout(600);
   await page.getByRole('button', { name: 'اردو' }).first().click();
   await page.waitForTimeout(1500);
@@ -209,24 +213,25 @@ await step('Urdu turns the app right to left', async () => {
   await shot('07-home-urdu');
   const homeTab = await page.getByRole('tab', { name: /ہوم/ }).boundingBox();
   assert.ok(homeTab.x > page.viewportSize().width / 2, 'in Urdu the app runs right to left: Home sits on the right');
-  await button('مینو').click();
+  await button('مینو کھولیں').click();
   await page.waitForTimeout(600);
   await page.getByRole('button', { name: 'English' }).first().click();
   await page.waitForTimeout(1500);
-  await visible('Featured Profiles');
+  await visible('Tap To Switch');
 });
 
-await step('the home search opens matching proposals: brides only', async () => {
+await step('the home search opens matching proposals: a city', async () => {
   await page.mouse.move(200, 430); await page.mouse.wheel(0, -40000);
-  await button('Bride').click();
-  await visible('2 proposals found');
+  await typeIn(SEARCH, 'Multan');
+  await page.keyboard.press('Enter');
+  await visible('1 proposal found');
   await scrollTo(text(sana));
   assert.equal(await text('Bilal').isVisible().catch(() => false), false);
   await shot('08-proposals');
 });
 
 await step('filters: caste type-ahead narrows the list, and clearing restores it', async () => {
-  await page.mouse.move(200, 430); await page.mouse.wheel(0, -40000);
+  await fresh('Search');
   await button('Filters').click();
   await visible('Search and filter');
   await pick('Caste / Biradari', 'Rajput', 'Raj');
@@ -453,6 +458,10 @@ await step('a new family creates an account, then submits a profile with a photo
   await button('Add photos').click();
   await (await chooser).setFiles(photoPath);
   await page.waitForTimeout(800);
+  // Like a WhatsApp DP: the family places the face in the circle for the proposal cards.
+  await visible('Adjust card photo');
+  await button('Use this photo').click({ force: true });
+  await page.waitForTimeout(800);
   await scrollTo(page.getByRole('checkbox', { name: 'I confirm', exact: false }), 40);
   await page.getByRole('checkbox', { name: 'I confirm', exact: false }).click();
   await shot('29-submit-documents');
@@ -554,8 +563,9 @@ await step('the official fee structure opens from the menu', async () => {
   await fresh('Profile');
   await scrollTo(button('Consultancy fees'), 40);
   await button('Consultancy fees').click();
-  await visible('Advance registration fees');
-  await visible('Rs. 25,000');
+  await visible('Plan 01');
+  await visible('Registration Fee');
+  await visible('Register Now');
   await shot('38-fees');
 });
 
@@ -576,7 +586,7 @@ await step('consultants, legal pages and settings open', async () => {
   await fresh('Profile');
   await scrollTo(button('Marriage consultants'), 30);
   await button('Marriage consultants').click();
-  await visible('Professional marriage consultants');
+  await visible('Hire Personal Matchmaking Consultant');
   await back();
   await scrollTo(button('Privacy policy'), 30);
   await button('Privacy policy').click();
@@ -584,9 +594,24 @@ await step('consultants, legal pages and settings open', async () => {
   await back();
   await page.getByRole('button', { name: 'Settings' }).first().click();
   await visible('App version');
-  assert.equal(await text('Connected website').count(), 0, 'the website address is not shown');
+  // The connected website can be changed in Settings; on the built-in one there is nothing to reset.
+  await visible('Connected website');
+  await button('Change website').waitFor();
+  assert.equal(await button('Use the default website').count(), 0, 'already on the default website');
   await shot('32-settings');
   await back();
+});
+
+await step('the WhatsApp Channel welcome shows once, and "Maybe later" closes it', async () => {
+  await page.evaluate(() => { localStorage.setItem('az_test_welcome', '1'); localStorage.removeItem('flutter.channel_welcome'); localStorage.removeItem('flutter.channel_welcome_at'); });
+  await fresh();
+  await button('Join WhatsApp Channel').waitFor({ timeout: 15000 });
+  await shot('25-channel-welcome');
+  await button('Maybe later').click();
+  await page.waitForTimeout(800);
+  await fresh();
+  await page.waitForTimeout(3000);
+  assert.equal(await button('Maybe later').isVisible().catch(() => false), false, 'the welcome waits a week after "Maybe later"');
 });
 
 await step('tablet width shows proposals in a grid', async () => {

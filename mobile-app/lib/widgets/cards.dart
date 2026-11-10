@@ -9,6 +9,7 @@ import '../screens/payments_screen.dart';
 import '../screens/profile_form_screen.dart';
 import '../screens/profile_screen.dart';
 import 'common.dart';
+import 'site.dart';
 
 /// Unpaid visitors see blurred photos when the bureau turns that restriction on (the server blurs them).
 bool get photosLocked {
@@ -403,7 +404,7 @@ class CardGrid extends StatelessWidget {
       final gap = compact ? 12.0 : 16.0;
       final width = (size.maxWidth - gap * (columns - 1)) / columns;
       return Wrap(spacing: gap, runSpacing: gap, children: [
-        for (final card in cards) SizedBox(width: width, child: compact ? MatchCard(card: card) : ProposalCard(card: card, tag: card['tag'] == null ? null : tr('${card['tag']}'))),
+        for (final card in cards) SizedBox(width: width, child: compact ? MatchCard(card: card) : SiteProfileCard(card: card)),
       ]);
     });
   }

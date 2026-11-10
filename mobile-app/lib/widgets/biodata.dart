@@ -98,8 +98,8 @@ class CandidateSection extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
               decoration: BoxDecoration(color: const Color(0xFFFBF8F1), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFFECE4D4))),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(tr('${item['label']}'), style: const TextStyle(fontSize: 11, color: AppColors.muted)),
-                Tx(tr(valueText(item['value'])), maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, height: 1.25)),
+                Text(titleCase(tr('${item['label']}')), style: const TextStyle(fontSize: 11, color: AppColors.muted)),
+                Tx(titleCase(tr(valueText(item['value']))), maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: headFont, fontSize: 17, fontWeight: FontWeight.w800, height: 1.25)),
               ]),
             ),
         ]);
