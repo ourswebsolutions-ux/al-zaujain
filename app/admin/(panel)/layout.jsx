@@ -33,6 +33,7 @@ export default async function AdminLayout({ children }) {
     { href: '/admin/credits', label: 'Credits and unlocks' },
     { href: '/admin/fees', label: 'Consultancy fees' },
     { group: 'Website' },
+    { href: '/admin/homepage', label: 'Homepage banners & director' },
     { href: '/admin/content', label: 'Website content' },
     { href: '/admin/faqs', label: 'FAQs' },
     { href: '/admin/categories', label: 'Categories' },

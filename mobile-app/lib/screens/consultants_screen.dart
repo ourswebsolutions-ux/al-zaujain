@@ -6,21 +6,42 @@ import '../widgets/biodata.dart';
 import '../widgets/common.dart';
 
 /// "Professional marriage consultants", as on the website.
-class ConsultantsScreen extends StatelessWidget {
+/// Some consultants serve one city only: they appear once the family chooses that city
+/// (a member's own city is chosen for them).
+class ConsultantsScreen extends StatefulWidget {
   const ConsultantsScreen({super.key});
+
+  @override
+  State<ConsultantsScreen> createState() => _ConsultantsScreenState();
+}
+
+class _ConsultantsScreenState extends State<ConsultantsScreen> {
+  String? city;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(tr('Marriage consultants'))),
       body: Loader(
-        load: () => app.api.get('consultants'),
+        key: ValueKey(city),
+        load: () => app.api.get('consultants', city == null ? null : {'city': city!}),
         builder: (context, data, reload) {
           final consultants = rowsOf(data['consultants']);
+          final cities = ((data['cities'] as List?) ?? []).map((item) => '$item').toList();
+          final chosen = data['city'] as String?;
           return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             const SectionTag('A REAL CONVERSATION'),
             const SizedBox(height: 4),
             const PageIntro('Professional marriage consultants', urdu: 'ہمارے مشیر', text: 'Work with an experienced consultant, in Pakistan or overseas, who will understand your family and guide every step.'),
+            if (cities.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: Wrap(spacing: 8, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                  Text('${tr('Your city')}:', style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.muted)),
+                  ChoiceChip(label: Text(tr('All cities')), selected: chosen == null, onSelected: (_) => setState(() => city = 'all')),
+                  for (final name in cities) ChoiceChip(label: Text(tr(name)), selected: chosen == name, onSelected: (_) => setState(() => city = name)),
+                ]),
+              ),
             if (consultants.isEmpty)
               const EmptyState(icon: Icons.support_agent_rounded, title: 'Our consultants will be listed here soon.')
             else
@@ -47,6 +68,7 @@ class ConsultantsScreen extends StatelessWidget {
                                   Text('${consultant['display_name']}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
                                   if (consultant['title'] != null) Text(tr('${consultant['title']}'), maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.deepGold)),
                                   if (consultant['city'] != null) Text(tr('${consultant['city']}'), style: const TextStyle(fontSize: 12, color: AppColors.muted)),
+                                  if (consultant['servesCity'] != null) Padding(padding: const EdgeInsets.only(top: 4), child: Pill(tr('For families in {city}', {'city': tr('${consultant['servesCity']}')}))),
                                 ]),
                               ),
                             ]),

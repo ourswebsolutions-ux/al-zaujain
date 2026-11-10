@@ -14,6 +14,7 @@ import { PROFILE_TYPES } from '@/lib/restrictions.js';
 import { encryptText, hashPassword, logActivity, randomToken } from '@/lib/security.js';
 import { saveSettings } from '@/lib/settings.js';
 import { deleteConsultantPhoto, saveConsultantPhoto, UploadError } from '@/lib/uploads.js';
+import { readAudience } from '@/lib/consultants.js';
 
 const refresh = () => revalidatePath('/', 'layout');
 const text = (form, key) => String(form.get(key) ?? '').trim();
@@ -224,7 +225,7 @@ function readConsultant(form) {
 }
 
 const readPermissions = (form) => ({
-  is_public: flag(form, 'is_public'), perm_edit: flag(form, 'perm_edit'), perm_review: flag(form, 'perm_review'),
+  perm_edit: flag(form, 'perm_edit'), perm_review: flag(form, 'perm_review'),
   perm_contact: flag(form, 'perm_contact'), perm_chat: flag(form, 'perm_chat'), perm_proposals: flag(form, 'perm_proposals'),
 });
 
@@ -241,6 +242,8 @@ export async function createConsultant(_previous, form) {
   if (!z.email().safeParse(email).success) return { ok: false, message: 'Enter a valid login email.' };
   const password = text(form, 'password') || randomToken(9);
   if (password.length < 8) return { ok: false, message: 'Password must be at least 8 characters.' };
+  const audience = readAudience(form);
+  if (audience.error) return { ok: false, message: audience.error };
   const db = getDb();
   if (await db.user.findUnique({ where: { email } })) return { ok: false, message: 'That email already has an account.' };
   let photo = null;
@@ -256,7 +259,7 @@ export async function createConsultant(_previous, form) {
   await db.user.create({
     data: {
       email, password_hash: hashPassword(password), name: data.display_name, phone: data.phone || null, role: 'consultant',
-      consultant: { create: { ...data, ...readPermissions(form), slug, photo } },
+      consultant: { create: { ...data, ...readPermissions(form), ...audience, slug, photo } },
     },
   });
   await logActivity(admin.id, 'consultant_created', slug);
@@ -272,6 +275,8 @@ export async function saveConsultant(_previous, form) {
   if (!existing) return { ok: false, message: 'Consultant not found.' };
   const parsed = readConsultant(form);
   if (!parsed.success) return { ok: false, message: parsed.error.issues[0].message };
+  const audience = readAudience(form);
+  if (audience.error) return { ok: false, message: audience.error };
   let photo = existing.photo;
   try {
     const uploaded = await photoFrom(form);
@@ -283,7 +288,7 @@ export async function saveConsultant(_previous, form) {
     if (error instanceof UploadError) return { ok: false, message: error.message };
     throw error;
   }
-  await db.consultant.update({ where: { id }, data: { ...parsed.data, ...readPermissions(form), photo } });
+  await db.consultant.update({ where: { id }, data: { ...parsed.data, ...readPermissions(form), ...audience, photo } });
   await logActivity(admin.id, 'consultant_updated', existing.slug);
   refresh();
   return { ok: true, message: 'Consultant saved.' };

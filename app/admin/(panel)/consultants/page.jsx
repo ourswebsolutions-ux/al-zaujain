@@ -14,13 +14,13 @@ export default async function Consultants() {
   return (
     <>
       <Title actions={<ButtonLink size="md" href="/admin/users/new">{t('Add consultant')}</ButtonLink>}>{t('Consultants')}</Title>
-      <Table head={['Consultant', 'City', 'Assigned', 'Public', 'Status']} empty={rows.length === 0 ? 'No consultants yet.' : null}>
+      <Table head={['Consultant', 'City', 'Assigned', 'Shown to', 'Status']} empty={rows.length === 0 ? 'No consultants yet.' : null}>
         {rows.map((row) => (
           <tr key={row.id}>
             <td><Identity name={row.display_name} sub={row.user.email} src={row.photo ? `/media/consultants/${row.photo}` : null} href={`/admin/consultants/${row.id}`} /></td>
             <td>{t(row.city)}</td>
             <td>{row._count.profiles}</td>
-            <td><Badge value={row.is_public ? 'active' : 'off'} /></td>
+            <td>{row.audience === 'team' ? t('Consultant team only') : row.audience === 'city' ? t('{city} only', { city: t(row.audience_city) }) : t('Everyone')}</td>
             <td><Badge value={row.user.status} /></td>
           </tr>
         ))}

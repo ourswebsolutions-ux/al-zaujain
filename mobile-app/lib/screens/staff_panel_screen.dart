@@ -149,6 +149,7 @@ class AdminHome extends StatelessWidget {
       (Icons.request_quote_rounded, 'Consultancy fees', '/admin/fees'),
     ]),
     ('Website', [
+      (Icons.view_carousel_rounded, 'Homepage banners & director', '/admin/homepage'),
       (Icons.web_rounded, 'Website content', '/admin/content'),
       (Icons.quiz_rounded, 'FAQs', '/admin/faqs'),
       (Icons.category_rounded, 'Categories', '/admin/categories'),

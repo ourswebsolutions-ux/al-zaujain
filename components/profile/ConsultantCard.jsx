@@ -22,6 +22,7 @@ export function ConsultantCard({ consultant }) {
       <div className="px-3 pb-3 pt-5">
         <h2 className="mb-1 text-[23px] font-extrabold leading-[27.6px]">{consultant.display_name}</h2>
         <p className="text-[13px] font-semibold text-[#9b712b]">{t(consultant.title)}</p>
+        {consultant.audience === 'city' && consultant.audience_city && <p className="mt-1.5 inline-block rounded-full bg-[#fcf4e1] px-2.5 py-0.5 text-[11px] font-bold text-[#806126]">{t('For families in {city}', { city: t(consultant.audience_city) })}</p>}
         {consultant.city && <p className="mb-3 mt-1 text-[13px] text-muted"><FaLocationDot aria-hidden="true" className="me-[5px] inline-block text-[#b18433]" />{t(consultant.city)}</p>}
         <Link href={`/consultants/${consultant.slug}`} className="group mt-3 flex items-center justify-between gap-2 rounded-xl bg-cream p-[15px] text-[13px] font-bold text-navy no-underline transition-colors hover:bg-navy hover:text-white">
           {t('View consultant')} <FaArrowRight aria-hidden="true" className="rtl:-scale-x-100 transition-transform duration-200 group-hover:translate-x-[3px] rtl:group-hover:-translate-x-[3px]" />

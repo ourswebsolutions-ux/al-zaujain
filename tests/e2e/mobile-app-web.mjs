@@ -24,7 +24,7 @@ if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
 
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'az-app-'));
 const DATABASE_URL = await prepareTestDatabase();
-const env = { ...process.env, DATABASE_URL, STORAGE_DIR: dir, APP_SECRET: crypto.randomBytes(32).toString('hex'), SITE_URL: SITE, SMTP_HOST: '127.0.0.1', SMTP_PORT: '2597' };
+const env = { ...process.env, DATABASE_URL, STORAGE_DIR: dir, APP_SECRET: crypto.randomBytes(32).toString('hex'), SITE_URL: SITE, CLOUDINARY_CLOUD_NAME: '', CLOUDINARY_API_KEY: '', CLOUDINARY_API_SECRET: '', SMTP_HOST: '127.0.0.1', SMTP_PORT: '2597' };
 Object.assign(process.env, env);
 const { closeDb, getDb } = await import('../../lib/db.js');
 const { hashPassword } = await import('../../lib/security.js');

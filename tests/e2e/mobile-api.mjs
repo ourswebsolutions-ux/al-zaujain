@@ -14,7 +14,7 @@ const BASE = `http://localhost:${PORT}`;
 const API = `${BASE}/api/mobile`;
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'az-mobile-'));
 const DATABASE_URL = await prepareTestDatabase();
-const env = { ...process.env, DATABASE_URL, STORAGE_DIR: dir, APP_SECRET: crypto.randomBytes(32).toString('hex'), SITE_URL: BASE, SMTP_HOST: '127.0.0.1', SMTP_PORT: '2598' };
+const env = { ...process.env, DATABASE_URL, STORAGE_DIR: dir, APP_SECRET: crypto.randomBytes(32).toString('hex'), SITE_URL: BASE, CLOUDINARY_CLOUD_NAME: '', CLOUDINARY_API_KEY: '', CLOUDINARY_API_SECRET: '', SMTP_HOST: '127.0.0.1', SMTP_PORT: '2598' };
 Object.assign(process.env, env);
 
 const { closeDb, getDb } = await import('../../lib/db.js');

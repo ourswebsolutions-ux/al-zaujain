@@ -18,7 +18,7 @@ const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'az-e2e-'));
 const DATABASE_URL = await prepareTestDatabase();
 const env = {
   ...process.env, DATABASE_URL, STORAGE_DIR: dir, APP_SECRET: crypto.randomBytes(32).toString('hex'),
-  SITE_URL: BASE, SMTP_HOST: '127.0.0.1', SMTP_PORT: String(SMTP_PORT), SMTP_SECURE: 'false', SMTP_USER: '', SMTP_PASS: '', SMTP_FROM: 'Al Zaujain <no-reply@test.local>',
+  SITE_URL: BASE, CLOUDINARY_CLOUD_NAME: '', CLOUDINARY_API_KEY: '', CLOUDINARY_API_SECRET: '', SMTP_HOST: '127.0.0.1', SMTP_PORT: String(SMTP_PORT), SMTP_SECURE: 'false', SMTP_USER: '', SMTP_PASS: '', SMTP_FROM: 'Al Zaujain <no-reply@test.local>',
 };
 Object.assign(process.env, env);
 
@@ -80,7 +80,10 @@ async function step(name, run) {
 }
 
 async function newPage(extra = {}) {
-  const context = await browser.newContext({ baseURL: BASE, acceptDownloads: true, permissions: ['clipboard-read', 'clipboard-write'], reducedMotion: 'reduce', ...extra });
+  const { welcome, ...options } = extra;
+  const context = await browser.newContext({ baseURL: BASE, acceptDownloads: true, permissions: ['clipboard-read', 'clipboard-write'], reducedMotion: 'reduce', ...options });
+  // A returning visitor: the WhatsApp Channel welcome was already answered. The welcome step opts in.
+  if (!welcome) await context.addInitScript(() => localStorage.setItem('az_channel_welcome', JSON.stringify({ choice: 'joined', at: Date.now() })));
   const page = await context.newPage();
   page.setDefaultTimeout(12000);
   page.on('pageerror', (error) => problems.push(`${page.url()}: ${error.message}`));
@@ -152,12 +155,34 @@ const applicant = {
 
 let manageUrl; let code;
 
-await step('homepage renders the reference sections', async () => {
+await step('homepage renders the new sections in order', async () => {
   const page = await newPage();
   await page.goto('/');
-  for (const text of ['Your search for', 'From a first conversation', 'Featured proposals', 'A personal approach.', 'A clear identity.', 'Your next chapter.', 'Your questions.', 'For your family’s', 'Let’s begin with a conversation.']) {
-    assert.ok(await page.getByText(text, { exact: false }).first().isVisible(), text);
+  for (const name of ['Government Registered Marriage Bureau', 'Offering Rishta Services', 'Pakistan Proposals', 'Overseas Proposals', 'Gulf Proposals']) {
+    assert.ok(await page.getByRole('heading', { name, level: 2 }).first().isVisible(), name);
   }
+  const order = await page.evaluate(() => ['registration', 'how-it-works', 'overseas-proposals', 'why-choose', 'android-app'].map((id) => document.getElementById(id)?.getBoundingClientRect().top ?? -1));
+  assert.ok(order.every((top, index) => top > 0 && (index === 0 || top > order[index - 1])), `sections in order: ${order}`);
+  for (const old of ['From a first conversation', 'A personal approach.', 'Your questions.']) assert.equal(await page.getByText(old).count(), 0, `${old} is gone`);
+  assert.ok(await page.getByText('Rs. 5,000').first().isVisible(), 'the plans show the official fees');
+  assert.ok(await page.locator('#contact').isVisible(), 'Contact us lands on the footer contacts');
+  await page.context().close();
+});
+
+await step('first visit shows the WhatsApp Channel welcome once, and Maybe later is remembered', async () => {
+  const page = await newPage({ welcome: true });
+  await page.goto('/');
+  const dialog = page.getByRole('dialog', { name: 'Join Al Zaujain on WhatsApp' });
+  await dialog.waitFor({ timeout: 8000 });
+  assert.equal(await dialog.getByRole('link', { name: 'Join WhatsApp Channel' }).getAttribute('href'), 'https://whatsapp.com/channel/0029VaddRahADTOD4MXm3T25');
+  await dialog.getByRole('button', { name: 'Maybe later' }).click();
+  await dialog.waitFor({ state: 'detached' });
+  await page.goto('/proposals');
+  await page.waitForTimeout(2600);
+  assert.equal(await page.getByRole('dialog').count(), 0, 'not shown again on the next page');
+  await page.reload();
+  await page.waitForTimeout(2600);
+  assert.equal(await page.getByRole('dialog').count(), 0, 'nor after a reload');
   await page.context().close();
 });
 
@@ -329,9 +354,9 @@ await step('public profile shows the blue tick and no private data', async () =>
 
 await step('search finds profiles by caste, and listings hide private data', async () => {
   const page = await newPage();
-  await page.goto('/');
-  await page.fill('form[aria-label="Find a rishta"] input[name=q]', 'Jutt');
-  await page.click('button:has-text("Search rishtay")');
+  await page.goto('/proposals');
+  await page.fill('#filters input[name=q]', 'Jutt');
+  await page.locator('#filters button[type=submit]').first().click();
   await page.waitForURL('**/proposals?**');
   await page.waitForSelector('text=1 proposal found');
   assert.ok(await page.getByRole('heading', { name: /Sadia/ }).isVisible());
@@ -759,14 +784,15 @@ await step('Urdu turns the whole layout right to left, on the public site and da
   const navOrder = () => page.$$eval('nav[aria-label] > a, nav[aria-label] > div', (items) => items.map((item) => Math.round(item.getBoundingClientRect().x)));
   const navBefore = await navOrder();
   assert.ok(navBefore.every((x, index) => index === 0 || x > navBefore[index - 1]), 'English menu runs left to right');
-  const before = await box('form[aria-label]');
+  const before = await box('#registration ul');
   assert.equal(await page.evaluate(() => document.documentElement.dir), 'ltr');
   await page.click('button:has-text("اردو")');
   await page.waitForFunction(() => document.documentElement.lang === 'ur');
-  await page.waitForSelector('text=اپنا شریک حیات تلاش کریں');
+  await page.waitForSelector('text=حکومت سے رجسٹرڈ میرج بیورو');
   assert.equal(await page.evaluate(() => document.documentElement.dir), 'rtl');
   assert.equal(await page.evaluate(() => getComputedStyle(document.body).direction), 'rtl', 'the page reads right to left');
-  assert.ok((await box('form[aria-label]'))[0] < before[0], 'the search box moves to the other side');
+  const after = await box('#registration ul');
+  assert.ok(after[0] > before[0], 'the registration text moves to the other side');
   const navAfter = await navOrder();
   assert.ok(navAfter.every((x, index) => index === 0 || x < navAfter[index - 1]), 'the Urdu menu runs right to left');
   const width = page.viewportSize().width;
@@ -792,26 +818,93 @@ await step('every admin page loads', async () => {
 });
 
 await step('admin edits reach the public site', async () => {
-  await adminPage.goto('/admin/content');
-  await adminPage.fill('[name=hero_line1]', 'Your journey to');
-  await adminPage.click('button:has-text("Save content")');
-  await adminPage.waitForSelector('text=Website content saved');
   await adminPage.goto('/admin/featured');
   await adminPage.fill('[name=code]', code);
   await adminPage.click('button:has-text("Add")');
   await adminPage.waitForSelector(`text=${code} is now featured`);
-  await adminPage.goto('/admin/faqs');
-  const form = adminPage.locator('form').last();
-  await form.locator('[name=question]').fill('Is this a new question?');
-  await form.locator('[name=answer]').fill('Yes it is.');
-  await form.locator('button[type=submit]').click();
-  await adminPage.waitForSelector('text=Is this a new question?', { state: 'attached' }).catch(() => {});
-  await adminPage.waitForTimeout(500);
   const page = await newPage();
   await page.goto('/');
-  await page.waitForSelector('text=Your journey to');
-  await page.waitForSelector('text=Is this a new question?');
-  assert.ok(await page.locator('#featured-proposals').getByText('Sadia').first().isVisible());
+  assert.ok(await page.locator('#pakistan-proposals').getByText('Sadia').first().isVisible(), 'a featured profile leads its proposals section');
+  await page.context().close();
+});
+
+await step('homepage banners: image only by default, optional text placed by dragging, drag to reorder', async () => {
+  const banner = path.join(dir, 'banner.jpg');
+  await sharp({ create: { width: 1920, height: 700, channels: 3, background: '#7a3b52' } }).jpeg().toFile(banner);
+  await adminPage.goto('/admin/homepage', { waitUntil: 'networkidle' });
+  const add = adminPage.locator('form').filter({ has: adminPage.locator('button:has-text("Add banner")') });
+  await add.locator('input[name=image]').setInputFiles(banner);
+  await add.locator('button:has-text("Add banner")').click();
+  await adminPage.waitForSelector('text=Banner added to the homepage');
+  let home = await (await fetch(`${BASE}/`)).text();
+  assert.ok(!home.includes('aria-roledescription="carousel"'), 'one banner stands still');
+  assert.ok(!home.includes('pakistani-couple'), 'the uploaded banner replaces the standard one');
+
+  await adminPage.reload({ waitUntil: 'networkidle' });
+  await add.locator('input[name=image]').setInputFiles(banner);
+  await add.locator('input[name=show_text]').check();
+  await add.locator('input[name=heading]').fill('Rishtay across the world');
+  await add.locator('input[name=cta]').fill('See proposals');
+  await add.locator('input[name=href]').fill('/proposals');
+  const handle = add.getByRole('button', { name: /Text position/ });
+  const frame = await handle.locator('xpath=..').boundingBox();
+  await handle.hover();
+  await adminPage.mouse.down();
+  await adminPage.mouse.move(frame.x + frame.width * 0.5, frame.y + frame.height * 0.5, { steps: 6 });
+  await adminPage.mouse.up();
+  const x = Number(await add.locator('input[name=text_x]').inputValue());
+  assert.ok(x > 40 && x < 60, `dragged to the middle (${x}%)`);
+  await add.locator('button:has-text("Add banner")').click();
+  await adminPage.waitForSelector('text=Banner added to the homepage');
+  home = await (await fetch(`${BASE}/`)).text();
+  assert.ok(home.includes('aria-roledescription="carousel"'), 'two banners rotate');
+  assert.ok(home.includes('Rishtay across the world') && home.includes('left:' + x.toString().replace(/\.0$/, '')) , 'the text sits where it was dragged');
+  const stored = JSON.parse((await db.setting.findUnique({ where: { key: 'home_banners' } })).value);
+  assert.deepEqual(stored.map((item) => item.showText), [false, true]);
+
+  await adminPage.reload({ waitUntil: 'networkidle' });
+  const tiles = adminPage.locator('[data-banner]');
+  await tiles.nth(1).dragTo(tiles.nth(0));
+  await adminPage.waitForSelector('text=Order saved.');
+  const after = JSON.parse((await db.setting.findUnique({ where: { key: 'home_banners' } })).value);
+  assert.deepEqual(after.map((item) => item.showText), [true, false], 'dragging changes the order');
+});
+
+await step('consultants can be for everyone, the team only, or one city', async () => {
+  const make = async (name, audience, city = null) => {
+    const user = await db.user.create({ data: { email: `${name.toLowerCase()}@consult.test`, password_hash: 'x', name, role: 'consultant' } });
+    return db.consultant.create({ data: { user_id: user.id, slug: name.toLowerCase(), display_name: name, audience, audience_city: city, is_public: audience !== 'team' } });
+  };
+  await make('Everyonec', 'everyone');
+  await make('Teamonlyc', 'team');
+  await make('Multanc', 'city', 'Multan');
+  const page = await newPage();
+  await page.goto('/consultants');
+  const listed = await page.content();
+  assert.ok(listed.includes('Everyonec') && !listed.includes('Teamonlyc') && !listed.includes('Multanc'), 'all cities: only the consultants for everyone');
+  await page.click('a:has-text("Multan")');
+  await page.waitForURL('**city=Multan');
+  const multan = await page.content();
+  assert.ok(multan.includes('Multanc') && multan.includes('Everyonec') && !multan.includes('Teamonlyc'), 'Multan adds its own consultant');
+  assert.equal((await fetch(`${BASE}/consultants/teamonlyc`)).status, 404, 'team consultants have no public page');
+  const api = await (await fetch(`${BASE}/api/mobile/consultants?city=Multan`)).json();
+  const names = api.consultants.map((item) => item.display_name);
+  assert.ok(names.includes('Everyonec') && names.includes('Multanc') && !names.includes('Teamonlyc'), `the app gets the same list: ${names}`);
+  const plain = (await (await fetch(`${BASE}/api/mobile/consultants?city=all`)).json()).consultants.map((item) => item.display_name);
+  assert.ok(!plain.includes('Multanc'), 'without the city the city consultant stays hidden');
+  assert.ok(api.cities.includes('Multan'));
+  await page.context().close();
+  await adminPage.goto('/admin/consultants', { waitUntil: 'networkidle' });
+  await adminPage.waitForSelector('text=Multan only');
+});
+
+await step('the caste field takes a caste that is not in the list', async () => {
+  const page = await newPage();
+  await page.goto('/submit-profile');
+  const box = page.locator('label:has-text("Caste / Biradari") [role=combobox], #caste').first();
+  await box.fill('Zzkhokharnew');
+  await page.keyboard.press('Tab');
+  assert.equal(await page.locator('input[type=hidden][name=caste], input[name=caste]').first().inputValue(), 'Zzkhokharnew');
   await page.context().close();
 });
 
@@ -820,13 +913,9 @@ await step('contact enquiry is stored and reaches the team', async () => {
   await adminPage.fill('[name=admin_notify_email]', 'team@test.local');
   await adminPage.click('button:has-text("Save content")');
   await adminPage.waitForSelector('text=Website content saved');
-  const page = await newPage();
-  await page.goto('/#contact');
-  await page.fill('#contact input[name=name]', 'Enquirer');
-  await page.fill('#contact input[name=phone]', '0300 1234567');
-  await page.click('button:has-text("Send your enquiry")');
-  await page.waitForSelector('text=Your enquiry has been sent');
-  await page.context().close();
+  // The website's enquiry form now lives in the app; the same server code stores it.
+  const sent = await fetch(`${BASE}/api/mobile/enquiry`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: 'Enquirer', phone: '0300 1234567', message: 'Please call me about a proposal.' }) });
+  assert.equal(sent.status, 200);
   await adminPage.goto('/admin/enquiries');
   await adminPage.waitForSelector('text=Enquirer');
   assert.ok(lastEmailTo('team@test.local').includes('Enquirer'));
@@ -1137,21 +1226,20 @@ await step('profiles: member submissions are Paid; admin switches Paid → Publi
 
 await step('homepage search combines filters and returns database results', async () => {
   const page = await newPage();
-  await page.goto('/', { waitUntil: 'networkidle' });
-  const form = page.locator('form[aria-label="Search matrimonial proposals"]');
+  await page.goto('/proposals/pakistan/multan', { waitUntil: 'networkidle' });
+  const form = page.locator('#filters');
   await form.locator('select[name="gender"]').selectOption('female');
   await pick(form, 'Caste / Biradari', 'Jutt');
-  await pick(form, 'City', 'Multan');
-  await form.locator('select[name="age_min"]').selectOption('22');
-  await form.locator('select[name="age_max"]').selectOption('30');
-  await form.locator('button[type=submit]').click();
-  await page.waitForURL('**/proposals?**');
+  await form.locator('input[name="age_min"]').fill('22');
+  await form.locator('input[name="age_max"]').fill('30');
+  await form.locator('button[type=submit]').first().click();
+  await page.waitForURL('**/proposals/pakistan/multan?**');
   const text = await page.content();
   assert.ok(text.includes(importedCode), 'the matching profile is found');
   assert.ok(!text.includes(premiumCode), 'a Rajput profile in Lahore is not');
   await page.goto('/');
-  await page.click('a:has-text("Gulf Country Proposals")');
-  await page.waitForURL('**/proposals/gulf');
+  await page.locator('#gulf-proposals a:has-text("View Female Proposals")').click();
+  await page.waitForURL('**/proposals/gulf?gender=female');
   await page.context().close();
 });
 
@@ -1161,25 +1249,15 @@ await step('smart search: type to find a country, its cities follow, extra filte
   const intlCode = profileCode(intl);
   const page = await newPage();
   await page.goto('/', { waitUntil: 'networkidle' });
-  const form = page.locator('form[aria-label="Search matrimonial proposals"]');
-  const country = form.locator('label:has-text("Country") [role=combobox]');
-  await country.fill('cana');
-  await page.waitForSelector('[role=option]:has-text("Canada")');
-  await country.press('Enter');
-  assert.equal(await form.locator('input[type=hidden][name=country]').inputValue(), 'Canada');
-  const city = form.locator('label:has-text("City") [role=combobox]');
-  await city.click();
-  const options = await page.locator('[role=listbox] [role=option]').allTextContents();
-  assert.ok(options.includes('Toronto'), 'Canadian cities are offered');
-  assert.ok(!options.some((text) => text.startsWith('Multan')), 'Pakistani cities are not');
-  await page.locator('[role=option]:has-text("Toronto")').click();
+  await page.locator('#overseas-proposals [role=tab]:has-text("Canada Proposals")').first().click();
+  assert.ok(await page.locator('#overseas-proposals').getByText('Hamza').first().isVisible(), 'the Canada tab lists the Toronto profile');
+  await page.goto('/proposals/other-countries/canada', { waitUntil: 'networkidle' });
+  const form = page.locator('#filters');
+  await form.locator('details summary').first().click();
   await form.locator('select[name="height_min"]').selectOption('178');
   await pick(form, 'Nationality', 'Canadian');
-  await form.locator('button[type=submit]').click();
-  await page.waitForURL('**/proposals?**');
-  const url = new URL(page.url());
-  assert.equal(url.searchParams.get('country'), 'Canada');
-  assert.equal(url.searchParams.get('city'), 'Toronto');
+  await form.locator('button[type=submit]').first().click();
+  await page.waitForURL('**/proposals/other-countries/canada?**');
   assert.ok((await page.content()).includes(intlCode), 'the Toronto profile is found');
   await page.waitForSelector('text=1 proposal found');
   assert.equal(await page.locator('#filters details').getAttribute('open'), '', 'More filters opens when one is in use');
@@ -1211,8 +1289,8 @@ await step('admin manages castes; a renamed caste follows on profiles and in the
   await adminPage.waitForFunction(() => [...document.querySelectorAll('input[name=name]')].some((input) => input.value === 'Zznewbiradari'));
   assert.equal((await db.profile.findUnique({ where: { id } })).caste, 'Zznewbiradari', 'the profile follows the rename');
   const page = await newPage();
-  await page.goto('/', { waitUntil: 'networkidle' });
-  const box = page.locator('form[aria-label="Search matrimonial proposals"] label:has-text("Caste / Biradari") [role=combobox]');
+  await page.goto('/proposals', { waitUntil: 'networkidle' });
+  const box = page.locator('#filters label:has-text("Caste / Biradari") [role=combobox]');
   await box.fill('zznew');
   await page.waitForSelector('[role=option]:has-text("Zznewbiradari")');
   await page.context().close();
@@ -1235,19 +1313,18 @@ await step('admin manages castes; a renamed caste follows on profiles and in the
   }
 });
 
-await step('homepage shows four proposal cards per row on a laptop, and the WhatsApp channel link is exact', async () => {
+await step('homepage proposal sections: tabs switch, cards open profiles, and the channel link is exact', async () => {
   const page = await newPage({ viewport: { width: 1366, height: 900 } });
   await page.goto('/', { waitUntil: 'networkidle' });
-  const cards = page.locator('#featured-proposals > ul > li');
-  await page.evaluate(() => document.querySelector('#featured-proposals').scrollIntoView());
-  await page.waitForTimeout(1500);
-  // Columns are read from the left edges, which the reveal animation never moves.
-  const lefts = await cards.evaluateAll((nodes) => nodes.slice(0, 5).map((node) => Math.round(node.getBoundingClientRect().left)));
-  if (lefts.length >= 5) {
-    assert.equal(new Set(lefts.slice(0, 4)).size, 4, `four columns: ${lefts}`);
-    assert.equal(lefts[4], lefts[0], 'the fifth starts a new row');
-  }
-  await page.waitForSelector('#featured-proposals a:has-text("View all proposals")');
+  const section = page.locator('#pakistan-proposals');
+  const tabs = section.locator('[role=tab]:visible');
+  assert.ok(await tabs.count() >= 2, 'city tabs appear for cities with proposals');
+  await tabs.nth(1).click();
+  assert.equal(await tabs.nth(1).getAttribute('aria-selected'), 'true');
+  const card = section.locator('article').first();
+  await card.locator('a:has-text("Profile Detail")').click();
+  await page.waitForURL('**/profile/AZ-*');
+  await page.goto('/', { waitUntil: 'networkidle' });
   const channel = page.locator('a[href="https://whatsapp.com/channel/0029VaddRahADTOD4MXm3T25"]');
   assert.equal(await channel.first().getAttribute('target'), '_blank');
   await page.context().close();

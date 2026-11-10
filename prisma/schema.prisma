@@ -380,6 +380,9 @@ model Consultant {
   languages        String?  @db.VarChar(160)
   experience_years Int?
   is_public        Boolean  @default(true)
+  // Who the consultant is shown to: everyone, the team only, or families of one city.
+  audience         String   @default("everyone") @db.VarChar(12)
+  audience_city    String?  @db.VarChar(80)
   perm_edit        Boolean  @default(false)
   perm_review      Boolean  @default(true)
   perm_contact     Boolean  @default(true)

@@ -1,8 +1,10 @@
 import { Assistant } from '@/components/layout/Assistant';
+import { ChannelWelcome } from '@/components/layout/ChannelWelcome';
 import { FloatingActions } from '@/components/layout/FloatingActions';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { currentUser } from '@/lib/auth.js';
+import { WHATSAPP_CHANNEL } from '@/lib/content.js';
 import { unreadCount } from '@/lib/chat.js';
 import { activeCategories } from '@/lib/places.js';
 import { getT } from '@/lib/i18n/server.js';
@@ -21,6 +23,7 @@ export default async function SiteLayout({ children }) {
       <Footer settings={settings} />
       <Assistant phone={settings.site_phone} whatsapp={settings.site_whatsapp} location={settings.site_location} />
       <FloatingActions whatsapp={settings.site_whatsapp} />
+      <ChannelWelcome url={WHATSAPP_CHANNEL} />
     </>
   );
 }
