@@ -164,7 +164,9 @@ await step('homepage renders the new sections in order', async () => {
   const order = await page.evaluate(() => ['registration', 'how-it-works', 'overseas-proposals', 'why-choose', 'android-app'].map((id) => document.getElementById(id)?.getBoundingClientRect().top ?? -1));
   assert.ok(order.every((top, index) => top > 0 && (index === 0 || top > order[index - 1])), `sections in order: ${order}`);
   for (const old of ['From a first conversation', 'A personal approach.', 'Your questions.']) assert.equal(await page.getByText(old).count(), 0, `${old} is gone`);
-  assert.ok(await page.getByText('Rs. 5,000').first().isVisible(), 'the plans show the official fees');
+  const plans = page.locator('#how-it-works');
+  assert.ok(await plans.getByText('5,000', { exact: true }).first().isVisible() && await plans.getByText('Rs 50,000').first().isVisible(), 'the plans show the official fees');
+  assert.ok(await page.locator('#registration img[alt="FBR Pakistan"]').isVisible(), 'the FBR logo is shown');
   assert.ok(await page.locator('#contact').isVisible(), 'Contact us lands on the footer contacts');
   await page.context().close();
 });
