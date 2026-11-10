@@ -559,16 +559,14 @@ await step('a member buys a credit package from the app; credits wait for approv
   await shot('37-credits');
 });
 
-await step('the official fee structure opens from the menu', async () => {
+await step('the packages open from the menu, with Personalized Matchmaking', async () => {
   await fresh('Profile');
-  await scrollTo(button('Consultancy fees'), 40);
-  await button('Consultancy fees').click();
-  await visible('Plan 01');
-  await visible('Registration Fee');
-  await visible('Register Now');
-  await shot('38-fees');
+  await scrollTo(button('Packages'), 40);
+  await button('Packages').click();
+  await visible('Rishta Packages');
+  await scrollTo(text('Personalized Matchmaking'), 60);
+  await shot('38-packages');
 });
-
 await step('the contact form sends an enquiry to the bureau', async () => {
   await fresh('Profile');
   await scrollTo(button('Contact us'), 30);

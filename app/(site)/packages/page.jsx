@@ -217,7 +217,6 @@ export default async function PackagesPage() {
               {lowest > 0
                 ? t('The Personalized Matchmaking fee depends on your case. The registration fee starts from Rs. {fee}, and the finalization fee is paid only after the rishta is finalized.', { fee: lowest.toLocaleString('en-PK') })
                 : t('The Personalized Matchmaking fee depends on your case. The finalization fee is paid only after the rishta is finalized.')}
-              {' '}<Link href="/fees" className="font-semibold text-navy">{t('See the full fee structure')}</Link>
             </p>
             <p className={`${paragraph} mb-3 text-start`}>{t('Please create your profile on the website and send the link of your profile to our consultants to discuss your case.')}</p>
             <p lang="ur" dir="rtl" className={`${urduParagraph} mb-2 text-end`}>ذاتی نوعیت کی میچ میکنگ میں ہمارے رشتہ کنسلٹنٹ آپ کو آپ کی ضرورت کے مطابق رشتے دکھائیں گے۔</p>

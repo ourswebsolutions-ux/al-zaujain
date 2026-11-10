@@ -53,6 +53,7 @@ const _appUrdu = <String, String>{
   'Change website': 'ویب سائٹ تبدیل کریں',
   'Use the default website': 'ڈیفالٹ ویب سائٹ استعمال کریں',
   'Open navigation': 'مینو کھولیں',
+  'Marriage Bureau Multan Pakistan': 'میرج بیورو ملتان پاکستان',
   'Connected website': 'منسلک ویب سائٹ',
   'Sign out': 'سائن آؤٹ',
   'Filters': 'فلٹرز',

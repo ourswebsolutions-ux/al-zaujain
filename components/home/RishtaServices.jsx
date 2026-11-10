@@ -20,7 +20,7 @@ export async function RishtaServices({ fees }) {
         </Reveal>
 
         <div className="mt-9 flex justify-center">
-          <GlowButton href="/fees"><FaHandshake aria-hidden="true" className="text-gold" /> <span>{t('View Full Fee Structure')}</span></GlowButton>
+          <GlowButton href="/packages#personalizedMatching"><FaHandshake aria-hidden="true" className="text-gold" /> <span>{t('View Full Fee Structure')}</span></GlowButton>
         </div>
       </div>
     </section>

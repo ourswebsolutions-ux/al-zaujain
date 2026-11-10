@@ -34,7 +34,7 @@ export default async function FeesAdmin() {
   const fees = await getFees();
   return (
     <>
-      <Title text="The official marriage consultancy fees shown on the Fees page. These are not premium profile packages." actions={<Link href="/fees" target="_blank" className="text-[13px] font-medium text-navy">{t('View the Fees page')} ↗</Link>}>{t('Consultancy fees')}</Title>
+      <Title text="The official marriage consultancy fees, used in the Personalized Matchmaking section of the Packages page. These are not the website packages." actions={<Link href="/packages#personalizedMatching" target="_blank" className="text-[13px] font-medium text-navy">{t('View the Packages page')} ↗</Link>}>{t('Consultancy fees')}</Title>
       <ActionForm action={saveFeesAction} className="grid gap-0">
         <Panel title="Letterhead">
           <div className="grid grid-cols-2 gap-3 max-m:grid-cols-1">

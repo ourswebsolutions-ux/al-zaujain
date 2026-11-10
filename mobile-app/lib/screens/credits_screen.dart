@@ -5,7 +5,6 @@ import '../core/app_state.dart';
 import '../core/theme.dart';
 import '../widgets/biodata.dart';
 import '../widgets/common.dart';
-import 'packages_screen.dart';
 import 'payments_screen.dart';
 import 'profile_screen.dart';
 
@@ -213,61 +212,6 @@ class _PackageCard extends StatelessWidget {
           Padding(padding: const EdgeInsets.symmetric(vertical: 2), child: Row(children: [const Icon(Icons.check_rounded, size: 16, color: Color(0xFF1F8A3A)), const SizedBox(width: 6), Expanded(child: Text(line, style: const TextStyle(fontSize: 13)))])),
         const SizedBox(height: 12),
         AppButton(tr('Choose {name}', {'name': pack['name']}), tone: featured ? Tone.gold : Tone.navy, expand: true, onPressed: onChoose),
-      ]),
-    );
-  }
-}
-
-/// The official consultancy fee structure. Separate from premium credit packages.
-class FeesScreen extends StatelessWidget {
-  const FeesScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final fees = ((app.config['fees'] as Map?) ?? const {}).cast<String, dynamic>();
-    final whatsapp = '${fees['whatsapp'] ?? ''}';
-    final digits = whatsapp.replaceAll(RegExp(r'\D'), '');
-    return Scaffold(
-      appBar: AppBar(title: Text(tr('Fee structure'))),
-      body: ListView(padding: const EdgeInsets.all(16), children: [
-        Panel(
-          color: AppColors.sand,
-          borderColor: AppColors.sandLine,
-          child: Row(children: [
-            Image.asset('assets/images/logo.png', width: 56, height: 56),
-            const SizedBox(width: 12),
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('${fees['company'] ?? ''}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-              Text([fees['registered'], fees['city']].where((part) => part != null && '$part'.isNotEmpty).join(' · '), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.goldText)),
-              Text([fees['ntn'], fees['ceo']].where((part) => part != null && '$part'.isNotEmpty).join(' · '), style: const TextStyle(fontSize: 11.5, color: AppColors.muted)),
-            ])),
-          ]),
-        ),
-        const SizedBox(height: 16),
-        for (var i = 0; i < rowsOf(fees['registration']).length; i++)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: FeePlanCard(
-              index: i,
-              category: '${rowsOf(fees['registration'])[i]['category']}',
-              registration: '${rowsOf(fees['registration'])[i]['fee']}',
-              finalization: i < rowsOf(fees['finalization']).length ? '${rowsOf(fees['finalization'])[i]['fee']}' : null,
-            ),
-          ),
-        Panel(
-          title: 'Please note',
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            for (final line in ['Advance registration fees are non-refundable.', 'Rishta finalization fees are payable after the rishta is finalized.', 'These consultancy fees are separate from Premium Profile Packages, which are bought on the website to unlock premium profiles.'])
-              Padding(padding: const EdgeInsets.only(bottom: 8), child: Tx('• ${tr(line)}', style: const TextStyle(fontSize: 13.5, height: 1.5, color: Color(0xFF536471)))),
-          ]),
-        ),
-        const SizedBox(height: 14),
-        Panel(title: 'International services', child: Tx(tr('${fees['countries'] ?? ''}'), style: const TextStyle(fontSize: 13.5, height: 1.6, color: Color(0xFF536471)))),
-        const SizedBox(height: 14),
-        Wrap(spacing: 10, runSpacing: 10, children: [
-          if (digits.isNotEmpty) AppButton(whatsapp, tone: Tone.whatsapp, icon: Icons.chat_rounded, onPressed: () => openLink(context, 'https://wa.me/${digits.startsWith('0') ? '92${digits.substring(1)}' : digits}')),
-          if ('${fees['email'] ?? ''}'.isNotEmpty) AppButton('${fees['email']}', tone: Tone.outline, icon: Icons.email_rounded, onPressed: () => openLink(context, 'mailto:${fees['email']}')),
-        ]),
       ]),
     );
   }

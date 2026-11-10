@@ -35,7 +35,7 @@ export async function GovRegistered({ fees }) {
                 <li key={item} className="flex items-center gap-2.5 text-[15.5px] font-semibold text-navy max-sm:text-[14.5px]"><FaCircleCheck aria-hidden="true" className="shrink-0 text-[#1f8a3a]" /> {item}</li>
               ))}
             </ul>
-            <GlowButton href="/fees"><FaFileLines aria-hidden="true" className="text-gold" /> <span>{t('View Registration Details')}</span></GlowButton>
+            <GlowButton href="/packages#personalizedMatching"><FaFileLines aria-hidden="true" className="text-gold" /> <span>{t('View Registration Details')}</span></GlowButton>
           </Reveal>
 
           <Reveal x={20} className="rounded-[20px] bg-white p-6 shadow-[0_15px_40px_#062b4e14] max-sm:p-4">

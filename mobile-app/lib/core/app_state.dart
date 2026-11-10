@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'api.dart';
 import 'i18n.dart';
 
-const appVersion = '1.0.9';
+const appVersion = '1.0.10';
 
 /// The website this build opens by default, set when the APK is built (scripts/build-apk.mjs reads
 /// APP_SITE_URL). With it, families never see the address screen. Settings can still change it.

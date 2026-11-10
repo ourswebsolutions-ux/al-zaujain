@@ -13,8 +13,7 @@ export function Brand({ tone = 'light', className = '' }) {
       <span className={`block whitespace-nowrap text-xl font-bold leading-[22px] tracking-[0.5px] max-m:text-[16px] max-m:leading-[18px] ${dark ? 'text-white' : 'text-navy'}`}>
         AL ZAUJAIN
         <small className={`mt-1.5 block whitespace-nowrap text-[9px] font-semibold leading-[9.9px] tracking-[0.2px] max-m:mt-1 max-m:text-[8.5px] max-m:leading-[10px] ${dark ? 'text-champagne' : 'text-[#876623]'}`}>
-          <span className="max-m:hidden">{t('International Marriage Consultancy')}</span>
-          <span className="m:hidden">{t('International Consultancy')}</span>
+          {t('Marriage Bureau Multan Pakistan')}
         </small>
       </span>
     </Link>

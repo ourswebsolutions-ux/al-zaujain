@@ -9,6 +9,7 @@ import '../widgets/common.dart';
 import 'auth_screens.dart';
 import 'consultants_screen.dart';
 import 'credits_screen.dart';
+import 'packages_screen.dart';
 import 'home_screen.dart';
 import 'info_screens.dart';
 import 'member_screens.dart';
@@ -106,7 +107,7 @@ class _InfoMenu extends StatelessWidget {
   const _InfoMenu();
   @override
   Widget build(BuildContext context) => _Menu(items: [
-        (Icons.request_quote_rounded, 'Consultancy fees', () => push(context, const FeesScreen()), 0),
+        (Icons.workspace_premium_rounded, 'Packages', () => push(context, const PackagesScreen()), 0),
         (Icons.translate_rounded, 'Language', () => push(context, const AppSettingsScreen()), 0),
         (Icons.privacy_tip_rounded, 'Privacy policy', () => push(context, const LegalScreen(kind: 'privacy')), 0),
         (Icons.gavel_rounded, 'Terms of use', () => push(context, const LegalScreen(kind: 'terms')), 0),

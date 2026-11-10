@@ -57,7 +57,6 @@ export async function Footer({ settings }) {
 
           <div>
             <h3 className={heading}>{t('Policies')}</h3>
-            <Link className={linkClass} href="/fees">{t('Consultancy fees')}</Link>
             <Link className={linkClass} href="/privacy">{t('Privacy policy')}</Link>
             <Link className={linkClass} href="/terms">{t('Terms of use')}</Link>
             <Link className={linkClass} href="/login">{t('Member login')}</Link>
@@ -99,7 +98,7 @@ export async function Footer({ settings }) {
         <div className="pt-5 text-center text-[13.5px] leading-6">
           <p>{t('We declare that Al Zaujain is not a dating website. It is strictly for matrimonial purposes only.')}</p>
           <p className="mt-2">© {new Date().getFullYear()} {t('Al Zaujain International Marriage Consultancy')} · {t('All rights reserved.')}</p>
-          <p className="mt-1">{t('Designed & developed by')} <a href="https://softisense.com" target="_blank" rel="noopener" className="font-semibold text-[#a17a33] no-underline">Softisense.com ↗</a> · <a href="#top" className="text-inherit no-underline hover:text-navy">{t('Back to top')} ↑</a></p>
+          <p className="mt-1">{t('Designed & developed by')} <a href="/" className="font-semibold text-[#a17a33] no-underline">{t('Al Zaujain')}</a> · <a href="#top" className="text-inherit no-underline hover:text-navy">{t('Back to top')} ↑</a></p>
         </div>
       </div>
     </footer>

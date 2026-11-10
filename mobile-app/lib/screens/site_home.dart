@@ -12,7 +12,6 @@ import '../widgets/common.dart';
 import '../widgets/site.dart';
 import 'auth_screens.dart';
 import 'consultants_screen.dart';
-import 'credits_screen.dart';
 import 'home_header.dart';
 import 'home_screen.dart';
 import 'info_screens.dart';
@@ -141,7 +140,7 @@ class SiteHeader extends StatelessWidget {
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
                 const Text('AL ZAUJAIN', maxLines: 1, style: TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.navy, letterSpacing: 0.5)),
-                Text(tr('International Consultancy'), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Poppins', fontSize: 8.5, fontWeight: FontWeight.w600, color: Color(0xFF876623))),
+                Text(tr('Marriage Bureau Multan Pakistan'), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Poppins', fontSize: 8.5, fontWeight: FontWeight.w600, color: Color(0xFF876623))),
               ]),
             ),
             ListenableBuilder(
@@ -475,7 +474,7 @@ class GovBlock extends StatelessWidget {
         for (final item in [tr('Government Registered'), ntn == null ? tr('FBR Registered') : tr('FBR Registered · NTN {ntn}', {'ntn': ntn})])
           Padding(padding: const EdgeInsets.only(bottom: 8), child: Row(children: [const Icon(Icons.check_circle_rounded, size: 18, color: Color(0xFF1F8A3A)), const SizedBox(width: 10), Expanded(child: Text(item, style: TextStyle(fontFamily: headFont, fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.navy)))])),
         const SizedBox(height: 16),
-        Align(alignment: AlignmentDirectional.centerStart, child: GlowButton('View Registration Details', icon: Icons.description_rounded, onPressed: () => push(context, const FeesScreen()))),
+        Align(alignment: AlignmentDirectional.centerStart, child: GlowButton('View Registration Details', icon: Icons.description_rounded, onPressed: () => push(context, const PackagesScreen()))),
         const SizedBox(height: 26),
         Container(
           padding: const EdgeInsets.all(14),
@@ -549,7 +548,6 @@ class SiteFooter extends StatelessWidget {
         link('Submit a profile', () => openProfileForm(context)),
         link('Registration information', () => scrollHomeTo('registration')),
         heading('Policies'),
-        link('Consultancy fees', () => push(context, const FeesScreen())),
         link('Privacy policy', () => push(context, const LegalScreen(kind: 'privacy'))),
         link('Terms of use', () => push(context, const LegalScreen(kind: 'terms'))),
         if (!app.signedIn) link('Member login', () => push(context, const LoginScreen())),

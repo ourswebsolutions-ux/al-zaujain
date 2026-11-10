@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export default async function sitemap() {
   const base = process.env.SITE_URL || 'http://localhost:3000';
   const db = getDb();
-  const paths = ['', '/proposals', '/consultants', '/fees', '/submit-profile', '/register', '/privacy', '/terms'].map((path) => ({ url: `${base}${path}` }));
+  const paths = ['', '/proposals', '/consultants', '/packages', '/submit-profile', '/register', '/privacy', '/terms'].map((path) => ({ url: `${base}${path}` }));
   for (const category of await activeCategories()) {
     paths.push({ url: `${base}/proposals/${category.slug}` });
     const countries = await countriesInCategory(category.id);

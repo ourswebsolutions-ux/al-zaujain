@@ -12,6 +12,10 @@ const nextConfig = {
   // Only the site's own artwork goes through the optimizer. Its cache cannot see who is asking, so
   // member photos must never pass through it, or a cached copy would outlive a restriction.
   images: { formats: ['image/avif', 'image/webp'], localPatterns: [{ pathname: '/images/**', search: '' }] },
+  // The Fees page was merged into Packages (Personalized Matchmaking); old links and bookmarks land there.
+  async redirects() {
+    return [{ source: '/fees', destination: '/packages#personalizedMatching', permanent: true }];
+  },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
   },

@@ -348,7 +348,6 @@ class HomeDrawer extends StatelessWidget {
       (Icons.home_rounded, 'Home', () => shellKey.currentState?.select(Tabs.home)),
       (Icons.travel_explore_rounded, 'Proposals', () => shellKey.currentState?.showProposals()),
       (Icons.inventory_2_rounded, 'Packages', () => push(context, const PackagesScreen())),
-      (Icons.request_quote_rounded, 'Fees', () => push(context, const FeesScreen())),
       (Icons.workspace_premium_rounded, 'Why Al Zaujain', () => scrollHomeTo('why-choose')),
       (Icons.verified_rounded, 'Registration', () => scrollHomeTo('registration')),
       (Icons.support_agent_rounded, 'Marriage consultants', () => push(context, const ConsultantsScreen())),

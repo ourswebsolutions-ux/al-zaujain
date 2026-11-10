@@ -14,7 +14,6 @@ const NAV = [
   { href: '/', label: 'Home' },
   { href: '/proposals', label: 'Proposals', menu: true },
   { href: '/packages', label: 'Packages' },
-  { href: '/fees', label: 'Fees' },
   { href: '/#why-choose', label: 'Why Al Zaujain' },
   { href: '/#registration', label: 'Registration' },
   { href: '/#android-app', label: 'Android app' },
