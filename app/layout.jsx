@@ -17,6 +17,8 @@ const nastaliq = Noto_Nastaliq_Urdu({ subsets: ['arabic'], weight: ['400', '500'
 const siteUrl = process.env.SITE_URL || 'http://localhost:3000';
 
 export const metadata = {
+  // The site is designed in light colours; this stops phone browsers from forcing a dark version.
+  other: { 'color-scheme': 'only light' },
   metadataBase: new URL(siteUrl),
   title: { default: 'Al Zaujain | International Marriage Consultancy', template: '%s | Al Zaujain International Marriage Consultancy' },
   description: 'Al Zaujain is an international marriage consultancy offering trusted matrimonial services, with verified proposals from Pakistan, the UK, Europe, the USA and the Gulf.',

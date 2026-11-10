@@ -8,6 +8,7 @@ import '../core/api.dart';
 import '../core/app_state.dart';
 import '../core/theme.dart';
 import '../widgets/common.dart';
+import '../widgets/photo_cropper.dart';
 import '../widgets/pickers.dart';
 import 'auth_screens.dart';
 import 'info_screens.dart';
@@ -17,6 +18,8 @@ class _Picked {
   _Picked(this.name, this.bytes);
   final String name;
   final Uint8List bytes;
+  // The part shown on proposal cards, chosen like a WhatsApp picture.
+  Crop? crop;
 }
 
 /// The website's step-by-step profile form (components/forms/ProfileWizard.jsx), built from the
@@ -48,6 +51,8 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
   String? message;
   final List<_Picked> photos = [];
   final List<int> removed = [];
+  // Photos already on file whose card picture was adjusted.
+  final Map<int, Crop> recrops = {};
   _Picked? front;
   _Picked? back;
   late bool showPhoto = widget.photoPublic;
@@ -119,6 +124,8 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
       if (consent) const MapEntry('consent', 'yes'),
       if (widget.token != null) MapEntry('manage_token', widget.token!),
       for (final id in removed) MapEntry('remove_photo', '$id'),
+      for (final photo in photos) MapEntry('photo_crop', photo.crop == null ? '' : cropJson(photo.crop!)),
+      for (final entry in recrops.entries) MapEntry('recrop', '${entry.key}|${cropJson(entry.value)}'),
     ];
     final files = [
       for (final photo in photos) UploadFile('photos', photo.bytes, photo.name),
@@ -175,7 +182,15 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
       added.add(_Picked(file.name.isEmpty ? 'photo.jpg' : file.name, await file.readAsBytes()));
     }
     setState(() => photos.addAll(added));
+    // Each new photo opens the cropper in turn, like choosing a WhatsApp picture.
+    for (final photo in added) {
+      if (!mounted) return;
+      final crop = await cropPhoto(context, MemoryImage(photo.bytes));
+      if (crop != null) setState(() => photo.crop = crop);
+    }
   }
+
+  ImageProvider _existing(Json photo) => NetworkImage(app.api.absolute('${photo['file']}'), headers: app.api.authHeaders);
 
   @override
   Widget build(BuildContext context) {
@@ -360,7 +375,17 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
         Wrap(spacing: 10, runSpacing: 10, children: [
           for (final photo in kept)
             Column(children: [
-              NetImage('${photo['thumb']}', width: 88, height: 88, radius: 10),
+              recrops[(photo['id'] as num).toInt()] != null
+                  ? CropPreview(image: _existing(photo), crop: recrops[(photo['id'] as num).toInt()])
+                  : ClipOval(child: NetImage('${photo['thumb']}', width: 88, height: 88)),
+              TextButton(
+                onPressed: () async {
+                  final id = (photo['id'] as num).toInt();
+                  final crop = await cropPhoto(context, _existing(photo), initial: recrops[id]);
+                  if (crop != null) setState(() => recrops[id] = crop);
+                },
+                child: Text(tr('Adjust card photo'), style: const TextStyle(fontSize: 12)),
+              ),
               TextButton(onPressed: () => setState(() => removed.add((photo['id'] as num).toInt())), child: Text(tr('Remove'), style: const TextStyle(color: AppColors.red, fontSize: 12))),
             ]),
         ]),
@@ -371,7 +396,14 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
       Wrap(spacing: 10, runSpacing: 10, children: [
         for (final photo in photos)
           Stack(children: [
-            ClipRRect(borderRadius: BorderRadius.circular(10), child: Image.memory(photo.bytes, width: 88, height: 88, fit: BoxFit.cover)),
+            InkWell(
+              customBorder: const CircleBorder(),
+              onTap: () async {
+                final crop = await cropPhoto(context, MemoryImage(photo.bytes), initial: photo.crop);
+                if (crop != null) setState(() => photo.crop = crop);
+              },
+              child: Tooltip(message: tr('Adjust'), child: CropPreview(image: MemoryImage(photo.bytes), crop: photo.crop)),
+            ),
             PositionedDirectional(end: 2, top: 2, child: InkWell(onTap: () => setState(() => photos.remove(photo)), child: Container(decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle), child: const Icon(Icons.close_rounded, size: 18, color: AppColors.red)))),
           ]),
         if (remaining > 0)

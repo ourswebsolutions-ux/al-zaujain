@@ -11,6 +11,7 @@ import { Urdu } from '@/components/ui/Text';
 import { ageFromDob } from '@/lib/format.js';
 import { SECTIONS, validateProfile, validateStep } from '@/lib/profile-schema.js';
 import { AdminProfileSettings } from './AdminProfileSettings';
+import { CropPreview, PhotoCropper } from './PhotoCropper';
 import { useT } from '@/components/i18n/LanguageProvider';
 
 const MAX_PHOTOS = 6;
@@ -35,6 +36,13 @@ export function ProfileWizard({ countries, castes = [], initial = {}, mode = 'cr
   const [errors, setErrors] = useState({});
   const [cities, setCities] = useState([]);
   const [photos, setPhotos] = useState([]);
+  // For each new photo: its preview address and the part chosen for cards.
+  const [previews, setPreviews] = useState([]);
+  const [crops, setCrops] = useState([]);
+  // Photos already on file whose card picture was adjusted: { [photoId]: crop }.
+  const [recrops, setRecrops] = useState({});
+  // The photo being adjusted: { kind: 'new', index, queue } or { kind: 'existing', photo }.
+  const [cropping, setCropping] = useState(null);
   const [removed, setRemoved] = useState([]);
   const [front, setFront] = useState([]);
   const [back, setBack] = useState([]);
@@ -112,7 +120,11 @@ export function ProfileWizard({ countries, castes = [], initial = {}, mode = 'cr
     setMessage('');
     const form = new FormData();
     form.append('data', JSON.stringify(values));
-    photos.forEach((file) => form.append('photos', file));
+    photos.forEach((file, index) => {
+      form.append('photos', file);
+      form.append('photo_crop', crops[index] ? JSON.stringify(crops[index]) : '');
+    });
+    Object.entries(recrops).forEach(([id, crop]) => form.append('recrop', `${id}|${JSON.stringify(crop)}`));
     if (front[0]) form.append('cnic_front', front[0]);
     if (back[0]) form.append('cnic_back', back[0]);
     form.append('photo_public', showPhoto ? 'yes' : 'no');
@@ -149,6 +161,26 @@ export function ProfileWizard({ countries, castes = [], initial = {}, mode = 'cr
     }
   };
 
+  const photoUrl = (file) => `/media/photos/${file}${token ? `?m=${token}` : ''}`;
+  // Like WhatsApp: each newly chosen photo opens the cropper in turn.
+  function choosePhotos(files) {
+    const chosen = files.slice(0, MAX_PHOTOS - existingPhotos.filter((photo) => !removed.includes(photo.id)).length);
+    previews.forEach((url) => URL.revokeObjectURL(url));
+    setPhotos(chosen);
+    setPreviews(chosen.map((file) => URL.createObjectURL(file)));
+    setCrops(chosen.map(() => null));
+    if (chosen.length > 0) setCropping({ kind: 'new', index: 0, queue: chosen.map((_, index) => index).slice(1) });
+  }
+  function nextCrop() {
+    setCropping((current) => (current?.kind === 'new' && current.queue.length > 0 ? { kind: 'new', index: current.queue[0], queue: current.queue.slice(1) } : null));
+  }
+  function dropPhoto(index) {
+    URL.revokeObjectURL(previews[index]);
+    setPhotos((list) => list.filter((_, i) => i !== index));
+    setPreviews((list) => list.filter((_, i) => i !== index));
+    setCrops((list) => list.filter((_, i) => i !== index));
+  }
+
   const keptPhotos = existingPhotos.filter((photo) => !removed.includes(photo.id));
   const remaining = MAX_PHOTOS - keptPhotos.length;
 
@@ -161,14 +193,44 @@ export function ProfileWizard({ countries, castes = [], initial = {}, mode = 'cr
                       {keptPhotos.map((photo) => (
                         <li key={photo.id} className="relative">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={`/media/photos/${photo.thumb}${token ? `?m=${token}` : ''}`} alt={t('Profile')} className="size-24 rounded-lg object-cover" />
-                          <button type="button" onClick={() => setRemoved([...removed, photo.id])} className="mt-1 block w-full cursor-pointer text-center text-[11px] font-semibold text-[#a33a2c]">{t('Remove')}</button>
+                          {recrops[photo.id]
+                            ? <CropPreview src={photoUrl(photo.file)} crop={recrops[photo.id]} />
+                            : <img src={photoUrl(photo.thumb)} alt={t('Profile')} className="size-24 rounded-full object-cover" />}
+                          <button type="button" onClick={() => setCropping({ kind: 'existing', photo })} className="mt-1 block w-full cursor-pointer text-center text-[11px] font-semibold text-navy underline">{t('Adjust card photo')}</button>
+                          <button type="button" onClick={() => setRemoved([...removed, photo.id])} className="block w-full cursor-pointer text-center text-[11px] font-semibold text-[#a33a2c]">{t('Remove')}</button>
                         </li>
                       ))}
                     </ul>
                   </div>
                 )}
-                {remaining > 0 && <FilePicker label={t('Profile photographs')} hint={t('JPG, PNG or WebP, up to 8 MB each. You can add {count} more.', { count: remaining })} multiple files={photos} onChange={(files) => setPhotos(files.slice(0, remaining))} />}
+                {remaining > 0 && <FilePicker label={t('Profile photographs')} hint={t('JPG, PNG or WebP, up to 8 MB each. You can add {count} more.', { count: remaining })} multiple files={photos} onChange={choosePhotos} />}
+                {photos.length > 0 && (
+                  <div>
+                    <p className={labelClass}>{t('How your photos appear on proposal cards')}</p>
+                    <ul className="mt-2 flex flex-wrap gap-3">
+                      {photos.map((file, index) => (
+                        <li key={`${file.name}-${index}`} className="w-24">
+                          <CropPreview src={previews[index]} crop={crops[index]} />
+                          <button type="button" onClick={() => setCropping({ kind: 'new', index, queue: [] })} className="mt-1 block w-full cursor-pointer text-center text-[11px] font-semibold text-navy underline">{t('Adjust')}</button>
+                          <button type="button" onClick={() => dropPhoto(index)} className="block w-full cursor-pointer text-center text-[11px] font-semibold text-[#a33a2c]">{t('Remove')}</button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {cropping && (
+                  <PhotoCropper
+                    key={cropping.kind === 'new' ? `new-${cropping.index}` : `old-${cropping.photo.id}`}
+                    src={cropping.kind === 'new' ? previews[cropping.index] : photoUrl(cropping.photo.file)}
+                    initial={cropping.kind === 'new' ? crops[cropping.index] : recrops[cropping.photo.id]}
+                    onCancel={nextCrop}
+                    onDone={(crop) => {
+                      if (cropping.kind === 'new') setCrops((list) => Object.assign([...list], { [cropping.index]: crop }));
+                      else setRecrops((map) => ({ ...map, [cropping.photo.id]: crop }));
+                      nextCrop();
+                    }}
+                  />
+                )}
                 <label className="flex items-start gap-2.5 text-xs leading-5">
                   <input type="checkbox" checked={!showPhoto} onChange={(event) => setShowPhoto(!event.target.checked)} className="mt-1 accent-navy" />
                   Keep my photo private. It will only be shared through the bureau.

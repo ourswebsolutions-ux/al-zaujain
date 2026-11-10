@@ -203,6 +203,8 @@ await step('rejects a fake image upload and keeps the form', async () => {
   await page.goto('/submit-profile');
   await fillWizard(page, { ...applicant, email: 'fake@test.local' });
   await page.locator('input[type=file]').first().setInputFiles(fakePath);
+  // The card-photo cropper opens; a broken file cannot be used, so the family cancels it.
+  await page.getByRole('dialog', { name: 'Adjust card photo' }).getByRole('button', { name: 'Cancel' }).click();
   await page.locator('input[type=checkbox]').last().check();
   await page.click('button:has-text("Submit profile")');
   await page.waitForSelector('text=not a valid image');
@@ -215,6 +217,18 @@ await step('login-free submission with photo and CNIC', async () => {
   await page.goto('/submit-profile');
   await fillWizard(page, applicant);
   await page.locator('input[type=file]').nth(0).setInputFiles(photoPath);
+  // Like a WhatsApp picture: drag the photo in the circle, zoom, and use it.
+  const cropper = page.getByRole('dialog', { name: 'Adjust card photo' });
+  await cropper.waitFor();
+  await cropper.getByRole('slider', { name: 'Zoom' }).fill('2');
+  const stage = await cropper.getByRole('application').boundingBox();
+  await page.mouse.move(stage.x + stage.width / 2, stage.y + stage.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(stage.x + stage.width / 2 + 40, stage.y + stage.height / 2 + 30, { steps: 5 });
+  await page.mouse.up();
+  await cropper.getByRole('button', { name: 'Use this photo' }).click();
+  await cropper.waitFor({ state: 'detached' });
+  await page.waitForSelector('text=How your photos appear on proposal cards');
   await page.locator('input[type=file]').nth(1).setInputFiles(cnicPath);
   await page.click('button:has-text("Submit profile")');
   await page.waitForSelector('text=Please confirm the consent statement');
@@ -957,12 +971,21 @@ await step('dashboard works on a phone', async () => {
 });
 
 await step('mobile navigation opens', async () => {
-  const page = await newPage({ viewport: { width: 390, height: 844 } });
-  await page.goto('/');
-  await page.click('[aria-label="Open navigation"]');
-  await page.locator('#mobile-navigation').getByText('Consultants').click();
-  await page.waitForURL('**/consultants');
-  await page.context().close();
+  for (const width of [360, 390]) {
+    const page = await newPage({ viewport: { width, height: 800 } });
+    await page.goto('/');
+    const brand = await page.getByRole('link', { name: 'AL ZAUJAIN' }).first().boundingBox();
+    assert.ok(brand.height < 60, `the name stays on one line (${brand.height}px)`);
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth) <= width, 'the bar fits the phone');
+    assert.match(await page.evaluate(() => getComputedStyle(document.documentElement).colorScheme), /^(only light|light only)$/, 'browsers may not force dark colours');
+    await page.click('[aria-label="Open navigation"]');
+    const menu = page.locator('#mobile-navigation');
+    assert.ok(await menu.getByRole('button', { name: 'اردو' }).isVisible(), 'the language choice is in the menu');
+    await menu.getByText('Consultants').click();
+    await page.waitForURL('**/consultants');
+    await menu.waitFor({ state: 'detached' });
+    await page.context().close();
+  }
 });
 
 await step('payments: admin adds methods and turns restrictions on', async () => {

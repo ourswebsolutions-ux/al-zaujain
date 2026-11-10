@@ -5,7 +5,7 @@
 @custom-variant ur (&:where(.lang-ur, .lang-ur *));
 
 /* "Towards the end of the line": right in English, left in Urdu. Used by gradients that follow the layout. */
-:root { --to-end: 90deg; }
+:root { --to-end: 90deg; color-scheme: only light; }
 [dir='rtl'] { --to-end: 270deg; }
 
 @theme {

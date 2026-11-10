@@ -1,5 +1,3 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -263,22 +261,6 @@ class LoaderState extends State<Loader> {
 }
 
 /// A photo from the website. The token goes along, so restricted photos follow the same rules as the website.
-/// A profile picture shown whole, never cropped or stretched: the frame around it is filled with a
-/// soft blurred copy. [thumb] is the small square version, [full] the whole picture.
-class WholePhoto extends StatelessWidget {
-  const WholePhoto({super.key, required this.thumb, this.full});
-  final String thumb;
-  final String? full;
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(fit: StackFit.expand, children: [
-      ImageFiltered(imageFilter: ImageFilter.blur(sigmaX: 14, sigmaY: 14), child: Opacity(opacity: 0.85, child: NetImage('/media/photos/$thumb'))),
-      NetImage('/media/photos/${full ?? thumb}', fit: BoxFit.contain),
-    ]);
-  }
-}
-
 class NetImage extends StatelessWidget {
   const NetImage(this.path, {super.key, this.fit = BoxFit.cover, this.radius = 0, this.width, this.height});
   final String? path;

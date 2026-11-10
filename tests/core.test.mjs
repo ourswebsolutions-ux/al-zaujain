@@ -75,7 +75,7 @@ describe('privacy of public output', () => {
   it('cards carry only public fields', async () => {
     const id = await approved({ full_name: 'Secret Surname' });
     const row = await db.profile.findUnique({ where: { id }, select: CARD_SELECT });
-    assert.deepEqual(Object.keys(toCard(row)).sort(), ['age', 'city', 'code', 'country', 'education', 'maritalStatus', 'name', 'photo', 'photoFull', 'profession', 'type', 'verified']);
+    assert.deepEqual(Object.keys(toCard(row)).sort(), ['age', 'city', 'code', 'country', 'education', 'maritalStatus', 'name', 'photo', 'profession', 'type', 'verified']);
     assert.equal(toCard(row).name, 'Secret');
   });
   it('search cannot find a surname or phone number', async () => {
@@ -439,7 +439,7 @@ describe('matching', () => {
   it('match results expose public fields only', async () => {
     const me = await getProfile(await approved({ gender: 'female' }));
     const [card] = await compatibleProfiles(me, 1);
-    assert.deepEqual(Object.keys(card).sort(), ['age', 'city', 'code', 'country', 'education', 'maritalStatus', 'name', 'photo', 'photoFull', 'profession', 'score', 'type', 'verified']);
+    assert.deepEqual(Object.keys(card).sort(), ['age', 'city', 'code', 'country', 'education', 'maritalStatus', 'name', 'photo', 'profession', 'score', 'type', 'verified']);
   });
 
   it('emails each match once and retries after a failure', async () => {
@@ -901,5 +901,35 @@ describe('premium profile credits', () => {
     assert.equal(saved.whatsapp, '0300 0000000');
     assert.equal(fees.whatsappDigits('0339-9077424'), '923399077424');
     assert.equal(await db.creditPackage.count({ where: { name: { contains: 'registration' } } }), 0);
+  });
+});
+
+describe('card photo chosen like a WhatsApp picture', () => {
+  // A tall photo: red on top (the face), blue below.
+  const tall = async () => {
+    const top = await sharp({ create: { width: 600, height: 600, channels: 3, background: '#d02020' } }).png().toBuffer();
+    const buffer = await sharp({ create: { width: 600, height: 1200, channels: 3, background: '#2030d0' } }).composite([{ input: top, top: 0, left: 0 }]).jpeg().toBuffer();
+    return new File([buffer], 'tall.jpg', { type: 'image/jpeg' });
+  };
+  const colour = async (name) => {
+    const { dominant } = await sharp(path.join(uploads.photosDir(), name)).stats();
+    return dominant.r > dominant.b ? 'red' : 'blue';
+  };
+
+  it('cuts the card picture from the chosen part and keeps the full photo', async () => {
+    const top = await uploads.savePhoto(await tall(), 'Photo', JSON.stringify({ x: 0, y: 0, w: 1, h: 0.5 }));
+    assert.equal(await colour(top.thumb), 'red');
+    const bottom = await uploads.savePhoto(await tall(), 'Photo', { x: 0, y: 0.5, w: 1, h: 0.5 });
+    assert.equal(await colour(bottom.thumb), 'blue');
+    const full = await sharp(path.join(uploads.photosDir(), top.file)).metadata();
+    assert.deepEqual([full.width, full.height], [600, 1200], 'the full photo is untouched');
+  });
+
+  it('ignores a malformed crop and can re-cut a photo later', async () => {
+    assert.equal(uploads.parseCrop('{"x":0.5,"y":0,"w":0.9,"h":0.5}'), null, 'outside the photo');
+    assert.equal(uploads.parseCrop('nonsense'), null);
+    const saved = await uploads.savePhoto(await tall(), 'Photo', 'nonsense');
+    const again = await uploads.recropPhoto(saved.file, { x: 0, y: 0.5, w: 1, h: 0.5 });
+    assert.equal(await colour(again), 'blue');
   });
 });
