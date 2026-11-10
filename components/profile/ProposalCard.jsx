@@ -6,6 +6,7 @@ import { FaArrowRight, FaBriefcase, FaCakeCandles, FaCrown, FaGraduationCap, FaL
 import { SaveButton } from './SaveButton';
 import { PhotoLock, useUnlock } from '@/components/payments/UnlockProvider';
 import { useT } from '@/components/i18n/LanguageProvider';
+import { CardPhoto } from '@/components/profile/CardPhoto';
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 
 // The corner ribbon from the reference design: Free, Premium (unlocks with credits) or Exclusive.
@@ -64,8 +65,7 @@ export function ProposalCard({ profile, tag, matchScore, saved }) {
           <span className="relative block h-[150px] w-[118px] overflow-hidden rounded-[50%] border-[3px] border-[#b18433] bg-white p-[3px] shadow-[0_8px_20px_#03223f26] max-sm:aspect-square max-sm:h-auto max-sm:w-full max-sm:rounded-2xl max-sm:border-0 max-sm:p-0 max-sm:shadow-none sm:h-[220px] sm:w-[172px]">
             <span className="relative block size-full overflow-hidden rounded-[50%] bg-[#e9e1d1] max-sm:rounded-2xl">
               {profile.photo ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={`/media/photos/${profile.photo}`} alt={t('Portrait of {name}', { name: profile.name })} loading="lazy" className="absolute inset-0 size-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]" />
+<CardPhoto profile={profile} alt={t('Portrait of {name}', { name: profile.name })} />
               ) : (
                 <span className="absolute inset-0 grid place-items-center"><Image src="/images/logo.png" alt="" width={84} height={84} className="rounded-full opacity-60" /></span>
               )}

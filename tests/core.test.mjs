@@ -75,7 +75,7 @@ describe('privacy of public output', () => {
   it('cards carry only public fields', async () => {
     const id = await approved({ full_name: 'Secret Surname' });
     const row = await db.profile.findUnique({ where: { id }, select: CARD_SELECT });
-    assert.deepEqual(Object.keys(toCard(row)).sort(), ['age', 'city', 'code', 'country', 'education', 'maritalStatus', 'name', 'photo', 'profession', 'type', 'verified']);
+    assert.deepEqual(Object.keys(toCard(row)).sort(), ['age', 'city', 'code', 'country', 'education', 'maritalStatus', 'name', 'photo', 'photoFull', 'profession', 'type', 'verified']);
     assert.equal(toCard(row).name, 'Secret');
   });
   it('search cannot find a surname or phone number', async () => {
@@ -439,7 +439,7 @@ describe('matching', () => {
   it('match results expose public fields only', async () => {
     const me = await getProfile(await approved({ gender: 'female' }));
     const [card] = await compatibleProfiles(me, 1);
-    assert.deepEqual(Object.keys(card).sort(), ['age', 'city', 'code', 'country', 'education', 'maritalStatus', 'name', 'photo', 'profession', 'score', 'type', 'verified']);
+    assert.deepEqual(Object.keys(card).sort(), ['age', 'city', 'code', 'country', 'education', 'maritalStatus', 'name', 'photo', 'photoFull', 'profession', 'score', 'type', 'verified']);
   });
 
   it('emails each match once and retries after a failure', async () => {

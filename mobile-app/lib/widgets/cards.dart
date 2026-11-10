@@ -233,7 +233,7 @@ class _OvalPhoto extends StatelessWidget {
           decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.all(Radius.elliptical(width / 2, height / 2)), border: Border.all(color: const Color(0xFFB18433), width: 3), boxShadow: const [BoxShadow(color: Color(0x2603223F), blurRadius: 20, offset: Offset(0, 8))]),
           child: ClipOval(
             child: Stack(fit: StackFit.expand, children: [
-              NetImage(photo == null ? null : '/media/photos/$photo'),
+              photo == null ? const NetImage(null) : WholePhoto(thumb: photo, full: card['photoFull'] as String?),
               if (blurred)
                 GestureDetector(
                   onTap: () => showUnlockSheet(context),
@@ -462,7 +462,7 @@ class HomeProfileCard extends StatelessWidget {
                         child: Stack(fit: StackFit.expand, children: [
                           photo == null
                               ? Container(color: const Color(0xFFF1E6D2), padding: const EdgeInsets.all(18), child: Opacity(opacity: 0.55, child: Image.asset('assets/images/logo.png')))
-                              : NetImage('/media/photos/$photo'),
+                              : WholePhoto(thumb: photo, full: card['photoFull'] as String?),
                           if (blurred) Container(color: const Color(0x3303223F), alignment: Alignment.center, child: const Icon(Icons.visibility_off_rounded, color: Colors.white, size: 22)),
                         ]),
                       ),

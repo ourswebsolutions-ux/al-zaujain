@@ -7,6 +7,7 @@ import { FaArrowRight, FaBriefcase, FaCheck, FaChevronRight, FaCrown, FaLocation
 import { useT } from '@/components/i18n/LanguageProvider';
 import { PhotoLock, useUnlock } from '@/components/payments/UnlockProvider';
 import { ProposalCard } from '@/components/profile/ProposalCard';
+import { CardPhoto } from '@/components/profile/CardPhoto';
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 import { GlowButton, GradientHeading, Ornament } from './HomeUi';
 
@@ -40,8 +41,7 @@ function HomeProfileCard({ profile }) {
         <Link href={href} aria-label={t('View proposal {code}', { code: profile.code })} className="relative block self-center no-underline">
           <span className="relative mx-auto block aspect-[140/150] w-full max-w-[140px] overflow-hidden rounded-[50%] border-2 border-[#b18433] bg-[#ece3d2] shadow-[0_6px_16px_#062b4e26]">
             {profile.photo ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={`/media/photos/${profile.photo}`} alt={t('Portrait of {name}', { name: profile.name })} loading="lazy" className="absolute inset-0 size-full object-cover object-top" />
+<CardPhoto profile={profile} alt={t('Portrait of {name}', { name: profile.name })} />
             ) : (
               <span className="absolute inset-0 grid place-items-center"><Image src="/images/logo.png" alt="" width={72} height={72} className="w-[55%] opacity-60" /></span>
             )}
