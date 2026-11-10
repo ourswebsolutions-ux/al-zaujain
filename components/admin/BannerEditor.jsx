@@ -74,10 +74,9 @@ export function BannerEditor({ banner, imageSrc }) {
       {banner && <input type="hidden" name="id" value={banner.id} />}
       <div className="grid grid-cols-2 gap-3 max-m:grid-cols-1">
         <label className={label}>
-          {t(banner ? 'Replace image (wide, about 1920 × 700)' : 'Banner image (wide, about 1920 × 700)')}
+          {t(banner ? 'Replace image (1500 × 500, shown the same on computers and phones)' : 'Banner image (1500 × 500, shown the same on computers and phones)')}
           <input type="file" name="image" accept="image/jpeg,image/png,image/webp" required={!banner} className={file} onChange={(event) => { const picked = event.target.files?.[0]; if (picked) setPreview(URL.createObjectURL(picked)); }} />
         </label>
-        <label className={label}>{t('Phone image (optional, about 800 × 900)')}<input type="file" name="mobile_image" accept="image/jpeg,image/png,image/webp" className={file} /></label>
       </div>
 
       <div className="flex flex-wrap items-center gap-5">
@@ -93,7 +92,7 @@ export function BannerEditor({ banner, imageSrc }) {
       )}
       {!values.showText && preview && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={preview} alt="" className="aspect-[1440/520] w-full max-w-[640px] rounded-lg object-cover shadow-[0_4px_14px_#062b4e26]" />
+        <img src={preview} alt="" className="aspect-[3/1] w-full max-w-[640px] rounded-lg object-cover shadow-[0_4px_14px_#062b4e26]" />
       )}
 
       {values.showText && (
@@ -121,7 +120,7 @@ export function BannerEditor({ banner, imageSrc }) {
 
           <div>
             <p className="mb-2 flex items-center gap-2 text-[12.5px] font-medium text-[var(--d-text,#47566a)]"><FaArrowsUpDownLeftRight aria-hidden="true" /> {t('Drag the text to place it. Arrow keys move it too.')}</p>
-            <div ref={frame} className="relative aspect-[1440/520] w-full overflow-hidden rounded-lg bg-dark shadow-[0_4px_14px_#062b4e26]">
+            <div ref={frame} className="relative aspect-[3/1] w-full overflow-hidden rounded-lg bg-dark shadow-[0_4px_14px_#062b4e26]">
               {preview ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={preview} alt="" className="absolute inset-0 size-full object-cover" />

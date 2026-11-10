@@ -209,97 +209,72 @@ class _HeroBannersState extends State<HeroBanners> {
   }
 
   Widget _image(Json banner) {
-    final src = '${banner['mobileSrc'] ?? banner['src'] ?? ''}';
-    if (src.startsWith('/images/')) return Image.asset('assets/images/banner-default.jpg', fit: BoxFit.cover, alignment: const Alignment(0.45, -1));
+    // The same wide image as on computers, like the reference site: no separate phone crop.
+    final src = '${banner['src'] ?? ''}';
+    if (src.startsWith('/images/')) return Image.asset('assets/images/banner-default.jpg', fit: BoxFit.cover, alignment: const Alignment(0.2, -0.36));
     return NetImage(src);
   }
 
   @override
   Widget build(BuildContext context) {
-    final height = (MediaQuery.of(context).size.width * 1.18).clamp(380.0, 520.0);
     final banners = widget.banners.isEmpty ? [<String, dynamic>{'src': '/images/default'}] : widget.banners;
-    return SizedBox(
-      height: height,
-      child: Stack(fit: StackFit.expand, children: [
-        PageView.builder(
-          controller: controller,
-          itemCount: banners.length,
-          onPageChanged: (value) => setState(() => page = value),
-          itemBuilder: (context, index) {
-            final banner = banners[index];
-            final words = banner['showText'] == true && '${banner['heading'] ?? ''}${banner['text'] ?? ''}'.isNotEmpty;
-            final href = '${banner['href'] ?? ''}';
-            return GestureDetector(
-              onTap: !words && href.isNotEmpty ? () => href.startsWith('/proposals') ? openListing(href) : openLink(context, href.startsWith('/') ? app.api.absolute(href) : href) : null,
-              child: Stack(fit: StackFit.expand, children: [
-                _image(banner),
-                if (words) ...[
-                  const DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0x4003223F), Color(0xF203223F)], stops: [0.3, 1]))),
-                  Positioned(
-                    left: 20,
-                    right: 20,
-                    bottom: 100,
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
-                      if ('${banner['eyebrow'] ?? ''}'.isNotEmpty) Text(tr('${banner['eyebrow']}'), style: const TextStyle(color: AppColors.champagne, fontSize: 13, fontWeight: FontWeight.w600)),
-                      if ('${banner['heading'] ?? ''}'.isNotEmpty) Text(tr('${banner['heading']}'), style: TextStyle(fontFamily: headFont, color: Colors.white, fontSize: 26, fontWeight: FontWeight.w700, height: 1.25)),
-                      if ('${banner['text'] ?? ''}'.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Text(tr('${banner['text']}'), style: const TextStyle(color: Colors.white, fontSize: 13.5, height: 1.5))),
-                      if ('${banner['cta'] ?? ''}'.isNotEmpty && href.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 14),
-                          child: FilledButton(
-                            onPressed: () => href.startsWith('/proposals') ? openListing(href) : openLink(context, href.startsWith('/') ? app.api.absolute(href) : href),
-                            style: FilledButton.styleFrom(backgroundColor: AppColors.gold, foregroundColor: AppColors.dark, shape: const StadiumBorder()),
-                            child: Text(tr('${banner['cta']}'), style: TextStyle(fontFamily: headFont, fontWeight: FontWeight.w700)),
-                          ),
-                        ),
-                    ]),
-                  ),
-                ],
+    // A 3:1 rectangle (1500 × 500) on every screen, like the reference site, with the search bar just below.
+    return Column(children: [
+      AspectRatio(
+        aspectRatio: 3,
+        child: Stack(fit: StackFit.expand, children: [
+          PageView.builder(
+            controller: controller,
+            itemCount: banners.length,
+            onPageChanged: (value) => setState(() => page = value),
+            itemBuilder: (context, index) {
+              // A phone's 3:1 strip is too short for words: the picture alone, and it is the link.
+              final href = '${banners[index]['href'] ?? ''}';
+              return GestureDetector(
+                onTap: href.isEmpty ? null : () => href.startsWith('/proposals') ? openListing(href) : openLink(context, href.startsWith('/') ? app.api.absolute(href) : href),
+                child: _image(banners[index]),
+              );
+            },
+          ),
+          if (banners.length > 1)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 8,
+              child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                for (var i = 0; i < banners.length; i++)
+                  AnimatedContainer(duration: const Duration(milliseconds: 300), margin: const EdgeInsets.symmetric(horizontal: 3), width: i == page ? 22 : 7, height: 7, decoration: BoxDecoration(color: i == page ? AppColors.gold : Colors.white70, borderRadius: BorderRadius.circular(4))),
               ]),
-            );
-          },
-        ),
-        const IgnorePointer(child: Align(alignment: Alignment.bottomCenter, child: SizedBox(height: 160, width: double.infinity, child: DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, Color(0x8003223F)])))))),
-        if (banners.length > 1)
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 84,
-            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              for (var i = 0; i < banners.length; i++)
-                AnimatedContainer(duration: const Duration(milliseconds: 300), margin: const EdgeInsets.symmetric(horizontal: 4), width: i == page ? 32 : 10, height: 10, decoration: BoxDecoration(color: i == page ? AppColors.gold : Colors.white70, borderRadius: BorderRadius.circular(5))),
-            ]),
-          ),
-        Positioned(
-          left: 16,
-          right: 16,
-          bottom: 20,
-          child: Container(
-            height: 56,
-            padding: const EdgeInsetsDirectional.only(start: 16, end: 5),
-            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.96), borderRadius: BorderRadius.circular(30), border: Border.all(color: Colors.white70), boxShadow: const [BoxShadow(color: Color(0x5903223F), blurRadius: 40, offset: Offset(0, 14))]),
-            child: Row(children: [
-              const Icon(Icons.search_rounded, color: Color(0xFFA17A33)),
-              const SizedBox(width: 8),
-              Expanded(
-                child: TextField(
-                  controller: query,
-                  textInputAction: TextInputAction.search,
-                  onSubmitted: (_) => _search(),
-                  style: const TextStyle(fontSize: 14.5, color: AppColors.navy),
-                  decoration: InputDecoration(hintText: tr('Search name, ID, city or caste'), filled: false, border: InputBorder.none, enabledBorder: InputBorder.none, focusedBorder: InputBorder.none, isDense: true, contentPadding: EdgeInsets.zero),
-                ),
+            ),
+        ]),
+      ),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+        child: Container(
+          height: 56,
+          padding: const EdgeInsetsDirectional.only(start: 16, end: 5),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(30), border: Border.all(color: const Color(0xFFE9CFA0)), boxShadow: const [BoxShadow(color: Color(0x2603223F), blurRadius: 24, offset: Offset(0, 8))]),
+          child: Row(children: [
+            const Icon(Icons.search_rounded, color: Color(0xFFA17A33)),
+            const SizedBox(width: 8),
+            Expanded(
+              child: TextField(
+                controller: query,
+                textInputAction: TextInputAction.search,
+                onSubmitted: (_) => _search(),
+                style: const TextStyle(fontSize: 14.5, color: AppColors.navy),
+                decoration: InputDecoration(hintText: tr('Search name, ID, city or caste'), filled: false, border: InputBorder.none, enabledBorder: InputBorder.none, focusedBorder: InputBorder.none, isDense: true, contentPadding: EdgeInsets.zero),
               ),
-              Material(
-                shape: const CircleBorder(),
-                color: AppColors.navy,
-                child: InkWell(customBorder: const CircleBorder(), onTap: _search, child: Tooltip(message: tr('Search'), child: const SizedBox(width: 46, height: 46, child: Icon(Icons.search_rounded, color: Colors.white)))),
-              ),
-            ]),
-          ),
+            ),
+            Material(
+              shape: const CircleBorder(),
+              color: AppColors.navy,
+              child: InkWell(customBorder: const CircleBorder(), onTap: _search, child: Tooltip(message: tr('Search'), child: const SizedBox(width: 46, height: 46, child: Icon(Icons.search_rounded, color: Colors.white)))),
+            ),
+          ]),
         ),
-      ]),
-    );
+      ),
+    ]);
   }
 }
 

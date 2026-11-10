@@ -15,21 +15,22 @@ function Slide({ banner, first, active }) {
       inert={!active ? true : undefined}
       className={`absolute inset-0 transition-opacity duration-1000 ease-in-out motion-reduce:transition-none ${active ? 'z-[1] opacity-100' : 'opacity-0'}`}
     >
+      {/* One wide rectangle on every screen, like the reference site: the same image, never a taller phone crop. */}
       <picture>
-        {banner.mobileSrc && <source media="(max-width: 640px)" srcSet={banner.mobileSrc} />}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={banner.src} alt={banner.heading || t('Al Zaujain Marriage Bureau')} loading={first ? 'eager' : 'lazy'} fetchPriority={first ? 'high' : 'auto'} className={`absolute inset-0 size-full object-cover ${banner.position ?? 'object-center'}`} />
       </picture>
-      {!words && banner.href && (
+      {/* With words the buttons lead on; phones show the picture alone (a 3:1 strip is too short), so there it is the link. */}
+      {banner.href && (
         /^(https?:|tel:|mailto:)/i.test(banner.href)
-          ? <a href={banner.href} target="_blank" rel="noopener" aria-label={t('Open')} className="absolute inset-0 z-[2]" />
-          : <Link href={banner.href} aria-label={t('Open')} className="absolute inset-0 z-[2]" />
+          ? <a href={banner.href} target="_blank" rel="noopener" aria-label={t('Open')} className={`absolute inset-0 z-[2] ${words ? 'sm:hidden' : ''}`} />
+          : <Link href={banner.href} aria-label={t('Open')} className={`absolute inset-0 z-[2] ${words ? 'sm:hidden' : ''}`} />
       )}
       {words && (
-        <>
+        <div className="max-sm:hidden">
           <BannerShade banner={banner} />
-          <div className="absolute inset-x-[6%] inset-y-[8%] group-data-[search]/hero:bottom-[130px] max-sm:inset-0 max-sm:group-data-[search]/hero:bottom-0"><BannerText banner={banner} /></div>
-        </>
+          <div className="absolute inset-x-[6%] inset-y-[8%] group-data-[search]/hero:bottom-[130px]"><BannerText banner={banner} /></div>
+        </div>
       )}
     </div>
   );
@@ -71,8 +72,10 @@ export function HeroBanner({ banners, search = null }) {
         setTouch(null);
       }}
       data-search={search ? '' : undefined}
-      className="group/hero relative h-[clamp(420px,36vw,560px)] w-full overflow-hidden bg-dark max-sm:h-[min(118vw,520px)]"
+      className="group/hero relative w-full"
     >
+      {/* The banner keeps the reference's 3:1 shape (1500 × 500) on computers and phones alike. */}
+      <div className="relative aspect-[3/1] w-full overflow-hidden bg-dark">
       <h1 className="sr-only">{t('Al Zaujain Marriage Bureau')} · {t('Government Registered Marriage Bureau')}</h1>
       {banners.map((banner, i) => <Slide key={banner.id} banner={banner} first={i === 0} active={i === index} />)}
 
@@ -84,7 +87,7 @@ export function HeroBanner({ banners, search = null }) {
           <button type="button" onClick={() => go((current) => current + 1)} aria-label={t('Next banner')} className="absolute end-4 top-1/2 z-10 grid size-11 -translate-y-1/2 cursor-pointer place-items-center rounded-full bg-white/85 text-navy shadow-[0_6px_18px_#0000002e] transition hover:bg-white max-sm:hidden">
             <FaChevronRight aria-hidden="true" className="rtl:-scale-x-100" />
           </button>
-          <div className="absolute inset-x-0 bottom-5 z-10 flex justify-center gap-2 group-data-[search]/hero:bottom-[104px] max-sm:bottom-4 max-sm:group-data-[search]/hero:bottom-[84px]">
+          <div className="absolute inset-x-0 bottom-5 z-10 flex justify-center gap-2 group-data-[search]/hero:bottom-[104px] max-lg:group-data-[search]/hero:bottom-[96px] max-sm:bottom-2.5 max-sm:gap-1.5 max-sm:group-data-[search]/hero:bottom-2.5">
             {banners.map((banner, i) => (
               <button
                 key={banner.id}
@@ -98,12 +101,10 @@ export function HeroBanner({ banners, search = null }) {
           </div>
         </>
       )}
-      {search && (
-        <>
-          <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] h-40 bg-[linear-gradient(180deg,transparent,#03223f80)]" />
-          <div className="absolute inset-x-0 bottom-8 z-20 max-sm:bottom-5">{search}</div>
-        </>
-      )}
+      {search && <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] h-40 bg-[linear-gradient(180deg,transparent,#03223f80)] max-sm:hidden" />}
+      </div>
+      {/* Computers: the search sits inside the banner's bottom edge. Phones: just below the banner. */}
+      {search && <div className="absolute inset-x-0 bottom-8 z-20 max-sm:static max-sm:bg-[#f8f1e6] max-sm:pb-1 max-sm:pt-4">{search}</div>}
     </section>
   );
 }

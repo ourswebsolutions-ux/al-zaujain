@@ -44,16 +44,7 @@ export default async function HomepageSettings() {
               <Badge value={banner.active ? 'active' : 'inactive'} label={banner.active ? 'Shown' : 'Hidden'} />
             </div>
             <div className="grid grid-cols-[minmax(0,160px)_minmax(0,1fr)] items-start gap-5 max-p:grid-cols-1 [&>*]:min-w-0">
-              <div className="grid gap-2">
-                {banner.mobileImage && (
-                  <>
-                    <p className="text-xs font-medium text-muted">{t('Phone image')}</p>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={imageSrc(banner.mobileImage, 400)} alt="" className="aspect-[8/9] w-28 rounded-lg object-cover shadow-[0_4px_14px_#062b4e26]" />
-                  </>
-                )}
-                {!banner.mobileImage && <p className="text-xs text-muted">{t('No phone image: phones show the wide image, cropped to fit.')}</p>}
-              </div>
+              <p className="text-xs text-muted">{t('Shown as a 3:1 rectangle (1500 × 500) on computers and phones alike, like the reference site.')}</p>
               <ActionForm action={saveBanner} className="grid gap-3">
                 <BannerEditor banner={banner} imageSrc={imageSrc(banner.image, 1400)} />
                 <Submit size="sm" className="w-fit cursor-pointer">{t('Save changes')}</Submit>
