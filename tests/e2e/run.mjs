@@ -173,7 +173,7 @@ await step('homepage renders the new sections in order', async () => {
   await page.context().close();
 });
 
-await step('first visit shows the WhatsApp Channel welcome once, and Maybe later is remembered', async () => {
+await step('the WhatsApp Channel welcome shows on every load, until the visitor joins', async () => {
   const page = await newPage({ welcome: true });
   await page.goto('/');
   const dialog = page.getByRole('dialog', { name: 'Join Al Zaujain on WhatsApp' });
@@ -181,12 +181,13 @@ await step('first visit shows the WhatsApp Channel welcome once, and Maybe later
   assert.equal(await dialog.getByRole('link', { name: 'Join WhatsApp Channel' }).getAttribute('href'), 'https://whatsapp.com/channel/0029VaddRahADTOD4MXm3T25');
   await dialog.getByRole('button', { name: 'Maybe later' }).click();
   await dialog.waitFor({ state: 'detached' });
-  await page.goto('/proposals');
-  await page.waitForTimeout(2600);
-  assert.equal(await page.getByRole('dialog').count(), 0, 'not shown again on the next page');
+  await page.reload();
+  await dialog.waitFor({ timeout: 8000 });
+  // Joining is remembered: no more welcome after that.
+  await page.evaluate(() => localStorage.setItem('az_channel_welcome', JSON.stringify({ choice: 'joined', at: Date.now() })));
   await page.reload();
   await page.waitForTimeout(2600);
-  assert.equal(await page.getByRole('dialog').count(), 0, 'nor after a reload');
+  assert.equal(await page.getByRole('dialog').count(), 0, 'not shown after joining');
   await page.context().close();
 });
 

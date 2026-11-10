@@ -53,12 +53,10 @@ class _SiteHomeScreenState extends State<SiteHomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _channelWelcome());
   }
 
-  // The website's WhatsApp Channel welcome: shown once; "Maybe later" waits a week.
+  // The website's WhatsApp Channel welcome: shown every time the app opens, until the member taps Join.
   Future<void> _channelWelcome() async {
     final prefs = await SharedPreferences.getInstance();
-    final choice = prefs.getString('channel_welcome');
-    final at = prefs.getInt('channel_welcome_at') ?? 0;
-    if (choice == 'joined' || (choice == 'later' && DateTime.now().millisecondsSinceEpoch - at < 7 * 86400000)) return;
+    if (prefs.getString('channel_welcome') == 'joined') return;
     await Future<void>.delayed(const Duration(milliseconds: 1800));
     if (!mounted) return;
     final joined = await showDialog<bool>(context: context, builder: (_) => const _ChannelDialog());

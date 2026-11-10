@@ -6,7 +6,6 @@ import { FaBell, FaCheck, FaWhatsapp, FaXmark } from 'react-icons/fa6';
 import { useT } from '@/components/i18n/LanguageProvider';
 
 const KEY = 'az_channel_welcome';
-const LATER_DAYS = 7;
 
 function read() {
   try {
@@ -25,9 +24,9 @@ function remember(choice) {
 }
 
 /**
- * The welcome screen inviting a first-time visitor to the official WhatsApp Channel. It appears once,
- * a moment after the first page loads. "Join" is remembered for good, "Maybe later" for a week, and it
- * never reappears while the visitor moves between pages.
+ * The welcome screen inviting visitors to the official WhatsApp Channel. It appears a moment after
+ * every page load or refresh (moving between pages inside the site does not reload, so it does not
+ * repeat there). Only a visitor who tapped "Join" is not asked again.
  */
 export function ChannelWelcome({ url }) {
   const t = useT();
@@ -37,13 +36,6 @@ export function ChannelWelcome({ url }) {
   useEffect(() => {
     const saved = read();
     if (saved?.choice === 'joined') return undefined;
-    if (saved?.choice === 'later' && Date.now() - saved.at < LATER_DAYS * 86400000) return undefined;
-    try {
-      if (sessionStorage.getItem(KEY)) return undefined;
-      sessionStorage.setItem(KEY, '1');
-    } catch {
-      /* ignore */
-    }
     const timer = setTimeout(() => setOpen(true), 1800);
     return () => clearTimeout(timer);
   }, []);

@@ -602,16 +602,18 @@ await step('consultants, legal pages and settings open', async () => {
   await back();
 });
 
-await step('the WhatsApp Channel welcome shows once, and "Maybe later" closes it', async () => {
+await step('the WhatsApp Channel welcome shows every time the app opens, and "Maybe later" closes it', async () => {
   await page.evaluate(() => { localStorage.setItem('az_test_welcome', '1'); localStorage.removeItem('flutter.channel_welcome'); localStorage.removeItem('flutter.channel_welcome_at'); });
   await fresh();
   await button('Join WhatsApp Channel').waitFor({ timeout: 15000 });
   await shot('25-channel-welcome');
   await button('Maybe later').click();
   await page.waitForTimeout(800);
+  await page.waitForTimeout(800);
+  assert.equal(await button('Maybe later').isVisible().catch(() => false), false, '"Maybe later" closes it');
   await fresh();
-  await page.waitForTimeout(3000);
-  assert.equal(await button('Maybe later').isVisible().catch(() => false), false, 'the welcome waits a week after "Maybe later"');
+  await button('Join WhatsApp Channel').waitFor({ timeout: 15000 });
+  await button('Maybe later').click();
 });
 
 await step('tablet width shows proposals in a grid', async () => {
