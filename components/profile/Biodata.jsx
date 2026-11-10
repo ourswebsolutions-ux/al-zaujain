@@ -23,9 +23,9 @@ async function InfoGrid({ rows, columns = 'grid-cols-3 max-p:grid-cols-2 max-m:g
   return (
     <dl className={`grid gap-x-7 ${columns}`}>
       {rows.map((row) => (
-        <div key={row.label} className="flex items-baseline justify-between gap-3 border-b border-dashed border-[#e9e2d4] py-2.5 max-sm:flex-col max-sm:items-start max-sm:gap-1 max-sm:py-3">
-          <dt className="shrink-0 text-xs capitalize text-muted max-sm:text-[12.5px] max-sm:font-semibold max-sm:text-[#8a6a2c]">{t(row.label)}</dt>
-          <dd className={`min-w-0 break-words text-end text-sm font-semibold text-navy ${/@|:\/\//.test(String(row.value)) ? '' : 'capitalize'} max-sm:w-full max-sm:text-start max-sm:text-[15px]`}>{t(row.value)}</dd>
+        <div key={row.label} className="flex flex-col items-start gap-1 border-b border-dashed border-[#e9e2d4] py-3">
+          <dt className="text-[12.5px] font-semibold capitalize text-[#8a6a2c]">{t(row.label)}</dt>
+          <dd className={`w-full min-w-0 break-words text-start text-[15px] font-semibold leading-snug text-navy ${/@|:\/\//.test(String(row.value)) ? '' : 'capitalize'}`}>{t(row.value)}</dd>
         </div>
       ))}
     </dl>
@@ -58,11 +58,11 @@ export async function Highlights({ items }) {
     <ul className="grid grid-cols-4 gap-3 max-m:grid-cols-2">
       {items.filter((item) => item.value).map((item) => (
         <li key={item.label} className="rounded-xl border border-[#ece4d4] bg-[#fbf8f1] px-4 py-3">
-          <p className="flex items-center justify-between gap-2 text-[11px] text-muted">
+          <p className="flex items-center justify-between gap-2 text-[11px] capitalize text-muted">
             {t(item.label)}
             <Urdu as="span" className="text-[11px] leading-6 text-[#9b712b] max-m:hidden">{item.ur}</Urdu>
           </p>
-          <p className="font-nunito text-[19px] font-extrabold leading-tight text-navy max-m:text-base">{t(item.value)}</p>
+          <p className="font-nunito text-[19px] font-extrabold capitalize leading-tight text-navy max-m:text-base">{t(item.value)}</p>
         </li>
       ))}
     </ul>
