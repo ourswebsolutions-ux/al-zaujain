@@ -242,7 +242,12 @@ export default async function PackagesPage() {
             <div className="mx-auto mt-8 w-[95%] columns-2 gap-[15px] text-center max-[991px]:w-full max-[991px]:columns-1">
               {methods.map((method) => (
                 <figure key={method.id} className="mx-0.5 mb-[15px] inline-block w-full break-inside-avoid rounded-[10px] border-2 border-[#fcfcfc] bg-[#fefefe] p-[15px] pb-0 shadow-[0_5px_10px_#2323234d]">
-                  <div aria-hidden="true" className="mx-auto mb-[5px] grid size-[110px] place-items-center border-b-2 border-navy text-[52px] text-navy"><FaBuildingColumns /></div>
+                  {method.qr_image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={`/media/payments/${method.qr_image}`} alt={t('{name} QR code', { name: method.name })} className="mx-auto mb-[5px] size-[190px] border-b-2 border-navy object-contain pb-1" />
+                  ) : (
+                    <div aria-hidden="true" className="mx-auto mb-[5px] grid size-[110px] place-items-center border-b-2 border-navy text-[52px] text-navy"><FaBuildingColumns /></div>
+                  )}
                   <figcaption className="text-[.9rem] leading-[1.5] text-[#444]">
                     <h3 className="my-2 text-[1.35rem] font-semibold text-[#9b712b]">{method.bank_name || method.name}</h3>
                     <table className="mb-4 w-full border-collapse">

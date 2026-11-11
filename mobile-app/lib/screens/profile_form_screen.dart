@@ -298,10 +298,13 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
         }
         return FieldShell(label: 'Age', child: Container(width: double.infinity, padding: const EdgeInsets.all(14), decoration: BoxDecoration(color: AppColors.cream, borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFFDCE0DC))), child: Text(age == null ? tr('Calculated from date of birth') : '$age')));
       case 'select':
-        return PickerField(label: label, required: required, locked: locked, hint: hint, error: error, options: optionsFrom(field['options']), value: value, anyLabel: required ? null : 'Not specified', placeholder: 'Select', onChanged: (picked) => _change(name, picked));
+        // Choose from the list or type your own; gender and height must be one of the list.
+        final strict = field['strict'] == true || field['numeric'] == true;
+        return PickerField(label: label, required: required, locked: locked, hint: hint, error: error, options: optionsFrom(field['options']), value: value, anyLabel: required ? null : 'Not specified', allowCustom: !strict, placeholder: strict ? 'Select' : 'Choose, or type your own', onChanged: (picked) => _change(name, picked));
       case 'country':
         final countries = ((app.config['countries'] as List?) ?? []).cast<Map>().map((country) => Option('${country['id']}', tr('${country['name']}'))).toList();
-        return PickerField(label: label, required: required, locked: locked, hint: hint, error: error, options: countries, value: value, placeholder: 'Select', onChanged: (picked) {
+        // A country from the list, or one the family types themselves (the website adds it).
+        return PickerField(label: label, required: required, locked: locked, hint: hint, error: error, options: countries, value: value, allowCustom: true, placeholder: 'Choose, or type your country', onChanged: (picked) {
           _change(name, picked);
           final city = values['city'];
           final country = _countryNameOf(picked);

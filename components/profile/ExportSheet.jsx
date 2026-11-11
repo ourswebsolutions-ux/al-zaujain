@@ -123,3 +123,87 @@ export function ExportSheet({ data, subtitle, photo, phone, generatedOn }) {
     </div>
   );
 }
+
+// Education and work rows get their own part; the rest of section A is personal information.
+const EDUCATION = /educat|qualif|degree|work|profession|occupation|job|business|employ|income|institut/i;
+
+// The parts of the mobile download: one phone-sized picture per section, zipped together.
+export function exportParts(data) {
+  const personal = data.candidate.filter((row) => !EDUCATION.test(row.label));
+  const education = data.candidate.filter((row) => EDUCATION.test(row.label));
+  return [
+    { file: '1-profile', title: 'Profile', ur: 'پروفائل', intro: true },
+    personal.length && { file: '2-personal-information', title: 'Personal Information', ur: 'ذاتی معلومات', rows: personal },
+    education.length && { file: '3-education-and-profession', title: 'Education & Profession', ur: 'تعلیم اور پیشہ', rows: education },
+    data.residence.length && { file: '4-residence', title: 'Residence', ur: 'رہائش', rows: data.residence },
+    (data.family.length || data.familyBackground) && { file: '5-family', title: 'Family Details', ur: 'خاندانی تفصیلات', rows: data.family, text: data.familyBackground },
+    data.about && { file: '6-about', title: 'About The Candidate', ur: 'امیدوار کے بارے میں', text: data.about },
+    data.contact.length && { file: '7-contact', title: 'Private Contact Details', ur: 'رابطے کی تفصیلات', rows: data.contact },
+    (data.partner.demand || data.partner.rows.length) && { file: '8-partner-requirements', title: 'Partner Requirements', ur: 'رشتے کی ضروریات', boxed: data.partner.demand, rows: data.partner.rows },
+  ].filter(Boolean);
+}
+
+// One picture of the mobile download: the brand band, the part's title and content, and the footer.
+export function ExportPart({ part, index, total, data, subtitle, photo, phone }) {
+  const t = useT();
+  const highlights = (data.highlights ?? []).filter((item) => item.value);
+  return (
+    <div data-part={part.file} className="w-[560px] bg-white font-sans text-ink">
+      <div className="border-b-[3px] border-gold bg-navy px-6 py-4 text-white">
+        <div className="flex items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/logo.png" alt="" className="size-[46px] rounded-full bg-white" />
+          <div className="flex-1">
+            <p className="text-[16px] font-bold tracking-[1px]">AL ZAUJAIN</p>
+            <p className="text-[8.5px] font-medium uppercase tracking-[1.2px] text-champagne">{t('Marriage Bureau Multan Pakistan')}</p>
+          </div>
+          <div className="text-end">
+            <p className="text-[8px] tracking-[2px] text-champagne">{t('PROFILE ID')}</p>
+            <p className="font-nunito text-[19px] font-extrabold">{data.code}</p>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center gap-3 px-6 pb-2 pt-4">
+        <span aria-hidden="true" className="grid size-7 shrink-0 place-items-center rounded-full border border-gold font-nunito text-[12px] font-extrabold text-[#9b712b]">{index}</span>
+        <h2 className="font-quicksand text-[17px] font-bold capitalize text-navy">{t(part.title)}</h2>
+        <Urdu keep as="span" className="ml-auto whitespace-nowrap text-[13px] leading-8 text-[#9b712b]">{part.ur}</Urdu>
+      </div>
+      <div className="mx-6 border-b border-[#eee6d8]" />
+      <div className="px-6 pb-5 pt-2">
+        {part.intro && (
+          <>
+            <div className="flex items-center gap-5 pt-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={photo || '/images/logo.png'} alt="" className={`size-[160px] shrink-0 rounded-[16px] object-cover ${photo ? '' : 'bg-[#e9e1d1] p-8 opacity-70'}`} />
+              <div className="min-w-0">
+                <p className="font-[family-name:var(--font-poppins)] text-[24px] font-bold capitalize leading-tight text-navy">
+                  {data.name}{data.verified && <span className="ms-2 inline-block rounded-full bg-[#e8f4ff] px-2 py-0.5 align-middle text-[11px] font-semibold text-verified">✓ {t('Verified')}</span>}
+                </p>
+                {subtitle && <p className="mt-1 text-[12.5px] capitalize text-muted">{subtitle}</p>}
+                <Urdu keep className="mt-1 text-start text-[14px] leading-9 text-[#9b712b]">رشتے محبت کے، فیصلے اپنوں کے</Urdu>
+              </div>
+            </div>
+            {highlights.length > 0 && (
+              <ul className="mt-4 grid grid-cols-2 gap-2.5">
+                {highlights.map((item) => (
+                  <li key={item.label} className="rounded-xl border border-[#ece4d4] bg-[#fbf8f1] px-3.5 py-2.5">
+                    <p className="text-[10.5px] capitalize text-muted">{t(item.label)}</p>
+                    <p className="font-nunito text-[15px] font-extrabold capitalize leading-tight text-navy">{t(item.value)}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
+        )}
+        {part.boxed && <BidiText text={part.boxed} className="mt-3 rounded-2xl border border-[#ece4d4] bg-[#fbf8f1] px-5 py-4 text-navy" englishClass="text-[13.5px] leading-[1.75]" urduClass="text-[15px] leading-[2.5]" />}
+        {part.rows?.length > 0 && <Rows rows={part.rows} columns={2} />}
+        {part.text && <BidiText text={part.text} className="mt-3 text-[#536471]" englishClass="text-[13.5px] leading-[1.75]" urduClass="text-[15px] leading-[2.5]" />}
+      </div>
+      <div className="flex items-center justify-between bg-navy px-6 py-3 text-[10.5px] text-white">
+        <span>{t('Trusted matchmaking for a better future.')}</span>
+        <span dir="ltr" className="text-champagne">{phone}</span>
+        <span>{index} / {total}</span>
+      </div>
+    </div>
+  );
+}

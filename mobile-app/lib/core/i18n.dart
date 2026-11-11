@@ -134,6 +134,7 @@ const _appUrdu = <String, String>{
   'Complete profile copied to your clipboard.': 'مکمل پروفائل کاپی ہو گئی۔',
   'The image could not be created. Please try again.': 'تصویر نہیں بن سکی۔ براہ کرم دوبارہ کوشش کریں۔',
   'The PDF could not be created. Please try again.': 'پی ڈی ایف نہیں بن سکی۔ براہ کرم دوبارہ کوشش کریں۔',
+  'The images could not be created. Please try again.': 'تصاویر نہیں بن سکیں۔ براہ کرم دوبارہ کوشش کریں۔',
   'Image': 'تصویر',
   'PDF': 'پی ڈی ایف',
   'Never shown publicly': 'کبھی عوامی طور پر نہیں دکھایا جاتا',

@@ -21,12 +21,14 @@
     "app:publish": "node mobile-app/scripts/publish-apk.mjs",
     "test:mobile-app": "node tests/e2e/mobile-app-web.mjs",
     "app:build": "node mobile-app/scripts/build-apk.mjs",
-    "seed:packages": "node scripts/seed-packages.mjs"
+    "seed:packages": "node scripts/seed-packages.mjs",
+    "seed:payments": "node scripts/add-payment-methods.mjs"
   },
   "dependencies": {
     "@prisma/adapter-mariadb": "7.10.1",
     "@prisma/client": "7.10.1",
     "framer-motion": "^14.9.1",
+    "fflate": "^0.8.3",
     "html-to-image": "^1.11.13",
     "jspdf": "^4.2.1",
     "next": "^16.4.5",

@@ -17,6 +17,14 @@ export function FieldControl({ field, value, onChange, error, countries = [], ci
     case 'textarea':
       return <textarea rows={field.rows ?? 3} maxLength={field.max} dir={field.dir} {...common} className={`${inputClass} ${URDU_SCRIPT.test(value ?? '') ? 'font-urdu text-base leading-[2.4]' : ''}`} />;
     case 'select':
+      // Choose from the list or type your own; only gender and height must be one of the list.
+      if (!field.strict && !field.numeric) {
+        const options = field.options.map((option) => {
+          const [optionValue, label] = Array.isArray(option) ? option : [option, option];
+          return { value: optionValue, label: t(label) };
+        });
+        return <SearchSelect {...searchable} options={options} allowCustom maxLength={80} placeholder="Choose, or type your own" />;
+      }
       return (
         <select {...common}>
           <option value="">{t('Select…')}</option>
@@ -29,7 +37,7 @@ export function FieldControl({ field, value, onChange, error, countries = [], ci
     case 'country':
     case 'country-name': {
       const options = countries.map((country) => ({ value: field.type === 'country' ? country.id : country.name, label: t(country.name) }));
-      return <SearchSelect {...searchable} options={options} placeholder="Type or choose a country" />;
+      return <SearchSelect {...searchable} options={options} allowCustom maxLength={100} placeholder="Choose, or type your country" />;
     }
     case 'date':
       return <input type="date" {...common} />;

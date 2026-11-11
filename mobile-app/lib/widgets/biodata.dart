@@ -25,7 +25,7 @@ class BiodataHeader extends StatelessWidget {
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(tr('AL ZAUJAIN'), style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 1)),
-              Text(tr('INTERNATIONAL MARRIAGE CONSULTANCY'), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.champagne, fontSize: 7.5, letterSpacing: 0.3)),
+              Text(tr('Marriage Bureau Multan Pakistan').toUpperCase(), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.champagne, fontSize: 7.5, letterSpacing: 0.3)),
             ]),
           ),
           Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
