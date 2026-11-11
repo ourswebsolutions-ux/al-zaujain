@@ -84,7 +84,7 @@ export function ChatThread({ conversationId, currentUserId, initialMessages, ini
           return (
             <div key={message.id} className={`mb-3 flex ${mine ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[78%] px-3.5 py-2.5 text-sm leading-[21px] ${mine ? 'rounded-[14px_14px_3px_14px] bg-navy text-white' : 'rounded-[14px_14px_14px_3px] border border-line bg-white text-navy'}`}>
-                <p className="whitespace-pre-wrap break-words">{message.body}</p>
+                <p data-plain className="whitespace-pre-wrap break-words">{message.body}</p>
                 <time className={`mt-1 block text-[10px] ${mine ? 'text-[#c1cdd6]' : 'text-muted'}`}>{formatDateTime(message.created_at, lang)}{t(mine && message.read_at ? ' · Read' : '')}</time>
               </div>
             </div>

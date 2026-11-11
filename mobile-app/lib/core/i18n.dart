@@ -9,6 +9,17 @@ class Translator {
 
   bool get isUrdu => lang == 'ur';
 
+  /// Title Case for English, as on the website: every word starts with a capital ("Candidate Information").
+  /// Emails, links and words that already have capitals inside (WhatsApp, AZ-61) are left as they are.
+  static String titled(String text) => text.replaceAllMapped(RegExp(r"[^\s]+"), (match) {
+        final word = match[0]!;
+        if (word.contains('@') || word.contains('://') || word.startsWith('www.')) return word;
+        final first = word.runes.first;
+        final letter = String.fromCharCode(first);
+        if (letter.toUpperCase() == letter) return word;
+        return letter.toUpperCase() + word.substring(letter.length);
+      });
+
   static String fill(String text, Map<String, Object?>? vars) {
     if (vars == null) return text;
     return text.replaceAllMapped(RegExp(r'\{(\w+)\}'), (match) => vars.containsKey(match[1]) ? '${vars[match[1]] ?? ''}' : match[0]!);
@@ -16,7 +27,7 @@ class Translator {
 
   String call(String? text, [Map<String, Object?>? vars]) {
     if (text == null || text.isEmpty) return text ?? '';
-    if (lang != 'ur') return fill(text, vars);
+    if (lang != 'ur') return titled(fill(text, vars));
     final exact = _ur[text];
     if (exact != null) return fill(exact, vars);
     for (final (pattern, template) in _patterns) {

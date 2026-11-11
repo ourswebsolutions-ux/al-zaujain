@@ -54,7 +54,7 @@ class _Heading extends StatelessWidget {
       child: Row(children: [
         Container(width: 30, height: 30, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.gold)), child: Text(letter, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.deepGold))),
         const SizedBox(width: 10),
-        Expanded(child: Tx(tr(title), style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700))),
+        Expanded(child: Tx(titleCase(tr(title)), style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700))),
         UrduLine(urdu, size: 12),
       ]),
     );

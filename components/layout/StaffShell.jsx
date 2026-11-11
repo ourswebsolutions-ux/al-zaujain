@@ -46,7 +46,8 @@ export function StaffShell({ title, items, footer, theme: initialTheme = 'light'
           <button type="button" aria-label={t('Open menu')} onClick={() => setOpen(!open)} className="cursor-pointer text-lg text-navy">{open ? <FaXmark aria-hidden="true" /> : <FaBars aria-hidden="true" />}</button>
           <strong className="text-sm">{t(title)}</strong>
         </div>
-        <main className="p-7 max-m:p-4">{children}</main>
+        {/* Staff pages are full of emails, codes and typed notes: their text stays as written; headings and buttons are still Title Case. */}
+        <main data-plain className="p-7 max-m:p-4">{children}</main>
       </div>
     </div>
   );

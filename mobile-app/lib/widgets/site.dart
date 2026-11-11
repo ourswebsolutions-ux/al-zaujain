@@ -66,10 +66,10 @@ class SectionHeading extends StatelessWidget {
     return Column(children: [
       if (label != null) ...[SiteLabel(label!), const SizedBox(height: 8)],
       if (highlight == null)
-        GradientText(tr(title), size: size)
+        GradientText(titleCase(tr(title)), size: size)
       else
         Wrap(alignment: WrapAlignment.center, crossAxisAlignment: WrapCrossAlignment.end, spacing: 8, children: [
-          Text(tr(title), style: TextStyle(fontFamily: headFont, fontSize: size, fontWeight: FontWeight.w700, color: AppColors.navy, height: app.t.isUrdu ? 1.9 : 1.2)),
+          Text(titleCase(tr(title)), style: TextStyle(fontFamily: headFont, fontSize: size, fontWeight: FontWeight.w700, color: AppColors.navy, height: app.t.isUrdu ? 1.9 : 1.2)),
           GradientText(tr(highlight!), size: size),
         ]),
       const SizedBox(height: 14),

@@ -25,7 +25,7 @@ async function InfoGrid({ rows, columns = 'grid-cols-3 max-p:grid-cols-2 max-m:g
       {rows.map((row) => (
         <div key={row.label} className="flex flex-col items-start gap-1 border-b border-dashed border-[#e9e2d4] py-3">
           <dt className="text-[12.5px] font-semibold capitalize text-[#8a6a2c]">{t(row.label)}</dt>
-          <dd className={`w-full min-w-0 break-words text-start text-[15px] font-semibold leading-snug text-navy ${/@|:\/\//.test(String(row.value)) ? '' : 'capitalize'}`}>{t(row.value)}</dd>
+          <dd className={`w-full min-w-0 break-words text-start text-[15px] font-semibold leading-snug text-navy ${/@|:\/\//.test(String(row.value)) ? 'normal-case' : 'capitalize'}`}>{t(row.value)}</dd>
         </div>
       ))}
     </dl>

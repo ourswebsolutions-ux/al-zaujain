@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -85,7 +86,11 @@ class _BiodataPreviewState extends State<BiodataPreview> {
   Future<ui.Image> _render() async {
     await Future<void>.delayed(const Duration(milliseconds: 250));
     final render = boundary.currentContext!.findRenderObject() as RenderRepaintBoundary;
-    return render.toImage(pixelRatio: 2);
+    // Phones cannot make a picture taller than their graphics limit (often 4096 pixels): a long biodata
+    // at double resolution went past it and the download failed. Stay safely inside it.
+    final size = render.size;
+    final ratio = [2.0, 4000 / size.height, 4000 / size.width].reduce((a, b) => a < b ? a : b);
+    return render.toImage(pixelRatio: ratio);
   }
 
   Future<Uint8List> _png(ui.Image image) async => (await image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
@@ -95,14 +100,17 @@ class _BiodataPreviewState extends State<BiodataPreview> {
     try {
       final image = await _render();
       final code = widget.data['code'];
-      XFile file;
-      if (kind == 'image') {
-        file = XFile.fromData(await _png(image), mimeType: 'image/png', name: 'al-zaujain-$code.png');
-      } else {
-        file = XFile.fromData(await _pdf(image), mimeType: 'application/pdf', name: 'al-zaujain-$code.pdf');
-      }
-      await SharePlus.instance.share(ShareParams(files: [file], fileNameOverrides: [file.name], subject: 'Al Zaujain $code'));
-    } catch (_) {
+      final png = kind == 'image';
+      final bytes = png ? await _png(image) : await _pdf(image);
+      // Saved as a real, named file first: handing raw bytes to the share sheet failed on Android
+      // ("Is a directory"), which is what "could not be created" was.
+      final folder = await Directory('${Directory.systemTemp.path}/biodata').create(recursive: true);
+      final path = '${folder.path}/al-zaujain-$code.${png ? 'png' : 'pdf'}';
+      await File(path).writeAsBytes(bytes, flush: true);
+      final file = XFile(path, mimeType: png ? 'image/png' : 'application/pdf', name: 'al-zaujain-$code.${png ? 'png' : 'pdf'}');
+      await SharePlus.instance.share(ShareParams(files: [file], subject: 'Al Zaujain $code'));
+    } catch (error, stack) {
+      debugPrint('Biodata $kind failed: $error\n$stack');
       if (mounted) showMessage(context, kind == 'image' ? 'The image could not be created. Please try again.' : 'The PDF could not be created. Please try again.', error: true);
     } finally {
       if (mounted) setState(() => busy = null);
@@ -176,25 +184,36 @@ class ExportSheet extends StatelessWidget {
       color: Colors.white,
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         BiodataHeader(data: data),
-        Padding(
+        // The photo and name, as on the profile page.
+        Container(
+          color: const Color(0xFFFCFBF8),
           padding: const EdgeInsets.all(24),
-          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            if (photo != null) Padding(padding: const EdgeInsetsDirectional.only(end: 18), child: NetImage(photo, width: 150, height: 150, radius: 14)),
+          child: Row(children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: photo != null
+                  ? NetImage(photo, width: 190, height: 190)
+                  : Container(width: 190, height: 190, color: const Color(0xFFE9E1D1), padding: const EdgeInsets.all(36), child: Opacity(opacity: 0.7, child: Image.asset('assets/images/logo.png'))),
+            ),
+            const SizedBox(width: 24),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Row(children: [Flexible(child: Tx('${data['name']}', style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700))), if (data['verified'] == true) const Padding(padding: EdgeInsetsDirectional.only(start: 6), child: VerifiedBadge(size: 20))]),
-                Tx(subtitle.where((part) => part.isNotEmpty).map(tr).join(' · '), style: const TextStyle(fontSize: 13, color: AppColors.muted)),
+                Row(children: [Flexible(child: Tx(titleCase('${data['name']}'), style: TextStyle(fontFamily: headFont, fontSize: 28, fontWeight: FontWeight.w700, color: AppColors.navy))), if (data['verified'] == true) const Padding(padding: EdgeInsetsDirectional.only(start: 8), child: VerifiedBadge(size: 20))]),
+                const SizedBox(height: 4),
+                Tx(titleCase(subtitle.where((part) => part.isNotEmpty).map(tr).join(' · ')), style: const TextStyle(fontSize: 13.5, color: AppColors.muted)),
+                if (!app.t.isUrdu) Text('رشتے محبت کے، فیصلے اپنوں کے', textDirection: TextDirection.rtl, style: urduStyle.copyWith(fontSize: 15, color: const Color(0xFF9B712B))),
               ]),
             ),
           ]),
         ),
+        const SizedBox(height: 20),
         Padding(padding: const EdgeInsets.fromLTRB(24, 0, 24, 18), child: CandidateSection(data: data)),
         PartnerSection(data: data),
         Container(
           color: AppColors.navy,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           child: Row(children: [
-            Expanded(child: Text('${tr('Al Zaujain International Marriage Consultancy')} · ${app.site['site_phone'] ?? ''}', style: const TextStyle(color: AppColors.champagne, fontSize: 11))),
+            Expanded(child: Text('${tr('Trusted matchmaking for a better future.')} · ${app.site['site_phone'] ?? ''}', style: const TextStyle(color: AppColors.champagne, fontSize: 11))),
             Text(formatDate(DateTime.now().toIso8601String()), style: const TextStyle(color: Colors.white, fontSize: 11)),
           ]),
         ),

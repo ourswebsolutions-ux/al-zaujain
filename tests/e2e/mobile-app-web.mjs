@@ -124,7 +124,8 @@ async function shot(name) {
 // Flutter draws on a canvas; with semantics on, every control also appears as an accessible element.
 const button = (name) => page.getByRole('button', { name, exact: false }).first();
 // Plain text appears either as an element's text or as its accessibility label; the deepest match wins.
-const text = (value) => page.locator(`flt-semantics[aria-label*=${JSON.stringify(value)}], flt-semantics:has-text(${JSON.stringify(value)})`).last();
+// The app shows English in Title Case ("1 Proposal Found"), so the match ignores capitals.
+const text = (value) => page.locator(`flt-semantics[aria-label*=${JSON.stringify(value)} i], flt-semantics:has-text(${JSON.stringify(value)})`).last();
 const tap = async (locator) => { await locator.waitFor({ state: 'visible' }); await locator.click(); };
 // Only the focused field is a real input in a Flutter web page: tap it, then type like a person.
 async function typeIn(label, value) {

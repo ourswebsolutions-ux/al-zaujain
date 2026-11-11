@@ -97,7 +97,7 @@ class AppButton extends StatelessWidget {
         else if (icon != null)
           Icon(icon, size: small ? 15 : 18),
         if (busy || icon != null) const SizedBox(width: 8),
-        Flexible(child: Text(tr(label), overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: headFont, fontWeight: FontWeight.w600, fontSize: small ? 12.5 : 14))),
+        Flexible(child: Text(titleCase(tr(label)), overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: headFont, fontWeight: FontWeight.w600, fontSize: small ? 12.5 : 14))),
         if (trailing != null) ...[const SizedBox(width: 8), Icon(trailing, size: small ? 14 : 16)],
       ],
     );
@@ -143,7 +143,7 @@ class Panel extends StatelessWidget {
       child: title == null
           ? child
           : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Row(children: [Expanded(child: Text(tr(title), style: TextStyle(fontFamily: headFont, fontSize: 15, fontWeight: FontWeight.w600))), ?trailing]),
+              Row(children: [Expanded(child: Text(titleCase(tr(title)), style: TextStyle(fontFamily: headFont, fontSize: 15, fontWeight: FontWeight.w600))), ?trailing]),
               const SizedBox(height: 12),
               child,
             ]),
@@ -187,7 +187,7 @@ class EmptyState extends StatelessWidget {
       child: Column(children: [
         Container(width: 56, height: 56, decoration: const BoxDecoration(color: AppColors.cream, shape: BoxShape.circle), child: Icon(icon, color: AppColors.gold, size: 24)),
         const SizedBox(height: 14),
-        Tx(tr(title), textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        Tx(titleCase(tr(title)), textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
         if (text != null) ...[const SizedBox(height: 6), Tx(tr(text), textAlign: TextAlign.center, style: const TextStyle(fontSize: 13, color: AppColors.muted, height: 1.5))],
         if (action != null) ...[const SizedBox(height: 18), action!],
       ]),
@@ -418,7 +418,7 @@ class PageIntro extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Tx(tr(title), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, height: 1.25)),
+        Tx(titleCase(tr(title)), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, height: 1.25)),
         if (urdu != null) UrduLine(urdu!, size: 16),
         if (text != null) ...[const SizedBox(height: 4), Tx(tr(text), style: const TextStyle(fontSize: 13, color: AppColors.muted, height: 1.5))],
       ]),

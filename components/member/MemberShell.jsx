@@ -99,7 +99,7 @@ function Sidebar({ groups, counts, pathname, onNavigate, user }) {
         <form action={logout}>
           <button type="submit" className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-start text-[13px] text-[#c7d3dd] hover:bg-white/5 hover:text-white"><FaRightFromBracket aria-hidden="true" className="text-xs" /> {t('Sign out')}</button>
         </form>
-        <p dir="ltr" className="mt-1 truncate px-3 text-[11px] text-[#8fa3b5]">{user.email}</p>
+        <p dir="ltr" data-plain className="mt-1 truncate px-3 text-[11px] text-[#8fa3b5]">{user.email}</p>
       </div>
     </div>
   );
