@@ -94,6 +94,8 @@ model User {
   match_frequency    MatchFrequency @default(weekly)
   match_last_sent_at DateTime?
   last_login_at      DateTime?
+  // When the member confirmed their email with a code. Accounts from before email confirmation count as confirmed.
+  email_verified_at  DateTime?
   created_at         DateTime       @default(now())
   // Premium profile credits. Only lib/credits.js changes this, always inside a transaction with a ledger row.
   credits            Int            @default(0)
@@ -102,6 +104,7 @@ model User {
 
   sessions            Session[]
   tokens              Token[]
+  email_codes         EmailCode[]
   profiles            Profile[]
   consultant          Consultant?
   conversations_low   Conversation[]      @relation("low")
@@ -779,4 +782,19 @@ model ProfileUnlock {
   @@unique([user_id, profile_id])
   @@index([profile_id])
   @@map("profile_unlocks")
+}
+
+// A 6-digit email confirmation code. Only its hash is stored; it expires and allows few attempts.
+model EmailCode {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  code_hash  String   @db.VarChar(64)
+  expires_at DateTime
+  attempts   Int      @default(0)
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, created_at])
+  @@map("email_codes")
 }

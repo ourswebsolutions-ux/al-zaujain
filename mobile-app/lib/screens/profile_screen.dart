@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 
 import '../core/api.dart';
@@ -390,8 +392,9 @@ class _HeroState extends State<_Hero> {
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 6),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         // The photos, square and whole, as on the website; blurred where the bureau's rules say so.
+        // A tall frame and the whole photo inside it (never cropped), on a soft blurred copy of itself.
         AspectRatio(
-          aspectRatio: 1,
+          aspectRatio: 4 / 5,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(18),
             child: Stack(fit: StackFit.expand, children: [
@@ -409,7 +412,11 @@ class _HeroState extends State<_Hero> {
                   onPageChanged: (value) => setState(() => index = value),
                   itemBuilder: (context, i) => GestureDetector(
                     onTap: widget.locked ? () => showUnlockSheet(context) : () => push(context, PhotoViewer(paths: photos.map((item) => '${item['file']}').toList(), start: i)),
-                    child: NetImage('${photos[i]['file']}'),
+                    child: Stack(fit: StackFit.expand, children: [
+                      ImageFiltered(imageFilter: ui.ImageFilter.blur(sigmaX: 24, sigmaY: 24), child: NetImage('${photos[i]['file']}')),
+                      Container(color: const Color(0x33FFFFFF)),
+                      NetImage('${photos[i]['file']}', fit: BoxFit.contain),
+                    ]),
                   ),
                 ),
               if (widget.locked)

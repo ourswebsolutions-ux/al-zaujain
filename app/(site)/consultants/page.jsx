@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { GradientHeading, Label, Ornament } from '@/components/home/HomeUi';
-import { ConsultantTile } from '@/components/profile/ConsultantTile';
+import { CONSULTANT_CARD_GRID, ConsultantTile } from '@/components/profile/ConsultantTile';
 import { Reveal } from '@/components/ui/Reveal';
 import { currentUser } from '@/lib/auth.js';
 import { consultantCities, publicConsultants } from '@/lib/consultants.js';
@@ -48,7 +48,7 @@ export default async function ConsultantsPage({ searchParams }) {
         )}
 
         {consultants.length > 0 ? (
-          <ul className="grid grid-cols-4 gap-6 max-[1180px]:grid-cols-3 max-t:grid-cols-2 max-sm:grid-cols-1 max-sm:gap-5">
+          <ul className={CONSULTANT_CARD_GRID}>
             {consultants.map((consultant, index) => (
               <Reveal as="li" key={consultant.id} y={24} delay={Math.min(index % 4, 3) * 0.06} className="min-w-0">
                 <ConsultantTile consultant={consultant} whatsapp={settings.site_whatsapp} t={t} now={now} />

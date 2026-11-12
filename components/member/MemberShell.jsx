@@ -71,21 +71,21 @@ function Badge({ count, className = '' }) {
 function Sidebar({ groups, counts, pathname, onNavigate, user }) {
   const t = useT();
   return (
-    <div className={`${KEEP_LIGHT} flex h-full flex-col bg-dark text-white`}>
-      <Link href="/" className="flex items-center gap-3 px-6 pb-5 pt-6 text-white no-underline">
-        <Image src="/images/logo.png" alt="Al Zaujain" width={42} height={42} className="rounded-full bg-white" />
-        <span className="text-sm font-bold leading-tight tracking-[1px]">AL ZAUJAIN<small className="mt-0.5 block text-[8.5px] font-medium tracking-[.4px] text-champagne">{t('International Consultancy')}</small></span>
+    <div className={`${KEEP_LIGHT} flex h-full flex-col border-e border-[var(--d-line,#e7e9ee)] bg-white text-navy shadow-[2px_0_14px_#062b4e0a]`}>
+      <Link href="/" className="flex items-center gap-3 border-b border-[#eef0f3] px-6 pb-5 pt-6 text-navy no-underline">
+        <Image src="/images/logo.png" alt="Al Zaujain" width={42} height={42} className="rounded-full" />
+        <span className="text-sm font-bold leading-tight tracking-[1px]">AL ZAUJAIN<small className="mt-0.5 block text-[8.5px] font-medium tracking-[.4px] text-[#9b712b]">{t('Marriage Bureau Multan Pakistan')}</small></span>
       </Link>
       <nav aria-label={t('Dashboard')} className="flex-1 overflow-y-auto px-3 pb-4">
         {groups.map((group) => (
           <div key={group.group} className="mt-5">
-            <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-[1.6px] text-[#8fa3b5]">{t(group.group)}</p>
+            <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-[1.6px] text-[#8a94a3]">{t(group.group)}</p>
             {group.items.map((item) => {
               const active = isActive(item.href, pathname);
               return (
-                <Link key={item.href} href={item.href} onClick={onNavigate} aria-current={active ? 'page' : undefined} className={`relative mb-0.5 flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] no-underline transition-colors duration-150 ${active ? 'font-medium text-white' : 'text-[#c7d3dd] hover:bg-white/5 hover:text-white'}`}>
-                  {active && <motion.span layoutId="active-nav" transition={{ type: 'spring', stiffness: 420, damping: 36 }} className="absolute inset-0 rounded-lg border-s-2 border-gold-soft bg-white/10" />}
-                  <item.icon aria-hidden="true" className={`relative text-sm ${active ? 'text-gold-soft' : ''}`} />
+                <Link key={item.href} href={item.href} onClick={onNavigate} aria-current={active ? 'page' : undefined} className={`relative mb-0.5 flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] no-underline transition-colors duration-150 ${active ? 'font-semibold text-white' : 'text-[#3d4a5a] hover:bg-[#f6f1e6] hover:text-navy'}`}>
+                  {active && <motion.span layoutId="active-nav" transition={{ type: 'spring', stiffness: 420, damping: 36 }} className="absolute inset-0 rounded-lg border-s-[3px] border-gold bg-navy shadow-[0_4px_12px_#062b4e33]" />}
+                  <item.icon aria-hidden="true" className={`relative text-sm ${active ? 'text-gold-soft' : 'text-[#9b712b]'}`} />
                   <span className="relative flex-1">{t(item.label)}</span>
                   <Badge count={counts[item.badge]} className="relative" />
                 </Link>
@@ -94,12 +94,12 @@ function Sidebar({ groups, counts, pathname, onNavigate, user }) {
           </div>
         ))}
       </nav>
-      <div className="border-t border-white/10 p-3">
-        <Link href="/" className="flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] text-[#c7d3dd] no-underline hover:bg-white/5 hover:text-white"><FaArrowUpRightFromSquare aria-hidden="true" className="text-xs" /> {t('Visit website')}</Link>
+      <div className="border-t border-[#eef0f3] p-3">
+        <Link href="/" className="flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] text-[#3d4a5a] no-underline hover:bg-[#f6f1e6] hover:text-navy"><FaArrowUpRightFromSquare aria-hidden="true" className="text-xs" /> {t('Visit website')}</Link>
         <form action={logout}>
-          <button type="submit" className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-start text-[13px] text-[#c7d3dd] hover:bg-white/5 hover:text-white"><FaRightFromBracket aria-hidden="true" className="text-xs" /> {t('Sign out')}</button>
+          <button type="submit" className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-start text-[13px] text-[#3d4a5a] hover:bg-[#f6f1e6] hover:text-navy"><FaRightFromBracket aria-hidden="true" className="text-xs" /> {t('Sign out')}</button>
         </form>
-        <p dir="ltr" data-plain className="mt-1 truncate px-3 text-[11px] text-[#8fa3b5]">{user.email}</p>
+        <p dir="ltr" data-plain className="mt-1 truncate px-3 text-[11px] text-muted">{user.email}</p>
       </div>
     </div>
   );
@@ -222,7 +222,7 @@ export function MemberShell({ user, avatar, unreadMessages, unreadAlerts, recent
       </AnimatePresence>
 
       <div className="b:ps-[264px]">
-        <header className="sticky top-0 z-20 flex h-[68px] items-center gap-3 border-b border-[var(--d-line,#e7e9ee)] bg-white/90 px-7 backdrop-blur max-m:h-[60px] max-m:px-3">
+        <header className="sticky top-0 z-20 flex h-[68px] items-center gap-3 border-b border-[var(--d-line,#e7e9ee)] bg-white px-7 shadow-[0_2px_10px_#062b4e08] max-m:h-[60px] max-m:px-3">
           <button type="button" onClick={() => setDrawer(true)} aria-label={t('Open menu')} className="grid size-10 cursor-pointer place-items-center rounded-full text-navy hover:bg-[var(--d-hover,#f2f3f6)] b:hidden"><FaBars aria-hidden="true" /></button>
           <p className="truncate text-[15px] font-semibold text-navy">{t(title)}</p>
           <form action="/proposals" role="search" className="ms-auto flex items-center gap-2 rounded-full border border-[var(--d-line,#e7e9ee)] bg-[var(--d-hover,#f7f8fa)] px-3.5 focus-within:border-gold max-p:hidden">

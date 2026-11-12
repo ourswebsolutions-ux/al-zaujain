@@ -130,11 +130,12 @@ class _BiodataPreviewState extends State<BiodataPreview> {
     ];
   }
 
-  Future<ui.Image> _capture(GlobalKey key) async {
+  /// [target] is the wanted width in pixels: 2480 for the PDF (A4 at about 300 DPI), smaller for the
+  /// phone pictures. Phones cannot make a picture beyond their graphics limit (often 4096 pixels).
+  Future<ui.Image> _capture(GlobalKey key, double target) async {
     final render = key.currentContext!.findRenderObject() as RenderRepaintBoundary;
-    // Phones cannot make a picture beyond their graphics limit (often 4096 pixels): stay inside it.
     final size = render.size;
-    final ratio = [2.0, 4000 / size.height, 4000 / size.width].reduce((a, b) => a < b ? a : b);
+    final ratio = [target / size.width, 4000 / size.height, 4000 / size.width].reduce((a, b) => a < b ? a : b);
     return render.toImage(pixelRatio: ratio);
   }
 
@@ -146,10 +147,10 @@ class _BiodataPreviewState extends State<BiodataPreview> {
       await Future<void>.delayed(const Duration(milliseconds: 250));
       final code = '${widget.data['code']}';
       final images = <ui.Image>[];
-      for (final key in keys) {
-        images.add(await _capture(key));
-      }
       final zip = kind == 'zip';
+      for (final key in keys) {
+        images.add(await _capture(key, zip ? 1400 : 2480));
+      }
       final Uint8List bytes;
       if (zip) {
         final archive = Archive();

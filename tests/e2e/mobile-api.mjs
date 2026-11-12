@@ -212,7 +212,7 @@ await step('a visitor submits a profile with photos and a CNIC, and manages it w
   submittedCode = body.code;
   manageToken = body.manageToken;
   assert.ok(manageToken);
-  const row = await db.profile.findUnique({ where: { id: Number(submittedCode.slice(3)) }, include: { photos: true, cnic_document: true } });
+  const row = await db.profile.findUnique({ where: { id: Number(submittedCode.replace(/\D/g, '')) }, include: { photos: true, cnic_document: true } });
   assert.equal(row.status, 'pending');
   assert.equal(row.photos.length, 2);
   assert.ok(row.cnic_document);
@@ -238,7 +238,7 @@ await step('the private link edits the profile, which goes back to review', asyn
   const { status, body } = await call('POST', `profiles/${submittedCode}`, { form });
   assert.equal(status, 200, JSON.stringify(body));
   assert.equal(body.reviewRequired, true);
-  const row = await db.profile.findUnique({ where: { id: Number(submittedCode.slice(3)) }, include: { photos: true } });
+  const row = await db.profile.findUnique({ where: { id: Number(submittedCode.replace(/\D/g, '')) }, include: { photos: true } });
   assert.equal(row.occupation, 'Doctor');
   assert.equal(row.photos.length, 1);
   assert.equal(row.photo_public, false);
@@ -262,7 +262,7 @@ await step('registering with the private link adds the profile to the new accoun
 });
 
 await step('restricted photos are blurred for unpaid viewers and sharp for the owner', async () => {
-  const id = Number(submittedCode.slice(3));
+  const id = Number(submittedCode.replace(/\D/g, ''));
   await db.profile.update({ where: { id }, data: { status: 'approved', photo_public: true } });
   await saveSettings({ restrict_photo: '1' });
   const { body } = await get(`profiles/${submittedCode}`, tokenA);
@@ -378,7 +378,7 @@ await step('the owner deletes a profile from the app', async () => {
   const owner = (await post('auth/login', { email: 'ayesha@test.local', password: 'Ayesha-pass-12' })).body.token;
   assert.equal((await call('DELETE', `profiles/${submittedCode}`, { json: {}, token: tokenB })).status, 403);
   assert.equal((await call('DELETE', `profiles/${submittedCode}`, { json: {}, token: owner })).status, 200);
-  assert.equal(await db.profile.count({ where: { id: Number(submittedCode.slice(3)) } }), 0);
+  assert.equal(await db.profile.count({ where: { id: Number(submittedCode.replace(/\D/g, '')) } }), 0);
 });
 
 await step('premium credits: buy a package, admin approves, unlock once, protected data only for the unlocker', async () => {

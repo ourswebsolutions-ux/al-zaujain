@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -39,6 +40,11 @@ class _AuthPage extends StatelessWidget {
 /// After signing in: go back to where the visitor was, or open a screen they asked for.
 void _afterSignIn(BuildContext context, Widget? then, bool replace) {
   final navigator = Navigator.of(context);
+  // A member who has not confirmed their email goes to the code screen (shown by the app's root) first.
+  if (app.user?['emailVerified'] == false) {
+    navigator.popUntil((route) => route.isFirst);
+    return;
+  }
   if (then != null) {
     if (replace) {
       navigator.pop();
@@ -279,4 +285,114 @@ class _PasswordInputState extends State<PasswordInput> {
         autofill: [widget.newPassword ? AutofillHints.newPassword : AutofillHints.password],
         suffix: IconButton(icon: Icon(hidden ? Icons.visibility_rounded : Icons.visibility_off_rounded), onPressed: () => setState(() => hidden = !hidden)),
       );
+}
+
+
+/// "Confirm your email": the 6-digit code sent at registration, with a resend button (one-minute wait).
+class VerifyEmailScreen extends StatefulWidget {
+  const VerifyEmailScreen({super.key});
+
+  @override
+  State<VerifyEmailScreen> createState() => _VerifyEmailScreenState();
+}
+
+class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
+  final code = TextEditingController();
+  bool busy = false;
+  bool sending = false;
+  String? message;
+  bool good = false;
+  int wait = 0;
+  Timer? timer;
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    code.dispose();
+    super.dispose();
+  }
+
+  void _countdown(int seconds) {
+    timer?.cancel();
+    setState(() => wait = seconds);
+    timer = Timer.periodic(const Duration(seconds: 1), (tick) {
+      if (!mounted) return tick.cancel();
+      setState(() => wait = wait - 1);
+      if (wait <= 0) tick.cancel();
+    });
+  }
+
+  Future<void> _confirm() async {
+    FocusScope.of(context).unfocus();
+    setState(() { busy = true; message = null; });
+    try {
+      final result = await app.api.post('auth/verify-email', {'code': code.text});
+      app.updateAccount(result);
+    } on ApiException catch (error) {
+      // The typed code stays in the box, so it can be corrected.
+      if (mounted) setState(() { message = error.message; good = false; });
+    } finally {
+      if (mounted) setState(() => busy = false);
+    }
+  }
+
+  Future<void> _resend() async {
+    setState(() { sending = true; message = null; });
+    try {
+      final result = await app.api.post('auth/resend-code');
+      if (mounted) setState(() { message = '${result['message']}'; good = true; });
+      _countdown(((result['wait'] as num?) ?? 60).toInt());
+    } on ApiException catch (error) {
+      if (mounted) setState(() { message = error.message; good = false; });
+      final seconds = int.tryParse(RegExp(r'(\d+) seconds').firstMatch(error.message)?.group(1) ?? '');
+      if (seconds != null) _countdown(seconds);
+    } finally {
+      if (mounted) setState(() => sending = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final email = '${app.user?['email'] ?? ''}';
+    return Scaffold(
+      backgroundColor: AppColors.cream,
+      body: SafeArea(
+        child: ListView(padding: const EdgeInsets.fromLTRB(22, 40, 22, 30), children: [
+          Center(child: Image.asset('assets/images/logo.png', width: 88, height: 88)),
+          const SizedBox(height: 14),
+          Text(tr('Confirm your email'), textAlign: TextAlign.center, style: TextStyle(fontFamily: headFont, fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.navy)),
+          const SizedBox(height: 8),
+          Text(tr('We sent a 6-digit code to {email}. Enter it below to confirm your email address.', {'email': email}), textAlign: TextAlign.center, style: const TextStyle(fontSize: 14, height: 1.5, color: AppColors.muted)),
+          const SizedBox(height: 24),
+          TextField(
+            controller: code,
+            keyboardType: TextInputType.number,
+            maxLength: 6,
+            textAlign: TextAlign.center,
+            autofillHints: const [AutofillHints.oneTimeCode],
+            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: 10, color: AppColors.navy),
+            decoration: InputDecoration(counterText: '', hintText: '123456', filled: true, fillColor: Colors.white, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))),
+            onSubmitted: (_) => _confirm(),
+          ),
+          if (message != null)
+            Container(
+              margin: const EdgeInsets.only(top: 12),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(color: good ? const Color(0xFFEEF4EF) : const Color(0xFFFBEEEC), borderRadius: BorderRadius.circular(8)),
+              child: Text(tr(message!), style: TextStyle(fontSize: 13, color: good ? const Color(0xFF3D6B4A) : const Color(0xFFA33A2C))),
+            ),
+          const SizedBox(height: 16),
+          AppButton(busy ? 'Checking…' : 'Confirm my email', expand: true, busy: busy, onPressed: busy ? null : _confirm),
+          const SizedBox(height: 12),
+          TextButton(
+            onPressed: sending || wait > 0 ? null : _resend,
+            child: Text(sending ? tr('Sending…') : wait > 0 ? tr('Send a new code in {seconds}s', {'seconds': wait}) : tr('Did not get it? Send a new code'), style: const TextStyle(fontWeight: FontWeight.w600)),
+          ),
+          Text(tr('Check your spam folder too. The code expires in 15 minutes.'), textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, color: AppColors.muted)),
+          const SizedBox(height: 18),
+          TextButton(onPressed: () => app.signOut(), child: Text(tr('Sign out'), style: const TextStyle(color: AppColors.muted))),
+        ]),
+      ),
+    );
+  }
 }

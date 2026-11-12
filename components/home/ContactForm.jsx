@@ -6,6 +6,7 @@ import { submitEnquiry } from '@/app/actions/public';
 import { useT } from '@/components/i18n/LanguageProvider';
 import { buttonClass } from '@/components/ui/Button';
 import { Urdu } from '@/components/ui/Text';
+import { KeepForm } from '@/components/ui/Form';
 
 const input = 'mt-2 block w-full rounded-[7px] border border-[#dce0dc] bg-[#fafbf9] p-[13px] font-sans text-xs font-normal text-navy';
 
@@ -24,7 +25,7 @@ export function ContactForm() {
   const t = useT();
   const [state, action, pending] = useActionState(submitEnquiry, null);
   return (
-    <form action={action} className="min-w-0">
+    <KeepForm action={action} state={state} resetOnSuccess className="min-w-0">
       <h3 className="mb-[7px] text-xl font-bold leading-[29px] max-m:text-lg max-m:leading-[26.1px]">
         <FaPenToSquare aria-hidden="true" className="me-2 inline-block text-[#a9802c]" /> {t('A little about your enquiry')}
       </h3>
@@ -64,6 +65,6 @@ export function ContactForm() {
       {state?.message && (
         <p role="status" className={`mt-[18px] border-s-[3px] p-[15px] text-xs ${state.ok ? 'border-[#588465] bg-[#eef4ef]' : 'border-[#a33a2c] bg-[#fbeeec]'}`}>{t(state.message)}</p>
       )}
-    </form>
+    </KeepForm>
   );
 }

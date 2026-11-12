@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 import 'core/app_state.dart';
 import 'core/theme.dart';
+import 'screens/auth_screens.dart';
 import 'screens/setup_screen.dart';
 import 'screens/shell.dart';
 import 'widgets/common.dart';
@@ -69,7 +70,8 @@ class _StartState extends State<_Start> {
 
   Widget _screen(BuildContext context) {
     if (app.domain == null) return const SetupScreen(first: true);
-    if (app.connected) return Shell();
+    // A member must confirm their email with the 6-digit code before using the app.
+    if (app.connected) return app.signedIn && app.user?['emailVerified'] == false ? const VerifyEmailScreen() : Shell();
     return Scaffold(
       backgroundColor: AppColors.navy,
       body: SafeArea(

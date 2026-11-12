@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { claimWithToken, checkLogin, homeFor, passwordRule, registerAccount, replacePassword, requestPasswordReset, saveAccountDetails, saveNotificationChoices } from '@/lib/accounts.js';
 import { consumeToken, createSession, destroySession, requireUser } from '@/lib/auth.js';
 import { getDb } from '@/lib/db.js';
+import { sendVerificationCode, verifyEmailCode } from '@/lib/email-verification.js';
 import { sendTemplate } from '@/lib/mail.js';
 import { hashPassword, logActivity } from '@/lib/security.js';
 
@@ -14,7 +15,21 @@ export async function register(_previous, formData) {
   const result = await registerAccount(values, String(formData.get('claim') ?? ''));
   if (!result.ok) return result;
   await createSession(result.userId);
+  // A 6-digit code goes to the email address; the account is used once it is confirmed.
+  await sendVerificationCode(result.userId);
+  redirect('/verify-email');
+}
+
+export async function confirmEmail(_previous, formData) {
+  const user = await requireUser('/verify-email');
+  const result = await verifyEmailCode(user.id, formData.get('code'));
+  if (!result.ok) return result;
   redirect('/dashboard?welcome=1');
+}
+
+export async function resendEmailCode() {
+  const user = await requireUser('/verify-email');
+  return sendVerificationCode(user.id);
 }
 
 export async function login(_previous, formData) {

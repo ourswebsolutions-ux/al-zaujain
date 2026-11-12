@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { FaComments, FaLock, FaWhatsapp } from 'react-icons/fa6';
 import { BiodataHeader, CandidateSection, NameLine, PartnerSection } from '@/components/profile/Biodata';
 import { LockedContact, LockedWhatsApp, PhotoLock } from '@/components/payments/UnlockProvider';
@@ -51,6 +51,8 @@ export default async function ProfilePage({ params }) {
   const { code } = await params;
   const profile = await getProfile(idFromCode(code));
   if (!profile) notFound();
+  // Old links ("AZ-61") open the profile at its current ID ("AZMB-61").
+  if (decodeURIComponent(code).toUpperCase() !== profileCode(profile.id)) permanentRedirect(`/profile/${profileCode(profile.id)}`);
 
   const user = await currentUser();
   const view = await profileView(profile, user, await clientIp());
@@ -70,12 +72,16 @@ export default async function ProfilePage({ params }) {
           <div className="grid grid-cols-[320px_1fr] max-b:grid-cols-1">
             <aside className="border-e border-[#eee6d8] bg-paper p-7 max-b:border-b max-b:border-e-0 max-m:p-5">
               <div className="b:sticky b:top-6">
-                <div className="relative mx-auto grid aspect-square max-w-[380px] place-items-center overflow-hidden rounded-[20px] bg-[#e9e1d1] ring-4 ring-white shadow-[0_10px_28px_#03223f1f]">
+                <div className="relative mx-auto grid aspect-[4/5] max-w-[380px] place-items-center overflow-hidden rounded-[20px] bg-[#e9e1d1] ring-4 ring-white shadow-[0_10px_28px_#03223f1f]">
                   {photoLocked && <PhotoLock large type={profile.access_type} />}
                   <TypeBadge type={profile.access_type} className="absolute start-3 top-3 z-10" />
                   {photos[0] ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={`/media/photos/${photos[0].file}`} alt={`Portrait of ${profile.display_name}`} className="size-full object-cover" />
+                    <>
+                      {/* The whole photo, never cropped, on a soft blurred copy of itself. */}
+                      <img src={`/media/photos/${photos[0].file}`} alt="" aria-hidden="true" className="absolute inset-0 size-full scale-110 object-cover blur-2xl" />
+                      <img src={`/media/photos/${photos[0].file}`} alt={`Portrait of ${profile.display_name}`} className="relative size-full object-contain" />
+                    </>
                   ) : (
                     <div className="p-4 text-center">
                       <Image src="/images/logo.png" alt="" width={120} height={120} className="mx-auto rounded-full opacity-60" />

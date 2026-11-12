@@ -66,7 +66,7 @@ async function seedProfile(values, color, extra = {}) {
   form.append('consent', 'yes');
   form.append('photos', await image(color), 'p.jpg');
   const { code } = await api('POST', 'profiles', { form });
-  const id = Number(code.slice(3));
+  const id = Number(code.replace(/\D/g, ''));
   await db.profile.update({ where: { id }, data: { status: 'approved', approved_at: new Date(), ...extra } });
   return code;
 }
@@ -76,9 +76,9 @@ const bilalProfile = await seedProfile({ full_name: 'Bilal Ahmed', gender: 'male
 await seedProfile({ full_name: 'Usman Ali', gender: 'male', caste: 'Awan', city: 'London', country_id: (await db.country.findFirst({ where: { name: 'United Kingdom' } }))?.id ?? 1, nationality: 'British' }, '#a09050', { access_type: 'premium' });
 const MEMBER = { email: 'bilal@test.local', password: 'Bilal-pass-123' };
 const bilal = await db.user.create({ data: { email: MEMBER.email, password_hash: hashPassword(MEMBER.password), name: 'Bilal Ahmed', phone: '0300 1112223' } });
-await db.profile.update({ where: { id: Number(bilalProfile.slice(3)) }, data: { user_id: bilal.id } });
+await db.profile.update({ where: { id: Number(bilalProfile.replace(/\D/g, '')) }, data: { user_id: bilal.id } });
 const sanaUser = await db.user.create({ data: { email: 'sana@test.local', password_hash: hashPassword('Sana-pass-1234'), name: 'Sana Tariq' } });
-await db.profile.update({ where: { id: Number(sana.slice(3)) }, data: { user_id: sanaUser.id } });
+await db.profile.update({ where: { id: Number(sana.replace(/\D/g, '')) }, data: { user_id: sanaUser.id } });
 await db.paymentMethod.create({ data: { name: 'Meezan Bank', account_holder: 'Al Zaujain', bank_name: 'Meezan Bank Ltd', iban: 'PK36MEZN0001234567890123', active: true } });
 await saveSettings({ access_price: 'Rs 5,000', announcements: 'New proposals every week\nOverseas rishtay from UK, USA and Gulf' });
 const starter = await db.creditPackage.create({ data: { name: 'Starter', credits: 5, price: '1000', description: 'Try premium profiles.', featured: true } });
@@ -381,7 +381,7 @@ await step('the member edits their profile through every step, and it goes back 
   await scrollTo(button('Save changes'), 40);
   await button('Save changes').click();
   await visible('Waiting for review', 20000);
-  const row = await db.profile.findUnique({ where: { id: Number(bilalProfile.slice(3)) } });
+  const row = await db.profile.findUnique({ where: { id: Number(bilalProfile.replace(/\D/g, '')) } });
   assert.equal(row.status, 'pending');
   await db.profile.update({ where: { id: row.id }, data: { status: 'approved' } });
   await back();
@@ -400,7 +400,7 @@ await step('partner preferences save through the website’s rules', async () =>
   let row;
   for (let i = 0; i < 30 && row?.pref_age_max !== 30; i += 1) {
     await page.waitForTimeout(500);
-    row = await db.profile.findUnique({ where: { id: Number(bilalProfile.slice(3)) } });
+    row = await db.profile.findUnique({ where: { id: Number(bilalProfile.replace(/\D/g, '')) } });
   }
   assert.equal(row.pref_age_max, 30);
   await visible('Our team will review the change', 8000);
@@ -492,7 +492,7 @@ await step('a member unlocks a Premium profile with credits, once', async () => 
   const { adjustCredits } = await import('../../lib/credits.js');
   const bilalUser = await db.user.findUnique({ where: { email: MEMBER.email } });
   await adjustCredits(bilalUser.id, 3, 'Test credits', bilalUser.id);
-  await db.profile.update({ where: { id: Number(hira.slice(3)) }, data: { access_type: 'paid' } });
+  await db.profile.update({ where: { id: Number(hira.replace(/\D/g, '')) }, data: { access_type: 'paid' } });
   await page.evaluate(() => localStorage.removeItem('flutter.profile_draft'));
   await fresh('Profile');
   // The previous steps left another family signed in; switch to the member with credits.

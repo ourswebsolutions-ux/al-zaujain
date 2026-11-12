@@ -62,11 +62,12 @@ export function ProfileActions({ text, sheet, code, compact }) {
     }
   };
 
-  const render = async () => {
+  // pixelRatio 3.2 on the 794-pixel A4 sheet gives about 2540 pixels across: print quality (~300 DPI).
+  const render = async (pixelRatio = 2) => {
     const { toPng } = await import('html-to-image');
     await document.fonts.ready;
     await Promise.all([...sheetRef.current.querySelectorAll('img')].map((image) => image.decode().catch(() => {})));
-    return toPng(sheetRef.current, { pixelRatio: 2, cacheBust: false, backgroundColor: '#ffffff' });
+    return toPng(sheetRef.current, { pixelRatio, cacheBust: false, backgroundColor: '#ffffff' });
   };
 
   const downloadImage = async () => {
@@ -110,7 +111,7 @@ export function ProfileActions({ text, sheet, code, compact }) {
   const downloadPdf = async () => {
     setBusy('pdf');
     try {
-      const png = await render();
+      const png = await render(3.2);
       const image = await loadImage(png);
       const { jsPDF } = await import('jspdf');
       const pdf = new jsPDF({ unit: 'mm', format: 'a4', compress: true });
@@ -128,7 +129,8 @@ export function ProfileActions({ text, sheet, code, compact }) {
         context.fillRect(0, 0, canvas.width, canvas.height);
         context.drawImage(image, 0, startY, image.width, height, 0, 0, image.width, height);
         if (index > 0) pdf.addPage();
-        pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 210, (height / image.width) * 210);
+        // High-quality JPEG keeps text and photos sharp at a sensible file size.
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, 210, (height / image.width) * 210, undefined, 'NONE');
       }
       pdf.save(`al-zaujain-${code}.pdf`);
       say('Your profile PDF has been downloaded.');

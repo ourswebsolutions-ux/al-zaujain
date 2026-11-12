@@ -1,11 +1,10 @@
 'use client';
 
 import { useActionState, useEffect, useState } from 'react';
-import { useFormStatus } from 'react-dom';
 import { FaArrowsRotate, FaCheck, FaCopy, FaEye, FaEyeSlash, FaPenToSquare } from 'react-icons/fa6';
 import { register } from '@/app/actions/auth';
 import { Button } from '@/components/ui/Button';
-import { inputClass, labelClass, Notice } from '@/components/ui/Form';
+import { inputClass, KeepForm, labelClass, Notice, useFormPending } from '@/components/ui/Form';
 import { useT } from '@/components/i18n/LanguageProvider';
 
 const LETTERS = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ';
@@ -31,7 +30,7 @@ function generatePassword(length = 16) {
 
 function SubmitButton() {
   const t = useT();
-  const { pending } = useFormStatus();
+  const pending = useFormPending();
   return <Button type="submit" disabled={pending} className="w-full cursor-pointer">{t(pending ? 'Creating your account…' : 'Create my account')}</Button>;
 }
 
@@ -57,7 +56,7 @@ export function RegisterForm({ claim }) {
   };
 
   return (
-    <form action={action} className="grid gap-4">
+    <KeepForm action={action} state={state} className="grid gap-4">
       <Notice state={state} />
       {claim && <input type="hidden" name="claim" value={claim} />}
       <label className={labelClass}>{t('Your name')}<input autoComplete="name" maxLength={100} {...field('name')} /></label>
@@ -91,6 +90,6 @@ export function RegisterForm({ claim }) {
         </div>
       </div>
       <SubmitButton />
-    </form>
+    </KeepForm>
   );
 }

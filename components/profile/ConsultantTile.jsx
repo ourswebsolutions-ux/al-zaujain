@@ -17,6 +17,10 @@ function Stars({ rating }) {
  * the working hours, Pakistan time), photo, name, experience, rating, specialities, hours and
  * Connect Now on WhatsApp with a ready message. Without their own WhatsApp number the bureau's is used.
  */
+// One size for the consultant card wherever it appears (homepage slider and the Consultants page).
+export const CONSULTANT_CARD_SLIDE = 'basis-[300px] max-sm:basis-[86%]';
+export const CONSULTANT_CARD_GRID = 'grid justify-center gap-6 [grid-template-columns:repeat(auto-fill,300px)] max-sm:[grid-template-columns:minmax(0,1fr)]';
+
 export function ConsultantTile({ consultant, whatsapp, t, now = new Date() }) {
   const number = (consultant.whatsapp || whatsapp || '').replace(/\D/g, '');
   const tags = String(consultant.specialties ?? '').split(',').map((item) => item.trim()).filter(Boolean).slice(0, 4);

@@ -9,7 +9,7 @@ export function FeaturedAdd() {
   const t = useT();
   return (
     <ActionForm action={addFeaturedByCode} className="flex flex-wrap items-center gap-2">
-      <input name="code" required aria-label={t('Profile code')} placeholder={t('Profile code, e.g. AZ-07')} className={inputSm} />
+      <input name="code" required aria-label={t('Profile code')} placeholder={t('Profile code, e.g. AZMB-07')} className={inputSm} />
       <Submit size="sm" className="cursor-pointer">{t('Add')}</Submit>
     </ActionForm>
   );

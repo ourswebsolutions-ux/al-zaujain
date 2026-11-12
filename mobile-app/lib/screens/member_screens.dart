@@ -22,7 +22,7 @@ void openHref(BuildContext context, String? href) {
   if (href == null || href.isEmpty) return;
   final path = Uri.parse(href).path;
   final chat = RegExp(r'^/messages/(\d+)').firstMatch(path);
-  final profile = RegExp(r'^/profile/(AZ-\d+)', caseSensitive: false).firstMatch(path);
+  final profile = RegExp(r'^/profile/(AZ(?:MB)?-\d+)', caseSensitive: false).firstMatch(path);
   if (chat != null) {
     push(context, ChatScreen(id: int.parse(chat[1]!)));
   } else if (path == '/messages') {

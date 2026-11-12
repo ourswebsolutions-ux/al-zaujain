@@ -1,5 +1,5 @@
 import { FaUsers } from 'react-icons/fa6';
-import { ConsultantTile } from '@/components/profile/ConsultantTile';
+import { CONSULTANT_CARD_SLIDE, ConsultantTile } from '@/components/profile/ConsultantTile';
 import { container, GlowButton, GradientHeading, Label, Ornament, sectionX } from './HomeUi';
 import { Slider } from './Slider';
 import { Reveal } from '@/components/ui/Reveal';
@@ -26,7 +26,7 @@ export async function HomeConsultants({ consultants, whatsapp }) {
           </p>
         </Reveal>
 
-        <Slider label={t('Matchmaking consultants')} perView={4} className="mx-auto max-w-[1310px]">
+        <Slider label={t('Matchmaking consultants')} itemClass={CONSULTANT_CARD_SLIDE} className="mx-auto max-w-[1310px]">
           {consultants.map((consultant) => <ConsultantTile key={consultant.id} consultant={consultant} whatsapp={whatsapp} t={t} now={now} />)}
         </Slider>
 

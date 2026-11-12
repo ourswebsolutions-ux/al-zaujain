@@ -10,7 +10,9 @@ import { useT } from '@/components/i18n/LanguageProvider';
  * own scroll snapping, so it is smooth, works with touch, trackpads and keyboards, and never makes the
  * page scroll sideways.
  */
-export function Slider({ children, label, perView = 3, className = '' }) {
+// `itemClass` gives every slide one fixed size instead of a share of the row, so a card reused elsewhere
+// (the consultant card) is the same size on every page.
+export function Slider({ children, label, perView = 3, itemClass = null, className = '' }) {
   const t = useT();
   const track = useRef(null);
   const [edges, setEdges] = useState({ start: true, end: false });
@@ -57,7 +59,7 @@ export function Slider({ children, label, perView = 3, className = '' }) {
         className={`-mx-1 flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth px-1 pb-6 pt-2 outline-none [scrollbar-width:none] focus-visible:ring-2 focus-visible:ring-gold [&::-webkit-scrollbar]:hidden max-sm:gap-4 ${items.length === 1 ? 'justify-center' : ''} ${items.length < perView ? 'lg:justify-center' : ''}`}
       >
         {items.map((child, index) => (
-          <div key={child.key ?? index} aria-roledescription="slide" aria-label={t('{number} of {count}', { number: index + 1, count: items.length })} className={`shrink-0 grow-0 basis-[86%] snap-start ${width}`}>
+          <div key={child.key ?? index} aria-roledescription="slide" aria-label={t('{number} of {count}', { number: index + 1, count: items.length })} className={`shrink-0 grow-0 snap-start ${itemClass ?? `basis-[86%] ${width}`}`}>
             {child}
           </div>
         ))}
