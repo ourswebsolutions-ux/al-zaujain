@@ -77,11 +77,8 @@ export default async function ProfilePage({ params }) {
                   <TypeBadge type={profile.access_type} className="absolute start-3 top-3 z-10" />
                   {photos[0] ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <>
-                      {/* The whole photo, never cropped, on a soft blurred copy of itself. */}
-                      <img src={`/media/photos/${photos[0].file}`} alt="" aria-hidden="true" className="absolute inset-0 size-full scale-110 object-cover blur-2xl" />
-                      <img src={`/media/photos/${photos[0].file}`} alt={`Portrait of ${profile.display_name}`} className="relative size-full object-contain" />
-                    </>
+                    // Fills the frame with no empty sides; anything trimmed comes off the bottom, so the face stays.
+                    <img src={`/media/photos/${photos[0].file}`} alt={`Portrait of ${profile.display_name}`} className="size-full object-cover object-top" />
                   ) : (
                     <div className="p-4 text-center">
                       <Image src="/images/logo.png" alt="" width={120} height={120} className="mx-auto rounded-full opacity-60" />

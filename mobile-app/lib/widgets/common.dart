@@ -272,9 +272,10 @@ class LoaderState extends State<Loader> {
 
 /// A photo from the website. The token goes along, so restricted photos follow the same rules as the website.
 class NetImage extends StatelessWidget {
-  const NetImage(this.path, {super.key, this.fit = BoxFit.cover, this.radius = 0, this.width, this.height});
+  const NetImage(this.path, {super.key, this.fit = BoxFit.cover, this.alignment = Alignment.center, this.radius = 0, this.width, this.height});
   final String? path;
   final BoxFit fit;
+  final Alignment alignment;
   final double radius;
   final double? width;
   final double? height;
@@ -297,6 +298,7 @@ class NetImage extends StatelessWidget {
         width: width,
         height: height,
         fit: fit,
+        alignment: alignment,
         gaplessPlayback: true,
         errorBuilder: (_, _, _) => placeholder,
         loadingBuilder: (context, child, progress) => progress == null ? child : Container(width: width, height: height, color: const Color(0xFFEFE8DA)),

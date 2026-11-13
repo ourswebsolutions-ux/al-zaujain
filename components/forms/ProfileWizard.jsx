@@ -93,11 +93,24 @@ export function ProfileWizard({ countries, castes = [], initial = {}, mode = 'cr
     top.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  // Scrolls to the first field with an error and puts the cursor in it, so it cannot be missed.
+  const showFirstError = (fieldErrors) => {
+    requestAnimationFrame(() => {
+      const names = Object.keys(fieldErrors);
+      const field = names.map((name) => document.getElementById(name)).find(Boolean);
+      if (field) {
+        field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        field.focus({ preventScroll: true });
+      } else top.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  };
+
   const next = () => {
     const stepErrors = validateStep(section.key, values, options);
     if (Object.keys(stepErrors).length) {
       setErrors(stepErrors);
       setMessage('Please correct the highlighted fields.');
+      showFirstError(stepErrors);
       return;
     }
     setErrors({});
@@ -109,7 +122,8 @@ export function ProfileWizard({ countries, castes = [], initial = {}, mode = 'cr
     if (Object.keys(stepErrors).length) {
       setErrors(stepErrors);
       setMessage('Please correct the highlighted fields.');
-      if (admin) top.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Go straight to the first field that needs fixing (everything typed stays as it is).
+      showFirstError(stepErrors);
       return;
     }
     if (mode === 'create' && !admin && !consent) {
@@ -149,6 +163,8 @@ export function ProfileWizard({ countries, castes = [], initial = {}, mode = 'cr
           const firstStep = SECTIONS.findIndex((item) => item.fields.some((field) => result.errors[field.name]));
           if (firstStep >= 0 && !admin) setStep(firstStep);
         }
+        // A field error goes to that field; anything else (such as a possible duplicate) to the message at the top.
+        showFirstError(result.errors ?? {});
         return;
       }
       if (draftKey) sessionStorage.removeItem(draftKey);

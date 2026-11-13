@@ -362,8 +362,9 @@ class ConsultantTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 56, 16, 22),
       decoration: BoxDecoration(color: const Color(0xFFFDF9F3), borderRadius: BorderRadius.circular(14), border: Border.all(color: const Color(0xFFE9CFA0)), boxShadow: const [BoxShadow(color: Color(0x0A062B4E), blurRadius: 10, offset: Offset(0, 2))]),
+      // The content spans the whole card and is centred, like the website's card.
       child: Stack(clipBehavior: Clip.none, children: [
-        Column(children: [
+        SizedBox(width: double.infinity, child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
           Container(
             width: 104,
             height: 104,
@@ -415,7 +416,7 @@ class ConsultantTile extends StatelessWidget {
               icon: const Icon(Icons.forum_rounded, size: 16),
               label: Text(tr('Connect Now'), style: TextStyle(fontFamily: headFont, fontWeight: FontWeight.w600, fontSize: 14)),
             ),
-        ]),
+        ])),
         if (online != null)
           PositionedDirectional(
             end: -4,

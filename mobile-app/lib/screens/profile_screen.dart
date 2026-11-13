@@ -1,5 +1,3 @@
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 
 import '../core/api.dart';
@@ -8,6 +6,7 @@ import '../core/theme.dart';
 import '../widgets/biodata.dart';
 import '../widgets/cards.dart';
 import '../widgets/common.dart';
+import '../widgets/site.dart';
 import '../widgets/export.dart';
 import 'auth_screens.dart';
 import 'chat_screen.dart';
@@ -293,15 +292,11 @@ class _Row extends StatelessWidget {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: SectionTag(tag)),
         Padding(padding: const EdgeInsets.fromLTRB(16, 2, 16, 12), child: Text(tr(title), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800))),
-        SizedBox(
-          height: 400,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: cards.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 12),
-            itemBuilder: (context, index) => MatchCard(card: cards[index], width: 200),
-          ),
+        // The website's proposal cards in a swipe row that sizes itself to the cards: no empty space under
+        // "View Profile", and each card shows education, profession and marital status.
+        Padding(
+          padding: const EdgeInsetsDirectional.only(start: 16),
+          child: SwipeCards(children: [for (final card in cards) SiteProfileCard(card: card)]),
         ),
       ]),
     );
@@ -392,7 +387,7 @@ class _HeroState extends State<_Hero> {
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 6),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         // The photos, square and whole, as on the website; blurred where the bureau's rules say so.
-        // A tall frame and the whole photo inside it (never cropped), on a soft blurred copy of itself.
+        // A tall frame filled by the photo, kept to its top (the face), trimmed only at the bottom.
         AspectRatio(
           aspectRatio: 4 / 5,
           child: ClipRRect(
@@ -412,11 +407,8 @@ class _HeroState extends State<_Hero> {
                   onPageChanged: (value) => setState(() => index = value),
                   itemBuilder: (context, i) => GestureDetector(
                     onTap: widget.locked ? () => showUnlockSheet(context) : () => push(context, PhotoViewer(paths: photos.map((item) => '${item['file']}').toList(), start: i)),
-                    child: Stack(fit: StackFit.expand, children: [
-                      ImageFiltered(imageFilter: ui.ImageFilter.blur(sigmaX: 24, sigmaY: 24), child: NetImage('${photos[i]['file']}')),
-                      Container(color: const Color(0x33FFFFFF)),
-                      NetImage('${photos[i]['file']}', fit: BoxFit.contain),
-                    ]),
+                    // Fills the frame with no empty sides; anything trimmed comes off the bottom, so the face stays.
+                    child: NetImage('${photos[i]['file']}', alignment: Alignment.topCenter),
                   ),
                 ),
               if (widget.locked)

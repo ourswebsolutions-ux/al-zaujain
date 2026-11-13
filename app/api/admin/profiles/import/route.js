@@ -23,8 +23,8 @@ export async function POST(request) {
     if (!values[field]) continue;
     const country = await db.country.findFirst({ where: { name: values[field] }, select: { id: true, name: true } });
     if (target) {
-      if (country) values[target] = country.id;
-      else unassigned.push(`Country: ${values[field]}`);
+      // A country missing from the list is kept as typed; saving adds it to the list.
+      values[target] = country ? country.id : values[field];
       if (!values.origin_country && country) values.origin_country = country.name;
       delete values[field];
     } else if (!country) {
