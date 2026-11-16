@@ -352,85 +352,85 @@ class ConsultantTile extends StatelessWidget {
 
   static const message = 'Hello, I would like to consult with you regarding marriage services.';
 
+  /// One detail row: an icon, the heading above the value.
+  Widget _detail(IconData icon, String label, Widget value) => Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Color(0xFFEADFCA)))),
+        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Padding(padding: const EdgeInsets.only(top: 2), child: Icon(icon, size: 15, color: const Color(0xFF9B712B))),
+          const SizedBox(width: 10),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(tr(label), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF8A6A2C))),
+            const SizedBox(height: 1),
+            value,
+          ])),
+        ]),
+      );
+
   @override
   Widget build(BuildContext context) {
     final online = consultant['online'] as bool?;
     final rating = (consultant['rating'] as num?)?.toDouble();
-    final tags = ((consultant['specialties'] as List?) ?? const []).map((item) => '$item').toList();
     final number = '${consultant['whatsapp'] ?? ''}'.replaceAll(RegExp(r'\D'), '');
-    final years = (consultant['experience_years'] as num?)?.toInt() ?? 0;
+    const valueStyle = TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.navy, height: 1.3);
+    String? text(String key) => consultant[key] == null || '${consultant[key]}'.trim().isEmpty ? null : '${consultant[key]}';
+    // The website's card: a large photo kept to the face, then name, designation and the details.
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 56, 16, 22),
-      decoration: BoxDecoration(color: const Color(0xFFFDF9F3), borderRadius: BorderRadius.circular(14), border: Border.all(color: const Color(0xFFE9CFA0)), boxShadow: const [BoxShadow(color: Color(0x0A062B4E), blurRadius: 10, offset: Offset(0, 2))]),
-      // The content spans the whole card and is centred, like the website's card.
-      child: Stack(clipBehavior: Clip.none, children: [
-        SizedBox(width: double.infinity, child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-          Container(
-            width: 104,
-            height: 104,
-            padding: EdgeInsets.all(rating != null && rating >= 4.8 ? 4 : 0),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: rating != null && rating >= 4.8 ? const LinearGradient(colors: [Color(0xFFFFE08A), Color(0xFFE4A92A)]) : null,
-              boxShadow: rating != null && rating >= 4.8 ? const [BoxShadow(color: Color(0x99F5C24A), blurRadius: 18)] : null,
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: const Color(0xFFE9CFA0)), boxShadow: const [BoxShadow(color: Color(0x12062B4E), blurRadius: 18, offset: Offset(0, 6))]),
+      clipBehavior: Clip.antiAlias,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        AspectRatio(
+          aspectRatio: 4 / 4.2,
+          child: Stack(fit: StackFit.expand, children: [
+            Container(
+              color: AppColors.navy,
+              child: consultant['photo'] != null ? NetImage('${consultant['photo']}', alignment: Alignment.topCenter) : const Icon(Icons.person_rounded, color: AppColors.champagne, size: 72),
             ),
-            child: ClipOval(
-              child: Container(
-                color: AppColors.navy,
-                child: consultant['photo'] != null ? NetImage('${consultant['photo']}') : const Icon(Icons.person_rounded, color: AppColors.champagne, size: 46),
+            if (online != null)
+              PositionedDirectional(
+                end: 10,
+                top: 10,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  decoration: BoxDecoration(color: online ? const Color(0xFF22A35A) : const Color(0xFF7C7C7C), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white, width: 2)),
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                    const Icon(Icons.history_rounded, size: 12, color: Colors.white),
+                    const SizedBox(width: 3),
+                    Text(tr(online ? 'Online' : 'Offline'), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white)),
+                  ]),
+                ),
               ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(titleCase('${consultant['display_name']}'), textAlign: TextAlign.center, style: TextStyle(fontFamily: headFont, fontSize: 17, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A1A))),
-          if (years > 0) Text(tr('{count} Years Exp.', {'count': years}), style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: Color(0xFF1A1A1A))),
-          if (rating != null)
-            Row(mainAxisSize: MainAxisSize.min, children: [
-              Text(rating.toStringAsFixed(1), style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700)),
-              const SizedBox(width: 4),
-              for (var n = 1; n <= 5; n++) Icon(rating >= n ? Icons.star_rounded : rating >= n - 0.5 ? Icons.star_half_rounded : Icons.star_outline_rounded, size: 16, color: const Color(0xFFF5B301)),
-            ]),
-          if (tags.isNotEmpty) ...[
-            const SizedBox(height: 10),
-            Wrap(alignment: WrapAlignment.center, spacing: 6, runSpacing: 6, children: [
-              for (final tag in tags) Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3), decoration: BoxDecoration(color: Colors.white, border: Border.all(color: const Color(0xFFE6C9CD)), borderRadius: BorderRadius.circular(3)), child: Text(titleCase(tr(tag)), style: const TextStyle(fontSize: 12, color: Color(0xFF333333)))),
-            ]),
-          ],
-          const SizedBox(height: 16),
-          if (consultant['hours'] != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Row(mainAxisSize: MainAxisSize.min, children: [
-                const Icon(Icons.schedule_rounded, size: 14, color: Color(0xFF222222)),
-                const SizedBox(width: 5),
-                Flexible(child: Text('${consultant['hours']}', textDirection: TextDirection.ltr, style: const TextStyle(fontSize: 13, color: Color(0xFF222222)))),
-              ]),
-            ),
-          if (number.isNotEmpty || '${app.site['site_whatsapp']}'.isNotEmpty)
-            FilledButton.icon(
-              onPressed: () {
-                final to = number.isNotEmpty ? number : '${app.site['site_whatsapp']}'.replaceAll(RegExp(r'\D'), '');
-                openLink(context, 'https://wa.me/$to?text=${Uri.encodeComponent(tr(message))}');
-              },
-              style: FilledButton.styleFrom(backgroundColor: AppColors.navy, foregroundColor: Colors.white, minimumSize: const Size(0, 40), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6))),
-              icon: const Icon(Icons.forum_rounded, size: 16),
-              label: Text(tr('Connect Now'), style: TextStyle(fontFamily: headFont, fontWeight: FontWeight.w600, fontSize: 14)),
-            ),
-        ])),
-        if (online != null)
-          PositionedDirectional(
-            end: -4,
-            top: -44,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-              decoration: BoxDecoration(color: online ? const Color(0xFF22A35A) : const Color(0xFF7C7C7C), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white, width: 2)),
-              child: Row(mainAxisSize: MainAxisSize.min, children: [
-                const Icon(Icons.history_rounded, size: 12, color: Colors.white),
-                const SizedBox(width: 3),
-                Text(tr(online ? 'Online' : 'Offline'), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white)),
-              ]),
-            ),
-          ),
+          ]),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Text(titleCase('${consultant['display_name']}'), style: TextStyle(fontFamily: headFont, fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.navy)),
+            if (text('title') != null) Text(titleCase(tr(text('title')!)), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF9B712B))),
+            const SizedBox(height: 8),
+            if (text('city') != null) _detail(Icons.location_on_rounded, 'City', Text(titleCase(tr(text('city')!)), style: valueStyle)),
+            if (text('registration_id') != null) _detail(Icons.badge_rounded, 'Registration ID', Text(text('registration_id')!, style: valueStyle)),
+            if (rating != null)
+              _detail(Icons.star_rounded, 'Rating', Row(children: [
+                Text(rating.toStringAsFixed(1), style: valueStyle),
+                const SizedBox(width: 6),
+                for (var n = 1; n <= 5; n++) Icon(rating >= n ? Icons.star_rounded : rating >= n - 0.5 ? Icons.star_half_rounded : Icons.star_outline_rounded, size: 16, color: const Color(0xFFF5B301)),
+              ])),
+            if (text('hours') != null) _detail(Icons.schedule_rounded, 'Available timing', Text(text('hours')!, textDirection: TextDirection.ltr, style: valueStyle)),
+            if (number.isNotEmpty || '${app.site['site_whatsapp'] ?? ''}'.isNotEmpty) ...[
+              const SizedBox(height: 14),
+              FilledButton.icon(
+                onPressed: () {
+                  final to = number.isNotEmpty ? number : '${app.site['site_whatsapp']}'.replaceAll(RegExp(r'\D'), '');
+                  openLink(context, 'https://wa.me/$to?text=${Uri.encodeComponent(tr(message))}');
+                },
+                style: FilledButton.styleFrom(backgroundColor: AppColors.navy, foregroundColor: Colors.white, minimumSize: const Size.fromHeight(46), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                icon: const Icon(Icons.forum_rounded, size: 17),
+                label: Text(tr('Connect Now'), style: TextStyle(fontFamily: headFont, fontWeight: FontWeight.w600, fontSize: 14.5)),
+              ),
+            ],
+          ]),
+        ),
       ]),
     );
   }

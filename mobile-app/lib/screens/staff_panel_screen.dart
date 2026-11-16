@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 
@@ -23,6 +25,26 @@ class StaffPanelScreen extends StatefulWidget {
 }
 
 class _StaffPanelScreenState extends State<StaffPanelScreen> {
+  /// Saves a file the website handed over ({"name": ..., "data": "data:...;base64,..."}) and shares it.
+  Future<void> _saveDownload(String payload) async {
+    try {
+      final json = jsonDecode(payload) as Map<String, dynamic>;
+      final name = '${json['name'] ?? 'al-zaujain-download'}'.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '-');
+      final data = '${json['data'] ?? ''}';
+      final comma = data.indexOf(',');
+      if (comma < 0) throw const FormatException('No file data');
+      final bytes = base64Decode(data.substring(comma + 1));
+      final mime = RegExp(r'^data:([^;,]+)').firstMatch(data)?.group(1) ?? 'application/octet-stream';
+      final folder = await Directory('${Directory.systemTemp.path}/downloads').create(recursive: true);
+      final file = File('${folder.path}/$name');
+      await file.writeAsBytes(bytes, flush: true);
+      await SharePlus.instance.share(ShareParams(files: [XFile(file.path, mimeType: mime, name: name)], subject: name));
+    } catch (error) {
+      debugPrint('Download from the panel failed: $error');
+      if (mounted) showMessage(context, 'The file could not be saved. Please try again.', error: true);
+    }
+  }
+
   WebViewController? controller;
   int progress = 0;
   String? error;
@@ -44,6 +66,9 @@ class _StaffPanelScreenState extends State<StaffPanelScreen> {
       final web = WebViewController()
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
         ..setBackgroundColor(AppColors.paper)
+        // The website's downloads (biodata image, ZIP, PDF) cannot be saved by a web view, so the page
+        // hands each file to the app here, and the app saves it and opens the phone's share screen.
+        ..addJavaScriptChannel('AzDownload', onMessageReceived: (message) => _saveDownload(message.message))
         ..setNavigationDelegate(NavigationDelegate(
           onProgress: (value) => mounted ? setState(() => progress = value) : null,
           onPageFinished: (_) async {
@@ -55,6 +80,8 @@ class _StaffPanelScreenState extends State<StaffPanelScreen> {
           },
           onNavigationRequest: (request) {
             final uri = Uri.tryParse(request.url);
+            // A download link the page could not hand over itself is never sent to the phone's browser.
+            if (uri != null && (uri.scheme == 'blob' || uri.scheme == 'data')) return NavigationDecision.prevent;
             // The website stays inside the app; WhatsApp, phone, email and other sites open outside it.
             if (uri != null && (uri.scheme == 'http' || uri.scheme == 'https') && uri.host == host) return NavigationDecision.navigate;
             if (uri != null && uri.scheme == 'about') return NavigationDecision.navigate;

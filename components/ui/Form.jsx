@@ -1,7 +1,8 @@
 'use client';
 
 import { inputClass, labelClass } from './styles';
-import { createContext, useActionState, useContext, useEffect, useRef, useTransition } from 'react';
+import { createContext, useActionState, useContext, useEffect, useRef, useState, useTransition } from 'react';
+import { FaEye, FaEyeSlash } from 'react-icons/fa6';
 import { useFormStatus } from 'react-dom';
 import { Button } from './Button';
 import { useT } from '@/components/i18n/LanguageProvider';
@@ -9,10 +10,22 @@ import { useT } from '@/components/i18n/LanguageProvider';
 
 export function Field({ label, hint, error, className = '', ...props }) {
   const t = useT();
+  const [visible, setVisible] = useState(false);
+  const password = props.type === 'password';
   return (
     <label className={`${labelClass} ${className}`}>
       {t(label)}
-      <input className={inputClass} aria-invalid={!!error} {...props} />
+      {password ? (
+        // A password box with an eye to show or hide what was typed.
+        <span className="relative block">
+          <input className={`${inputClass} pe-12`} aria-invalid={!!error} {...props} type={visible ? 'text' : 'password'} />
+          <button type="button" onClick={() => setVisible(!visible)} aria-label={t(visible ? 'Hide password' : 'Show password')} aria-pressed={visible} className="absolute end-1.5 top-1/2 mt-1 grid size-9 -translate-y-1/2 cursor-pointer place-items-center rounded-md text-[17px] text-muted hover:bg-[#f4f1ea] hover:text-navy">
+            {visible ? <FaEyeSlash aria-hidden="true" /> : <FaEye aria-hidden="true" />}
+          </button>
+        </span>
+      ) : (
+        <input className={inputClass} aria-invalid={!!error} {...props} />
+      )}
       {hint && <span className="mt-1 block font-normal text-muted">{t(hint)}</span>}
       {error && <span className="mt-1 block font-medium text-[var(--d-red,#a33a2c)]">{t(error)}</span>}
     </label>

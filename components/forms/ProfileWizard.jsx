@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { inputClass, labelClass } from '@/components/ui/Form';
 import { Urdu } from '@/components/ui/Text';
 import { ageFromDob } from '@/lib/format.js';
-import { SECTIONS, validateProfile, validateStep } from '@/lib/profile-schema.js';
+import { SECTIONS, validateProfile, validateStep, ALL_FIELDS } from '@/lib/profile-schema.js';
 import { AdminProfileSettings } from './AdminProfileSettings';
 import { CropPreview, PhotoCropper } from './PhotoCropper';
 import { useT } from '@/components/i18n/LanguageProvider';
@@ -286,7 +286,7 @@ export function ProfileWizard({ countries, castes = [], initial = {}, mode = 'cr
             </div>
             {item.fields.length > 0 ? (
               <div className="grid grid-cols-2 gap-5 max-m:grid-cols-1">
-                {item.fields.filter((field) => field.type !== 'derived').map((field) => <FieldRow key={field.name} field={field} value={values[field.name]} onChange={change} error={errors[field.name]} countries={countries} cities={cities} castes={castes} />)}
+                {item.fields.filter((field) => field.type !== 'derived').map((field) => <FieldRow key={field.name} field={field} value={values[field.name]} onChange={change} error={errors[field.name]} countries={countries} cities={cities} castes={castes} values={values} errors={errors} fields={ALL_FIELDS} />)}
               </div>
             ) : documents}
           </section>
@@ -332,7 +332,7 @@ export function ProfileWizard({ countries, castes = [], initial = {}, mode = 'cr
                   <p className="mt-2 rounded-[7px] border border-[#dce0dc] bg-cream p-[13px] text-[13px] font-normal">{age ?? 'Calculated from date of birth'}</p>
                 </div>
               ) : (
-                <FieldRow key={field.name} field={field} value={values[field.name]} onChange={change} error={errors[field.name]} countries={countries} cities={cities} castes={castes} />
+                <FieldRow key={field.name} field={field} value={values[field.name]} onChange={change} error={errors[field.name]} countries={countries} cities={cities} castes={castes} values={values} errors={errors} fields={ALL_FIELDS} />
               ))}
             </div>
 

@@ -19,7 +19,7 @@ export const packageColor = (pack, index) => pack.color || DEFAULT_COLORS[index 
  * the crossed-out price before discount, the price, each fact with its Urdu line, and the button.
  * `rows` are { label, value, ur }.
  */
-export function RishtaPackageCard({ name, color, discount = 0, was = null, price, rows, cta = 'Register Now', href, t, children = null }) {
+export function RishtaPackageCard({ name, color, discount = 0, was = null, price, priceNote = null, rows, cta = 'Register Now', href, t, children = null }) {
   return (
     <article className="relative flex h-full flex-col overflow-hidden rounded-[20px] border border-[#f0f0f0] bg-white px-5 py-[30px] text-center shadow-[0_10px_30px_#0000000d] transition-[transform,box-shadow] duration-300 hover:-translate-y-2.5 hover:shadow-[0_20px_40px_#0000001a] motion-reduce:transition-none motion-reduce:hover:translate-y-0">
       {discount > 0 && (
@@ -33,6 +33,7 @@ export function RishtaPackageCard({ name, color, discount = 0, was = null, price
       <div className="my-2" dir="ltr">
         {was > 0 && <span className="mb-[5px] block text-[14px] text-[#a0a0a0] line-through">{t('Was')} Rs. {Number(was).toLocaleString('en-PK')}</span>}
         <span className="block text-[32px] font-extrabold leading-tight" style={{ color }}><small className="text-[18px]">Rs. </small>{Number(price).toLocaleString('en-PK')}</span>
+        {priceNote && <span className="mt-1 block text-[12.5px] text-muted">{t(priceNote)}</span>}
       </div>
       <ul className="my-[30px] border-t border-[#eee]">
         {rows.map((row) => (

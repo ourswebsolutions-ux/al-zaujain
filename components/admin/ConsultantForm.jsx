@@ -32,8 +32,9 @@ export function ConsultantForm({ action, consultant, cities = [] }) {
           <Field label={t('Password')} name="password" type="text" hint={t('Leave blank to generate one.')} />
         </>
       )}
-      <Field label={t('Title')} name="title" defaultValue={value('title')} placeholder={t('Senior marriage consultant')} />
-      <Field label={t('City')} name="city" defaultValue={value('city')} />
+      <Field label={t('Designation')} name="title" defaultValue={value('title')} placeholder={t('Senior marriage consultant')} hint={t('Shown on the consultant card.')} />
+      <Field label={t('City')} name="city" defaultValue={value('city')} hint={t('Shown on the consultant card.')} />
+      <Field label={t('Registration ID')} name="registration_id" defaultValue={value('registration_id')} maxLength={40} placeholder="AZMB-C-01" hint={t('Shown on the consultant card.')} />
       <Field label={t('Phone')} name="phone" defaultValue={value('phone')} />
       <Field label={t('WhatsApp number')} name="whatsapp" type="tel" defaultValue={value('whatsapp')} placeholder="0300 1234567" hint={t('Any format: 0300 1234567, +92 300 1234567 or an overseas number with its country code.')} />
       <Field label={t('Public email')} name="public_email" type="email" defaultValue={value('public_email')} />

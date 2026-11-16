@@ -58,8 +58,29 @@ export function FieldControl({ field, value, onChange, error, countries = [], ci
   }
 }
 
-export function FieldRow({ field, value, onChange, error, countries, cities, castes }) {
+export function FieldRow({ field, value, onChange, error, countries, cities, castes, values = {}, errors = {}, fields = [] }) {
   const t = useT();
+  // The second half of a "from – to" question is drawn by the first half.
+  if (field.paired) return null;
+  if (field.pair) {
+    const second = fields.find((item) => item.name === field.pair) ?? { ...field, name: field.pair, pair: undefined };
+    const [first, last] = field.pairLabels ?? ['From', 'To'];
+    return (
+      <div>
+        <p className={labelClass}>{t(field.label)}</p>
+        <div className="grid grid-cols-2 gap-3">
+          {[[field, value, error, first], [second, values[field.pair], errors[field.pair], last]].map(([item, itemValue, itemError, caption]) => (
+            <div key={item.name}>
+              <label htmlFor={item.name} className="mt-1 block text-[10.5px] font-medium text-muted">{t(caption)}</label>
+              <FieldControl field={{ ...item, pair: undefined }} value={itemValue} onChange={onChange} error={itemError} countries={countries} cities={cities} castes={castes} />
+              {itemError && <p role="alert" className="mt-1 text-[11px] font-medium text-[#a33a2c]">{t(itemError)}</p>}
+            </div>
+          ))}
+        </div>
+        {field.hint && <p className="mt-1 text-[11px] text-muted">{t(field.hint)}</p>}
+      </div>
+    );
+  }
   return (
     <div className={field.type === 'textarea' || field.wide ? 'col-span-2 max-m:col-auto' : ''}>
       <label htmlFor={field.name} className={labelClass}>

@@ -15,7 +15,22 @@ const loadImage = (src) => new Promise((resolve, reject) => {
   image.src = src;
 });
 
-function triggerDownload(href, fileName) {
+// Inside the Al Zaujain app the page runs in a web view that cannot save files: the app gives it an
+// "AzDownload" channel, and the file is handed over as a data URL for the app to save and share.
+async function handToApp(href, fileName) {
+  if (typeof window === 'undefined' || !window.AzDownload?.postMessage) return false;
+  const data = href.startsWith('data:') ? href : await fetch(href).then((response) => response.blob()).then((blob) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  }));
+  window.AzDownload.postMessage(JSON.stringify({ name: fileName, data }));
+  return true;
+}
+
+async function triggerDownload(href, fileName) {
+  if (await handToApp(href, fileName)) return;
   const link = document.createElement('a');
   link.href = href;
   link.download = fileName;
@@ -73,7 +88,7 @@ export function ProfileActions({ text, sheet, code, compact }) {
   const downloadImage = async () => {
     setBusy('image');
     try {
-      triggerDownload(await render(), `al-zaujain-${code}.png`);
+      await triggerDownload(await render(), `al-zaujain-${code}.png`);
       say('Your profile image has been downloaded.');
     } catch {
       say('The image could not be created. Please try again.', false);
@@ -98,7 +113,7 @@ export function ProfileActions({ text, sheet, code, compact }) {
         files[`al-zaujain-${code}-${node.dataset.part}.png`] = [bytes, { level: 0 }];
       }
       const url = URL.createObjectURL(new Blob([zipSync(files)], { type: 'application/zip' }));
-      triggerDownload(url, `al-zaujain-${code}.zip`);
+      await triggerDownload(url, `al-zaujain-${code}.zip`);
       setTimeout(() => URL.revokeObjectURL(url), 10000);
       say('Your profile images have been downloaded (ZIP).');
     } catch {
@@ -132,7 +147,8 @@ export function ProfileActions({ text, sheet, code, compact }) {
         // High-quality JPEG keeps text and photos sharp at a sensible file size.
         pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, 210, (height / image.width) * 210, undefined, 'NONE');
       }
-      pdf.save(`al-zaujain-${code}.pdf`);
+      // In the app the PDF is handed over like the images; in a browser it downloads as usual.
+      if (!(await handToApp(pdf.output("datauristring"), `al-zaujain-${code}.pdf`))) pdf.save(`al-zaujain-${code}.pdf`);
       say('Your profile PDF has been downloaded.');
     } catch {
       say('The PDF could not be created. Please try again.', false);
@@ -145,7 +161,7 @@ export function ProfileActions({ text, sheet, code, compact }) {
     <div>
       <div className="flex flex-wrap gap-3">
         <Button type="button" size={size} onClick={copy} className="cursor-pointer"><FaCopy aria-hidden="true" /> {t(compact ? 'Copy profile' : 'Copy complete profile')}</Button>
-        <Button type="button" size={size} tone="gold" disabled={!!busy} onClick={downloadImage} className="cursor-pointer"><FaFileImage aria-hidden="true" /> {t(busy === 'image' ? 'Creating…' : 'Download image (desktop)')}</Button>
+        <Button type="button" size={size} tone="gold" disabled={!!busy} onClick={downloadImage} className="cursor-pointer max-sm:hidden"><FaFileImage aria-hidden="true" /> {t(busy === 'image' ? 'Creating…' : 'Download image (desktop)')}</Button>
         <Button type="button" size={size} tone="gold" disabled={!!busy} onClick={downloadZip} className="cursor-pointer"><FaFileZipper aria-hidden="true" /> {t(busy === 'zip' ? 'Creating…' : 'Download for mobile (ZIP)')}</Button>
         <Button type="button" size={size} tone="gold" disabled={!!busy} onClick={downloadPdf} className="cursor-pointer"><FaFilePdf aria-hidden="true" /> {t(busy === 'pdf' ? 'Creating…' : 'Download PDF')}</Button>
       </div>

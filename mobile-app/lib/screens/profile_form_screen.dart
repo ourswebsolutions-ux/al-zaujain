@@ -281,6 +281,26 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
   }
 
   Widget _field(Json field) {
+    // A "from – to" question (preferred age, preferred height): one label, two boxes side by side.
+    if (field['paired'] == true) return const SizedBox.shrink();
+    if (field['pair'] != null) {
+      final captions = ((field['pairLabels'] as List?) ?? const ['From', 'To']).map((item) => '$item').toList();
+      final all = [for (final section in sections) ...((section['fields'] as List?) ?? []).cast<Map>()];
+      final second = all.firstWhere((item) => item['name'] == field['pair'], orElse: () => {...field, 'name': field['pair']}).cast<String, dynamic>();
+      Widget half(Json item, String caption) => _field({...item, 'pair': null, 'paired': null, 'label': caption, 'hint': null, 'required': false});
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(tr('${field['label']}'), style: TextStyle(fontFamily: headFont, fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.navy)),
+          const SizedBox(height: 6),
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Expanded(child: half(field, captions[0])),
+            const SizedBox(width: 12),
+            Expanded(child: half(second, captions.length > 1 ? captions[1] : 'To')),
+          ]),
+        ]),
+      );
+    }
     final name = '${field['name']}';
     final label = '${field['label']}';
     final required = field['required'] == true;

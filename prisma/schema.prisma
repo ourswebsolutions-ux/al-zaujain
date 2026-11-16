@@ -245,19 +245,19 @@ model Profile {
   gender             Gender
   date_of_birth      DateTime @db.Date
   height_cm          Int?
-  marital_status     String   @db.VarChar(60)
+  marital_status     String   @db.VarChar(80)
   children_details   String?  @db.VarChar(60)
   // Set only when a female candidate explicitly says she is willing to be a second wife.
   second_wife        String?  @db.VarChar(10)
-  mother_tongue      String?  @db.VarChar(40)
+  mother_tongue      String?  @db.VarChar(80)
   caste              String?  @db.VarChar(60)
   nationality        String?  @db.VarChar(60)
   origin_country     String?  @db.VarChar(100)
   origin_city        String?  @db.VarChar(80)
-  profile_created_by String?  @db.VarChar(40)
+  profile_created_by String?  @db.VarChar(80)
 
   // Education
-  education_level      String? @db.VarChar(60)
+  education_level      String? @db.VarChar(80)
   degree               String? @db.VarChar(100)
   institution          String? @db.VarChar(120)
   other_qualifications String? @db.Text
@@ -267,31 +267,63 @@ model Profile {
   job_title         String? @db.VarChar(100)
   business_details  String? @db.Text
   monthly_income    String? @db.VarChar(40)
-  employment_status String? @db.VarChar(40)
+  employment_status String? @db.VarChar(80)
 
   // Religious
-  religion            String? @db.VarChar(40)
-  sect                String? @db.VarChar(40)
-  religious_practices String? @db.VarChar(40)
+  religion            String? @db.VarChar(80)
+  sect                String? @db.VarChar(80)
+  religious_practices String? @db.VarChar(80)
   religious_details   String? @db.Text
 
   // Family
-  father_status     String? @db.VarChar(20)
-  mother_status     String? @db.VarChar(20)
+  father_status     String? @db.VarChar(80)
+  mother_status     String? @db.VarChar(80)
   father_occupation String? @db.VarChar(100)
   mother_occupation String? @db.VarChar(100)
   brothers          Int?
   sisters           Int?
-  family_status     String? @db.VarChar(40)
+  family_status     String? @db.VarChar(80)
   family_background String? @db.Text
   family_location   String? @db.VarChar(120)
+  father_name       String? @db.VarChar(100)
+  mother_name       String? @db.VarChar(100)
+  married_brothers  Int?
+  married_sisters   Int?
+  family_type       String? @db.VarChar(80)
+
+  // Questionnaire: personal, work and lifestyle
+  weight              String? @db.VarChar(20)
+  complexion          String? @db.VarChar(80)
+  other_languages     String? @db.VarChar(120)
+  organization        String? @db.VarChar(120)
+  work_location       String? @db.VarChar(120)
+  prayers             String? @db.VarChar(80)
+  smoking             String? @db.VarChar(80)
+  lifestyle           String? @db.VarChar(80)
+  willing_to_relocate String? @db.VarChar(80)
+  hobbies             String? @db.VarChar(200)
+  personality         String? @db.Text
+
+  // Questionnaire: more partner preferences
+  pref_height_max    Int?
+  pref_complexion    String? @db.VarChar(80)
+  pref_religion      String? @db.VarChar(80)
+  pref_sect          String? @db.VarChar(80)
+  pref_family_type   String? @db.VarChar(80)
+  pref_family_status String? @db.VarChar(80)
+  accept_divorced    String? @db.VarChar(80)
+  accept_children    String? @db.VarChar(80)
+  overseas_ok        String? @db.VarChar(80)
+  relocate_abroad    String? @db.VarChar(80)
+  pref_cultural      String? @db.Text
+  pref_qualities     String? @db.Text
 
   // Residence
   country_id          Int?
   state               String? @db.VarChar(80)
   city                String? @db.VarChar(80)
-  residence_area      String? @db.VarChar(20)
-  home_ownership      String? @db.VarChar(30)
+  residence_area      String? @db.VarChar(80)
+  home_ownership      String? @db.VarChar(80)
   current_residence   String? @db.VarChar(200)
   permanent_residence String? @db.VarChar(200)
   // Where the family would like the couple to settle after marriage. Public.
@@ -306,7 +338,7 @@ model Profile {
   pref_caste          String? @db.VarChar(60)
   pref_country        String? @db.VarChar(100)
   pref_city           String? @db.VarChar(80)
-  pref_marital_status String? @db.VarChar(60)
+  pref_marital_status String? @db.VarChar(80)
 
   // Partner requirements, kept apart from the candidate's own details. Urdu or English, any length.
   partner_demand String? @db.Text
@@ -383,6 +415,8 @@ model Consultant {
   display_name     String   @db.VarChar(100)
   photo            String?  @db.VarChar(80)
   title            String?  @db.VarChar(120)
+  // The consultant's registration number, shown on their card.
+  registration_id  String?  @db.VarChar(40)
   bio              String?  @db.Text
   phone            String?  @db.VarChar(30)
   whatsapp         String?  @db.VarChar(20)
