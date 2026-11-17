@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { ProfileWizard } from '@/components/forms/ProfileWizard';
+import { ProfileCreator } from '@/components/admin/ProfileCreator';
 import { PageHeader } from '@/components/member/Ui';
 import { requireUser } from '@/lib/auth.js';
 import { memberProfiles, primaryProfile } from '@/lib/dashboard.js';
@@ -16,7 +16,7 @@ export default async function EditEntryPage({ searchParams }) {
   return (
     <div className="mx-auto max-w-[900px]">
       <PageHeader title={t('Create your biodata')} text={t('Fields marked with a lock are never shown publicly.')} />
-      <ProfileWizard countries={await activeCountries()} castes={await casteOptions()} initial={{ contact_email: user.email, contact_phone: user.phone ?? '' }} doneUrl="/dashboard/profile" />
+      <ProfileCreator member countries={await activeCountries()} castes={await casteOptions()} initial={{ contact_email: user.email, contact_phone: user.phone ?? '' }} doneUrl="/dashboard/profile" />
     </div>
   );
 }

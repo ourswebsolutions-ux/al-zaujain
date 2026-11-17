@@ -59,6 +59,9 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
   bool consent = false;
   final scroll = ScrollController();
   final picker = ImagePicker();
+  // Bumped after a pasted biodata fills the form, so the text boxes show the new values.
+  int pasteRound = 0;
+  List<String> unplaced = [];
 
   int get maxPhotos => (app.config['maxPhotos'] as num?)?.toInt() ?? 6;
   bool get draftable => !widget.editing;
@@ -83,6 +86,51 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
       errors.remove(name);
     });
     if (draftable) app.saveFormDraft(values);
+  }
+
+  /// Paste a biodata from WhatsApp, Word or a PDF; the website reads it and fills the form. Nothing is sent
+  /// until the member checks every step and submits.
+  Future<void> _paste() async {
+    final input = TextEditingController();
+    final text = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (sheet) => Padding(
+        padding: EdgeInsets.fromLTRB(18, 18, 18, 18 + MediaQuery.of(sheet).viewInsets.bottom),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Tx(tr('Paste biodata'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.navy)),
+          const SizedBox(height: 6),
+          Tx(tr('Copy your biodata from WhatsApp, Word, a PDF or anywhere else and paste it here. Urdu and English both work. The form below is filled in for you; nothing is sent until you check it and press Submit.'), style: const TextStyle(fontSize: 12.5, color: AppColors.muted, height: 1.45)),
+          const SizedBox(height: 12),
+          TextField(controller: input, minLines: 8, maxLines: 14, maxLength: 20000, decoration: const InputDecoration(hintText: 'Name: …\nAge: …\nCity: …', counterText: '')),
+          const SizedBox(height: 12),
+          AppButton('Read biodata', icon: Icons.auto_fix_high_rounded, tone: Tone.gold, expand: true, onPressed: () => Navigator.pop(sheet, input.text)),
+        ]),
+      ),
+    );
+    input.dispose();
+    if (text == null || text.trim().isEmpty || !mounted) return;
+    setState(() { busy = true; message = null; });
+    try {
+      final result = await app.api.post('form/read-biodata', {'text': text});
+      final read = ((result['values'] as Map?) ?? {}).cast<String, dynamic>();
+      setState(() {
+        read.forEach((key, value) {
+          if (value != null && '$value'.isNotEmpty) values[key] = '$value';
+        });
+        errors = {};
+        unplaced = ((result['unassigned'] as List?) ?? []).map((line) => '$line').toList();
+        pasteRound++;
+      });
+      if (draftable) app.saveFormDraft(values);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('{count} details filled in.', {'count': read.length}))));
+    } on ApiException catch (error) {
+      setState(() => message = error.message);
+    } finally {
+      if (mounted) setState(() => busy = false);
+    }
   }
 
   Json get section => sections[step];
@@ -143,7 +191,7 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
       await app.saveFormDraft(null);
       final code = '${result['code']}';
       final token = result['manageToken'] as String?;
-      if (token != null) await app.rememberManageLink(code, token, values['full_name']?.split(' ').first ?? code);
+      if (token != null) await app.rememberManageLink(code, token, values['full_name']?.trim() ?? code);
       if (!mounted) return;
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => _Submitted(code: code, token: token)));
     } on ApiException catch (error) {
@@ -207,6 +255,14 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
           if (step == 0 && !widget.editing) ...[
             Tx(tr(app.signedIn ? 'Fields marked with a lock are never shown publicly.' : 'No account needed. Fields marked with a lock are never shown publicly.'), style: const TextStyle(fontSize: 13, color: AppColors.muted)),
             const SizedBox(height: 10),
+            AppButton('Paste biodata', icon: Icons.content_paste_rounded, tone: Tone.gold, expand: true, busy: busy, onPressed: busy ? null : _paste),
+            const SizedBox(height: 6),
+            Tx(tr('Quick profile import'), textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, color: AppColors.muted)),
+            if (unplaced.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Notice('${tr('These lines could not be placed automatically. Please add them in the right fields yourself:')}\n• ${unplaced.join('\n• ')}', warning: true),
+            ],
+            const SizedBox(height: 12),
           ],
           if (widget.editing) Padding(padding: const EdgeInsets.only(bottom: 12), child: Tx(tr('Editing a live profile sends it back to our team for review.'), style: const TextStyle(fontSize: 13, color: AppColors.muted))),
           Row(children: [
@@ -368,7 +424,7 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
           return PickerField(label: label, required: required, locked: locked, hint: hint, error: error, options: _suggestions(suggest), value: value, allowCustom: true, anyLabel: required ? null : 'Not specified', placeholder: field['placeholder'] as String? ?? 'Type or choose', onChanged: (picked) => _change(name, picked));
         }
         return TextInput(
-          key: ValueKey('$name-$step'),
+          key: ValueKey('$name-$step-$pasteRound'),
           label: label,
           required: required,
           locked: locked,

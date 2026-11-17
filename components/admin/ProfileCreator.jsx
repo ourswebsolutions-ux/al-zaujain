@@ -7,12 +7,19 @@ import { useT } from '@/components/i18n/LanguageProvider';
 import { Button } from '@/components/ui/Button';
 import { inputClass } from '@/components/ui/Form';
 
+// Pasted values override the starting ones only where the biodata actually had something.
+const filledOnly = (values) => Object.fromEntries(Object.entries(values).filter(([, value]) => value !== null && value !== undefined && value !== ''));
+
 const TABS = [
   { key: 'paste', icon: FaPaste, label: 'Paste biodata', text: 'Quick profile import' },
   { key: 'manual', icon: FaPenToSquare, label: 'Fill in manually', text: 'Complete profile form' },
 ];
 
-export function ProfileCreator({ countries, castes }) {
+/**
+ * "Paste biodata" or "Fill in manually". Administrators get duplicate checks and unassigned lines kept as
+ * extra information; members (`member`) get the same reader and review every step before submitting.
+ */
+export function ProfileCreator({ countries, castes, member = false, initial = {}, doneUrl }) {
   const t = useT();
   const [tab, setTab] = useState('paste');
   const [text, setText] = useState('');
@@ -25,7 +32,7 @@ export function ProfileCreator({ countries, castes }) {
     setBusy(true);
     setError('');
     try {
-      const response = await fetch('/api/admin/profiles/import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
+      const response = await fetch(member ? '/api/profiles/read-biodata' : '/api/admin/profiles/import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
       const data = await response.json();
       if (!response.ok) {
         setError(data.message);
@@ -57,7 +64,7 @@ export function ProfileCreator({ countries, castes }) {
         <>
           <section className="rounded-[20px] border border-line bg-white p-[30px] shadow-[0_12px_35px_#03223f08] max-m:p-5">
             <label htmlFor="biodata" className="mb-1 block text-[15px] font-bold text-navy">{t('Paste the complete biodata')}</label>
-            <p className="mb-3 text-xs leading-5 text-muted">{t('Copy it from WhatsApp, Word, a PDF or anywhere else. Urdu and English both work. Nothing is saved until you review it and press Save.')}</p>
+            <p className="mb-3 text-xs leading-5 text-muted">{t(member ? 'Copy your biodata from WhatsApp, Word, a PDF or anywhere else and paste it here. Urdu and English both work. The form below is filled in for you; nothing is sent until you check it and press Submit.' : 'Copy it from WhatsApp, Word, a PDF or anywhere else. Urdu and English both work. Nothing is saved until you review it and press Save.')}</p>
             <textarea id="biodata" value={text} onChange={(event) => setText(event.target.value)} rows={14} dir="auto" placeholder={'Name: …\nAge: …\nCity: …'} className={`${inputClass} font-mono text-[13px] leading-6`} />
             {error && <p role="alert" className="mt-3 border-s-[3px] border-[#a33a2c] bg-[#fbeeec] p-3 text-xs">{t(error)}</p>}
             <div className="mt-4 flex flex-wrap items-center gap-4">
@@ -65,20 +72,30 @@ export function ProfileCreator({ countries, castes }) {
               {result && (
                 <p className="flex items-center gap-2 text-[13px] font-semibold text-[var(--d-green,#1f8a3a)]">
                   <FaCircleCheck aria-hidden="true" /> {t('{count} details filled in.', { count: filled })}
-                  {result.unassigned.length > 0 && <span className="font-normal text-muted">{t('{count} kept as unassigned information.', { count: result.unassigned.length })}</span>}
+                  {!member && result.unassigned.length > 0 && <span className="font-normal text-muted">{t('{count} kept as unassigned information.', { count: result.unassigned.length })}</span>}
                 </p>
               )}
             </div>
           </section>
           {result && (
             <>
-              <p className="text-[13px] font-semibold text-navy">{t('Check every section below, correct anything that needs it, then save.')}</p>
-              <ProfileWizard key={round} countries={countries} castes={castes} initial={result.values} admin={{ type: 'paid', hash: result.hash, duplicates: result.duplicates, extra: result.unassigned.join('\n') }} />
+              <p className="text-[13px] font-semibold text-navy">{t(member ? 'Check every step below, fill in anything missing, then submit.' : 'Check every section below, correct anything that needs it, then save.')}</p>
+              {member && result.unassigned.length > 0 && (
+                <div className="rounded-2xl border border-[#ecdcb8] bg-[#fcf6e8] p-4 text-[13px] text-[#5d4a22]">
+                  <p className="mb-2 font-bold">{t('These lines could not be placed automatically. Please add them in the right fields yourself:')}</p>
+                  <ul className="list-disc space-y-1 ps-5" dir="auto">{result.unassigned.map((line, index) => <li key={index}>{line}</li>)}</ul>
+                </div>
+              )}
+              {member ? (
+                <ProfileWizard key={round} countries={countries} castes={castes} initial={{ ...initial, ...filledOnly(result.values) }} doneUrl={doneUrl} />
+              ) : (
+                <ProfileWizard key={round} countries={countries} castes={castes} initial={result.values} admin={{ type: 'paid', hash: result.hash, duplicates: result.duplicates, extra: result.unassigned.join('\n') }} />
+              )}
             </>
           )}
         </>
       ) : (
-        <ProfileWizard key="manual" countries={countries} castes={castes} admin={{ type: 'paid' }} />
+        member ? <ProfileWizard key="manual" countries={countries} castes={castes} initial={initial} doneUrl={doneUrl} /> : <ProfileWizard key="manual" countries={countries} castes={castes} admin={{ type: 'paid' }} />
       )}
     </div>
   );
