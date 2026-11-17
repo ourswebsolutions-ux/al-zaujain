@@ -82,7 +82,7 @@ export function ProposalCard({ profile, tag, matchScore, saved }) {
         <div className="min-w-0 flex-1 pt-1 max-sm:px-3 max-sm:pt-[23px] sm:w-full sm:pt-0">
           {label && <span className="mb-1.5 inline-block rounded-full bg-[#fcf4e1] px-2.5 py-0.5 text-[11.5px] font-bold capitalize text-[#806126]">{label}</span>}
           <h3 className="flex min-w-0 items-center gap-1.5 pe-12 text-[21px] font-extrabold leading-tight text-[#062b4e] max-sm:pe-0 max-sm:text-[23px] sm:pe-0">
-            <Link href={href} className="min-w-0 truncate capitalize text-inherit no-underline">{profile.name}</Link>
+            <Link href={href} className="line-clamp-2 min-w-0 capitalize text-inherit no-underline">{profile.name}</Link>
             {profile.age && <span className="shrink-0 text-[19px] font-semibold text-muted sm:hidden">· {profile.age}</span>}
             {profile.verified && <VerifiedBadge className="shrink-0 text-[17px]" />}
           </h3>

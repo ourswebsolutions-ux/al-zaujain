@@ -205,7 +205,7 @@ void showAssistant(BuildContext context) {
     (tr('Can I enquire for my family?'), tr('Yes. You can enquire for yourself, your son, daughter, or another adult family member. Involve the person concerned and share their preferences with our team.')),
     (tr('What are your charges?'), tr('Please contact our team for current service charges, what is included, and the terms before deciding. We do not publish a fixed package price here yet.')),
     (tr('When can I use the app?'), tr('The Al Zaujain Android app is available now. Download it from the Android app section on our homepage. Your login, profile, matches and messages are the same in the app and on this website.')),
-    (tr('How is my information shared?'), tr('Public proposals show a first name and general details only. Your full name, contact details and CNIC stay private. Ask our team if you would like to know how consent is handled.')),
+    (tr('How is my information shared?'), tr('Public proposals show the candidate’s name and general details only. Contact details and CNIC stay private. Ask our team if you would like to know how consent is handled.')),
     (tr('How can I contact your team?'), tr('We are based in {location}. Call {phone} or tap “Speak with our team” below to open WhatsApp. Our team can guide you about proposals and the next steps.', {'location': tr('${site['site_location']}'), 'phone': site['site_phone']})),
   ];
   showModalBottomSheet(

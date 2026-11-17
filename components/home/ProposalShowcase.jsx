@@ -54,7 +54,7 @@ function HomeProfileCard({ profile }) {
         </Link>
         <div className="min-w-0 py-2 pe-1">
           <h3 className="mb-1.5 flex min-w-0 items-center gap-1.5 pe-12 text-[20px] font-semibold leading-tight text-navy max-sm:text-[18px]">
-            <Link href={href} className="min-w-0 truncate capitalize text-inherit no-underline hover:text-[#a17a33]">{profile.name}</Link>
+            <Link href={href} className="line-clamp-2 min-w-0 capitalize text-inherit no-underline hover:text-[#a17a33]">{profile.name}</Link>
             {profile.verified && <VerifiedBadge className="shrink-0 text-[15px]" />}
           </h3>
           <ul className="grid gap-0.5 text-[15px] font-medium capitalize text-[#343434] max-sm:text-[14px]">

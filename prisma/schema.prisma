@@ -241,7 +241,7 @@ model Profile {
   // Personal
   headline_ur        String?  @db.VarChar(200)
   full_name          String   @db.VarChar(100)
-  display_name       String   @db.VarChar(60)
+  display_name       String   @db.VarChar(100)
   gender             Gender
   date_of_birth      DateTime @db.Date
   height_cm          Int?

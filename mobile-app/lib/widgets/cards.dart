@@ -306,7 +306,7 @@ class ProposalCard extends StatelessWidget {
         if (label != null)
           Container(margin: const EdgeInsets.only(bottom: 6), padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3), decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(20)), child: Text(label.toUpperCase(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.goldText))),
         Row(children: [
-          Flexible(child: Text('${card['name']}', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: compact ? 17 : 21, fontWeight: FontWeight.w800, color: AppColors.navy))),
+          Flexible(child: Text('${card['name']}', maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: compact ? 17 : 21, fontWeight: FontWeight.w800, color: AppColors.navy))),
           if (card['verified'] == true) const Padding(padding: EdgeInsetsDirectional.only(start: 5), child: VerifiedBadge(size: 17)),
         ]),
         Text(code, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.muted, letterSpacing: 0.5)),
@@ -502,7 +502,7 @@ class HomeProfileCard extends StatelessWidget {
             ]),
             const SizedBox(height: 10),
             Row(children: [
-              Flexible(child: Text('${card['name']}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Playfair', fontSize: 17, color: AppColors.navy, fontVariations: [FontVariation('wght', 600)]))),
+              Flexible(child: Text('${card['name']}', maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Playfair', fontSize: 17, color: AppColors.navy, fontVariations: [FontVariation('wght', 600)]))),
               if (card['verified'] == true) const Padding(padding: EdgeInsetsDirectional.only(start: 4), child: VerifiedBadge(size: 15)),
             ]),
             const SizedBox(height: 2),

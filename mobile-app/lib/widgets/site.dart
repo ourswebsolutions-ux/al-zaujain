@@ -291,7 +291,7 @@ class SiteProfileCard extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(12, 22, 12, 4),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
-              Flexible(child: Text(titleCase('${card['name']}'), maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: headFont, fontSize: 23, fontWeight: FontWeight.w800, color: AppColors.navy))),
+              Flexible(child: Text(titleCase('${card['name']}'), maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: headFont, fontSize: 23, fontWeight: FontWeight.w800, color: AppColors.navy))),
               if (card['age'] != null) Text(' · ${card['age']}', style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: AppColors.muted)),
               if (card['verified'] == true) const Padding(padding: EdgeInsetsDirectional.only(start: 6), child: VerifiedBadge(size: 17)),
             ]),
