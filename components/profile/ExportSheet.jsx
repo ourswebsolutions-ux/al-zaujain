@@ -60,10 +60,10 @@ export function ExportSheet({ data, subtitle, photo, phone, generatedOn }) {
       <div data-block className="flex items-center gap-7 bg-[#fcfbf8] px-10 py-6">
         {photo ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={photo} alt="" className="size-[190px] shrink-0 rounded-[18px] object-cover shadow-[0_10px_24px_#062b4e1f]" />
+          <img src={photo} alt="" className="h-[238px] w-[190px] shrink-0 rounded-[18px] object-cover object-top shadow-[0_10px_24px_#062b4e1f]" />
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src="/images/logo.png" alt="" className="size-[190px] shrink-0 rounded-[18px] bg-[#e9e1d1] p-10 opacity-70" />
+          <img src="/images/logo.png" alt="" className="h-[238px] w-[190px] shrink-0 rounded-[18px] bg-[#e9e1d1] object-contain p-10 opacity-70" />
         )}
         <div className="min-w-0">
           <p className="font-[family-name:var(--font-poppins)] text-[30px] font-bold capitalize leading-tight text-navy">
@@ -174,7 +174,7 @@ export function ExportPart({ part, index, total, data, subtitle, photo, phone })
           <>
             <div className="flex items-center gap-5 pt-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photo || '/images/logo.png'} alt="" className={`size-[160px] shrink-0 rounded-[16px] object-cover ${photo ? '' : 'bg-[#e9e1d1] p-8 opacity-70'}`} />
+              <img src={photo || '/images/logo.png'} alt="" className={`h-[200px] w-[160px] shrink-0 rounded-[16px] ${photo ? 'object-cover object-top' : 'bg-[#e9e1d1] object-contain p-8 opacity-70'}`} />
               <div className="min-w-0">
                 <p className="font-[family-name:var(--font-poppins)] text-[24px] font-bold capitalize leading-tight text-navy">
                   {data.name}{data.verified && <span className="ms-2 inline-block rounded-full bg-[#e8f4ff] px-2 py-0.5 align-middle text-[11px] font-semibold text-verified">✓ {t('Verified')}</span>}

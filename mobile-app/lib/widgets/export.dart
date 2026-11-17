@@ -290,8 +290,8 @@ class _ProfileIntro extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(16),
           child: photo != null
-              ? NetImage(photo, width: 170, height: 170)
-              : Container(width: 170, height: 170, color: const Color(0xFFE9E1D1), padding: const EdgeInsets.all(32), child: Opacity(opacity: 0.7, child: Image.asset('assets/images/logo.png'))),
+              ? NetImage(photo, width: 170, height: 212, alignment: Alignment.topCenter)
+              : Container(width: 170, height: 212, color: const Color(0xFFE9E1D1), padding: const EdgeInsets.all(32), child: Opacity(opacity: 0.7, child: Image.asset('assets/images/logo.png'))),
         ),
         const SizedBox(width: 20),
         Expanded(
