@@ -189,7 +189,7 @@ class _PackagesScreenState extends State<PackagesScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F1E6),
       appBar: AppBar(title: Text(titleCase(tr('Packages')))),
-      body: ListView(controller: scroll, padding: const EdgeInsets.only(bottom: 40), children: [
+      body: SingleChildScrollView(controller: scroll, padding: const EdgeInsets.only(bottom: 40), child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 36, 16, 10),
           child: Column(children: [
@@ -211,10 +211,10 @@ class _PackagesScreenState extends State<PackagesScreen> {
             if (urdu) Text('آپ کو کس قسم کی رشتہ سروس کی ضرورت ہے؟', textAlign: TextAlign.center, textDirection: TextDirection.rtl, style: urduStyle.copyWith(fontSize: 17, color: const Color(0xFF333333))),
             const SizedBox(height: 16),
             if (local.isNotEmpty || foreign.isNotEmpty) ...[
-              _TypeButton(label: 'Self Matching', icon: Icons.search_rounded, colors: const [AppColors.navy, Color(0xFF0D3D6B)], onTap: () => Scrollable.ensureVisible(webKey.currentContext!, duration: const Duration(milliseconds: 500))),
+              _TypeButton(label: 'Self Matching', icon: Icons.search_rounded, colors: const [AppColors.navy, Color(0xFF0D3D6B)], onTap: () { final c = webKey.currentContext; if (c != null) Scrollable.ensureVisible(c, duration: const Duration(milliseconds: 500)); }),
               const SizedBox(height: 12),
             ],
-            _TypeButton(label: 'Personal Matching', icon: Icons.handshake_rounded, colors: const [Color(0xFF9B712B), Color(0xFFD5AD6D)], onTap: () => Scrollable.ensureVisible(consultancyKey.currentContext!, duration: const Duration(milliseconds: 500))),
+            _TypeButton(label: 'Personal Matching', icon: Icons.handshake_rounded, colors: const [Color(0xFF9B712B), Color(0xFFD5AD6D)], onTap: () { final c = consultancyKey.currentContext; if (c != null) Scrollable.ensureVisible(c, duration: const Duration(milliseconds: 500)); }),
           ]),
         ),
         SizedBox(key: webKey, height: 30),
@@ -284,7 +284,7 @@ class _PackagesScreenState extends State<PackagesScreen> {
           padding: const EdgeInsets.fromLTRB(16, 30, 16, 0),
           child: Notice(tr('Self Matching packages are separate from the Personal Matching fees. Our team will tell you which plan fits your family; contact us on WhatsApp any time.')),
         ),
-      ]),
+      ])),
     );
   }
 }
