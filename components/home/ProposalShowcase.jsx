@@ -18,11 +18,11 @@ const RIBBON = {
 };
 
 /**
- * The proposal card from the homepage design: a round portrait on the left with a status button over
+ * The proposal card from the homepage design: a rounded-rectangle portrait on the left with a status button over
  * its edge, the name, age, work and place on the right, and "Profile Detail". It receives only public
  * card fields; photos stay blurred where the bureau's rules say so.
  */
-function HomeProfileCard({ profile }) {
+export function HomeProfileCard({ profile, matchScore = null }) {
   const t = useT();
   const { isUnlocked, photoLocked } = useUnlock();
   const type = profile.type ?? 'paid';
@@ -39,20 +39,23 @@ function HomeProfileCard({ profile }) {
       <span className={`absolute -end-1.5 top-2.5 z-10 py-0.5 pe-2.5 ps-3.5 text-[11px] font-bold [clip-path:polygon(8px_0,100%_0,100%_100%,8px_100%,0_50%)] rtl:[clip-path:polygon(0_0,calc(100%-8px)_0,100%_50%,calc(100%-8px)_100%,0_100%)] ${ribbonClass}`}>{t(ribbon)}</span>
       <div className="grid h-full grid-cols-[5fr_7fr] items-center gap-3 max-[360px]:grid-cols-[4fr_7fr]">
         <Link href={href} aria-label={t('View proposal {code}', { code: profile.code })} className="relative block self-center no-underline">
-          <span className="relative mx-auto block aspect-[140/150] w-full max-w-[140px] overflow-hidden rounded-[50%] border-2 border-[#b18433] bg-[#ece3d2] shadow-[0_6px_16px_#062b4e26]">
+          <span className="relative mx-auto block w-full max-w-[140px]">
+          <span className="relative block aspect-[140/150] w-full overflow-hidden rounded-[14px] border-2 border-[#b18433] bg-[#ece3d2] shadow-[0_6px_16px_#062b4e26]">
             {profile.photo ? (
 <CardPhoto profile={profile} alt={t('Portrait of {name}', { name: profile.name })} />
             ) : (
               <span className="absolute inset-0 grid place-items-center"><Image src="/images/logo.png" alt="" width={72} height={72} className="w-[55%] opacity-60" /></span>
             )}
-            {profile.photo && photoLocked && <PhotoLock type={type} code={profile.code} className="absolute inset-0 rounded-[50%]" />}
+            {profile.photo && photoLocked && <PhotoLock type={type} code={profile.code} className="absolute inset-0 rounded-[12px]" />}
           </span>
-          <span title={t(status.title)} className={`absolute bottom-1 start-[6%] z-10 grid size-10 place-items-center rounded-full border-[3px] border-white text-[14px] shadow-[0_4px_12px_#03223f40] max-sm:size-9 ${status.className}`}>
+          <span title={t(status.title)} className={`absolute -bottom-2 -start-2 z-10 grid size-10 place-items-center rounded-full border-[3px] border-white text-[14px] shadow-[0_4px_12px_#03223f40] max-sm:size-9 ${status.className}`}>
             <status.icon aria-hidden="true" />
             <span className="sr-only">{t(status.title)}</span>
           </span>
+          </span>
         </Link>
         <div className="min-w-0 py-2 pe-1">
+          {matchScore ? <span className="mb-1.5 inline-block rounded-full bg-[#fcf4e1] px-2.5 py-0.5 text-[11.5px] font-bold capitalize text-[#806126]">{t('{score}% match', { score: matchScore })}</span> : null}
           <h3 className="mb-1.5 flex min-w-0 items-center gap-1.5 pe-12 text-[20px] font-semibold leading-tight text-navy max-sm:text-[18px]">
             <Link href={href} className="line-clamp-2 min-w-0 capitalize text-inherit no-underline hover:text-[#a17a33]">{profile.name}</Link>
             {profile.verified && <VerifiedBadge className="shrink-0 text-[15px]" />}

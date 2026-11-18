@@ -8,6 +8,7 @@ import { ChatButton } from '@/components/profile/ChatButton';
 import { ProfileActions } from '@/components/profile/ProfileActions';
 import { SaveButton } from '@/components/profile/SaveButton';
 import { ProposalCard } from '@/components/profile/ProposalCard';
+import { HomeProfileCard } from '@/components/home/ProposalShowcase';
 import { ButtonLink } from '@/components/ui/Button';
 import { PremiumContact } from '@/components/profile/PremiumContact';
 import { TypeBadge } from '@/components/profile/TypeBadge';
@@ -37,11 +38,17 @@ function MatchRow({ tag, title, profiles }) {
     <section className="bg-cream px-[6%] py-[60px] font-nunito text-navy">
       <SectionTag>{tag}</SectionTag>
       <h2 className="mb-8 mt-2 text-[34px] font-extrabold leading-tight max-b:text-[26px]">{title}</h2>
-      <div className="grid grid-cols-4 gap-5 max-[1180px]:grid-cols-3 max-p:grid-cols-2 max-sm:grid-cols-1">
+      {/* The same cards as the homepage: side-by-side on wider screens, the tall card on phones. */}
+      <ul className="grid grid-cols-3 gap-x-5 gap-y-7 max-n:grid-cols-2 max-t:grid-cols-1 max-sm:gap-y-5">
         {profiles.map((profile) => (
-          <Reveal key={profile.code} y={38} scale={0.96}><ProposalCard profile={profile} matchScore={profile.score} /></Reveal>
+          <li key={profile.code} className="min-w-0">
+            <Reveal y={38} scale={0.96} className="h-full">
+              <div className="h-full max-sm:hidden"><HomeProfileCard profile={profile} matchScore={profile.score} /></div>
+              <div className="sm:hidden"><ProposalCard profile={profile} matchScore={profile.score} /></div>
+            </Reveal>
+          </li>
         ))}
-      </div>
+      </ul>
     </section>
   );
 }

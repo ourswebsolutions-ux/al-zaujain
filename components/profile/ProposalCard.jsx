@@ -62,14 +62,14 @@ export function ProposalCard({ profile, tag, matchScore, saved }) {
       <Ribbon type={type} />
       <div className="flex gap-4 max-sm:flex-col max-sm:gap-0 sm:flex-col sm:items-center sm:gap-4">
         <Link href={href} aria-label={t('View proposal {code}', { code: profile.code })} className="relative block shrink-0 self-start no-underline max-sm:w-full sm:self-center">
-          <span className="relative block h-[150px] w-[118px] overflow-hidden rounded-[50%] border-[3px] border-[#b18433] bg-white p-[3px] shadow-[0_8px_20px_#03223f26] max-sm:aspect-square max-sm:h-auto max-sm:w-full max-sm:rounded-2xl max-sm:border-0 max-sm:p-0 max-sm:shadow-none sm:h-[220px] sm:w-[172px]">
-            <span className="relative block size-full overflow-hidden rounded-[50%] bg-[#e9e1d1] max-sm:rounded-2xl">
+          <span className="relative block h-[150px] w-[118px] overflow-hidden rounded-[18px] border-[3px] border-[#b18433] bg-white p-[3px] shadow-[0_8px_20px_#03223f26] max-sm:aspect-square max-sm:h-auto max-sm:w-full max-sm:rounded-2xl max-sm:border-0 max-sm:p-0 max-sm:shadow-none sm:h-[220px] sm:w-[172px]">
+            <span className="relative block size-full overflow-hidden rounded-[13px] bg-[#e9e1d1] max-sm:rounded-2xl">
               {profile.photo ? (
 <CardPhoto profile={profile} alt={t('Portrait of {name}', { name: profile.name })} />
               ) : (
                 <span className="absolute inset-0 grid place-items-center"><Image src="/images/logo.png" alt="" width={84} height={84} className="rounded-full opacity-60" /></span>
               )}
-              {profile.photo && photoLocked && <PhotoLock type={type} code={profile.code} className="absolute inset-0 rounded-[50%] max-sm:rounded-2xl" />}
+              {profile.photo && photoLocked && <PhotoLock type={type} code={profile.code} className="absolute inset-0 rounded-[13px] max-sm:rounded-2xl" />}
             </span>
             <span aria-hidden="true" className="absolute bottom-3 end-3 z-[6] rounded-md bg-[#062b4ed9] px-2.5 py-1.5 font-sans text-[10px] font-bold tracking-[.6px] text-white sm:hidden">{profile.code}</span>
           </span>

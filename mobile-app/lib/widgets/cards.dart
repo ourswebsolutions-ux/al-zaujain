@@ -231,8 +231,9 @@ class _OvalPhoto extends StatelessWidget {
           width: width,
           height: height,
           padding: const EdgeInsets.all(3),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.all(Radius.elliptical(width / 2, height / 2)), border: Border.all(color: const Color(0xFFB18433), width: 3), boxShadow: const [BoxShadow(color: Color(0x2603223F), blurRadius: 20, offset: Offset(0, 8))]),
-          child: ClipOval(
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18), border: Border.all(color: const Color(0xFFB18433), width: 3), boxShadow: const [BoxShadow(color: Color(0x2603223F), blurRadius: 20, offset: Offset(0, 8))]),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(13),
             child: Stack(fit: StackFit.expand, children: [
               NetImage(photo == null ? null : '/media/photos/$photo'),
               if (blurred)
@@ -449,17 +450,18 @@ class HomeProfileCard extends StatelessWidget {
                   final d = (size.maxWidth * 0.68).clamp(80.0, 140.0);
                   return Container(
                     width: d,
-                    height: d,
+                    height: d * 150 / 140,
                     padding: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
+                      borderRadius: BorderRadius.circular(16),
                       gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFFE9C77B), Color(0xFFB8893A)]),
                       boxShadow: const [BoxShadow(color: Color(0x2603223F), blurRadius: 14, offset: Offset(0, 6))],
                     ),
                     child: Container(
                       padding: const EdgeInsets.all(3),
-                      decoration: const BoxDecoration(color: Color(0xFFF5EBDA), shape: BoxShape.circle),
-                      child: ClipOval(
+                      decoration: BoxDecoration(color: const Color(0xFFF5EBDA), borderRadius: BorderRadius.circular(13)),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(11),
                         child: Stack(fit: StackFit.expand, children: [
                           photo == null
                               ? Container(color: const Color(0xFFF1E6D2), padding: const EdgeInsets.all(18), child: Opacity(opacity: 0.55, child: Image.asset('assets/images/logo.png')))
