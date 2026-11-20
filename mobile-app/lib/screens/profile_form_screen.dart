@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../core/api.dart';
 import '../core/app_state.dart';
+import '../core/form_conditions.dart';
 import '../core/theme.dart';
 import '../widgets/common.dart';
 import '../widgets/photo_cropper.dart';
@@ -62,6 +63,21 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
   // Bumped after a pasted biodata fills the form, so the text boxes show the new values.
   int pasteRound = 0;
   List<String> unplaced = [];
+  // The documents step asks first: photos only if wanted, the CNIC only for the blue tick.
+  late String wantPhotos = widget.photos.isNotEmpty ? 'yes' : '';
+  String applyTick = '';
+  bool verifyConsent = false;
+
+  // The conditional questionnaire (lib/core/form_conditions.dart): only questions that apply are shown.
+  late final List<Map> allFields = [for (final section in sections) ...((section['fields'] as List?) ?? []).cast<Map>()];
+  Countries get countries => ((app.config['countries'] as List?) ?? []).cast<Map>();
+  Set<String> get visible => visibleFieldNames(allFields, values, countries);
+  bool _shows(Map field) => field['type'] == 'derived' || visible.contains('${field['name']}');
+  /// The answers to send: questions that no longer apply go as blank, so stale answers are not saved.
+  Map<String, String> get sendable {
+    final shown = visible;
+    return {for (final entry in values.entries) entry.key: allFields.any((field) => field['name'] == entry.key) && !shown.contains(entry.key) ? '' : entry.value};
+  }
 
   int get maxPhotos => (app.config['maxPhotos'] as num?)?.toInt() ?? 6;
   bool get draftable => !widget.editing;
@@ -134,6 +150,8 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
   }
 
   Json get section => sections[step];
+  // The questions of this step that apply (the second half of a pair is counted with the first).
+  List<Map> get _stepQuestions => ((section['fields'] as List?) ?? []).cast<Map>().where((field) => field['type'] != 'derived' && field['paired'] != true && _shows(field)).toList();
   bool get last => step == sections.length - 1;
 
   void _goTo(int next) {
@@ -145,7 +163,7 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
     FocusScope.of(context).unfocus();
     setState(() => busy = true);
     try {
-      final result = await app.api.post('form/validate', {'section': section['key'], 'values': values});
+      final result = await app.api.post('form/validate', {'section': section['key'], 'values': sendable});
       final stepErrors = ((result['errors'] as Map?) ?? {}).map((key, value) => MapEntry('$key', '$value'));
       if (stepErrors.isNotEmpty) {
         setState(() { errors = stepErrors; message = 'Please correct the highlighted fields.'; });
@@ -165,20 +183,31 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
       setState(() => message = 'Please confirm the consent statement.');
       return;
     }
+    final sendCnic = applyTick == 'yes';
+    if (sendCnic && (front == null) != (back == null)) {
+      setState(() => message = 'Please upload both the front and the back of the CNIC.');
+      return;
+    }
+    if (sendCnic && front != null && !verifyConsent) {
+      setState(() => message = 'Please authorise Al Zaujain to verify your information and documents.');
+      return;
+    }
+    final sendPhotos = wantPhotos == 'yes';
     setState(() { busy = true; message = null; });
     final fields = <MapEntry<String, String>>[
-      MapEntry('data', jsonEncode(values)),
+      MapEntry('data', jsonEncode(sendable)),
       MapEntry('photo_public', showPhoto ? 'yes' : 'no'),
       if (consent) const MapEntry('consent', 'yes'),
       if (widget.token != null) MapEntry('manage_token', widget.token!),
       for (final id in removed) MapEntry('remove_photo', '$id'),
-      for (final photo in photos) MapEntry('photo_crop', photo.crop == null ? '' : cropJson(photo.crop!)),
+      if (sendPhotos) for (final photo in photos) MapEntry('photo_crop', photo.crop == null ? '' : cropJson(photo.crop!)),
+      if (sendCnic && verifyConsent) const MapEntry('verify_consent', 'yes'),
       for (final entry in recrops.entries) MapEntry('recrop', '${entry.key}|${cropJson(entry.value)}'),
     ];
     final files = [
-      for (final photo in photos) UploadFile('photos', photo.bytes, photo.name),
-      if (front != null) UploadFile('cnic_front', front!.bytes, front!.name),
-      if (back != null) UploadFile('cnic_back', back!.bytes, back!.name),
+      if (sendPhotos) for (final photo in photos) UploadFile('photos', photo.bytes, photo.name),
+      if (sendCnic && front != null) UploadFile('cnic_front', front!.bytes, front!.name),
+      if (sendCnic && back != null) UploadFile('cnic_back', back!.bytes, back!.name),
     ];
     try {
       final result = await app.api.multipart(widget.editing ? 'profiles/${widget.code}' : 'profiles', fields, files);
@@ -275,7 +304,10 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
               ),
           ]),
           const SizedBox(height: 8),
-          Text(tr('STEP {step} OF {total}', {'step': step + 1, 'total': sections.length}), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1, color: AppColors.bronze)),
+          Row(children: [
+            Expanded(child: Text(tr('STEP {step} OF {total}', {'step': step + 1, 'total': sections.length}), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1, color: AppColors.bronze))),
+            if (_stepQuestions.isNotEmpty) Text(tr('{answered} of {total} questions answered', {'answered': _stepQuestions.where((field) => (values['${field['name']}'] ?? '').trim().isNotEmpty).length, 'total': _stepQuestions.length}), style: const TextStyle(fontSize: 11, color: AppColors.muted)),
+          ]),
           const SizedBox(height: 12),
           Panel(
             padding: const EdgeInsets.all(18),
@@ -289,7 +321,7 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                   UrduLine('${section['ur']}', size: 14),
                 ]),
               ),
-              for (final field in ((section['fields'] as List?) ?? []).cast<Map>()) _field(field.cast<String, dynamic>()),
+              for (final field in ((section['fields'] as List?) ?? []).cast<Map>().where(_shows)) _field(field.cast<String, dynamic>()),
               if (last) _documents(),
               if (message != null) ...[const SizedBox(height: 8), Notice(message!)],
               const SizedBox(height: 18),
@@ -376,7 +408,7 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
       case 'select':
         // Choose from the list or type your own; gender and height must be one of the list.
         final strict = field['strict'] == true || field['numeric'] == true;
-        return PickerField(label: label, required: required, locked: locked, hint: hint, error: error, options: optionsFrom(field['options']), value: value, anyLabel: required ? null : 'Not specified', allowCustom: !strict, placeholder: strict ? 'Select' : 'Choose, or type your own', onChanged: (picked) => _change(name, picked));
+        return PickerField(label: label, required: required, locked: locked, hint: hint, error: error, options: optionsFrom(allowedOptions(field, values, countries)), value: value, anyLabel: required ? null : 'Not specified', allowCustom: !strict, placeholder: strict ? 'Select' : 'Choose, or type your own', onChanged: (picked) => _change(name, picked));
       case 'country':
         final countries = ((app.config['countries'] as List?) ?? []).cast<Map>().map((country) => Option('${country['id']}', tr('${country['name']}'))).toList();
         // A country from the list, or one the family types themselves (the website adds it).
@@ -444,10 +476,7 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
     }
   }
 
-  Widget _documents() {
-    final kept = widget.photos.where((photo) => !removed.contains((photo['id'] as num).toInt())).toList();
-    final remaining = maxPhotos - kept.length - photos.length;
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+  List<Widget> _photoSection(List<Json> kept, int remaining) => [
       if (kept.isNotEmpty) ...[
         Text(tr('Current photos'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
@@ -497,13 +526,18 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
       ]),
       const SizedBox(height: 6),
       Tx(tr('JPG, PNG or WebP, up to 8 MB each. You can add {count} more.', {'count': remaining < 0 ? 0 : remaining}), style: const TextStyle(fontSize: 12, color: AppColors.muted)),
-      CheckboxListTile(
-        contentPadding: EdgeInsets.zero,
-        controlAffinity: ListTileControlAffinity.leading,
-        value: !showPhoto,
-        onChanged: (checked) => setState(() => showPhoto = !(checked ?? false)),
-        title: Tx(tr('Keep my photo private. It will only be shared through the bureau.'), style: const TextStyle(fontSize: 13)),
-      ),
+      // The privacy choice only matters once there are photos.
+      if (kept.isNotEmpty || photos.isNotEmpty)
+        CheckboxListTile(
+          contentPadding: EdgeInsets.zero,
+          controlAffinity: ListTileControlAffinity.leading,
+          value: !showPhoto,
+          onChanged: (checked) => setState(() => showPhoto = !(checked ?? false)),
+          title: Tx(tr('Keep my photographs private and share them only through Al Zaujain Marriage Bureau.'), style: const TextStyle(fontSize: 13)),
+        ),
+  ];
+
+  Widget _verification() =>
       Container(
         padding: const EdgeInsets.all(16),
         margin: const EdgeInsets.symmetric(vertical: 8),
@@ -514,14 +548,67 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
           Tx(tr('Upload your CNIC so our team can verify this profile. It is encrypted, never shown publicly, and only administrators can open it.'), style: const TextStyle(fontSize: 12.5, color: AppColors.muted, height: 1.5)),
           if (widget.verification == 'verified') Padding(padding: const EdgeInsets.only(top: 8), child: Text(tr('This profile is verified. Uploading a new CNIC restarts the review.'), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.green))),
           if (widget.verification == 'pending') Padding(padding: const EdgeInsets.only(top: 8), child: Text(tr('Your CNIC is waiting for review.'), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.goldText))),
-          const SizedBox(height: 10),
-          Row(children: [
-            Expanded(child: _cnicButton('CNIC front', front, (file) => setState(() => front = file))),
-            const SizedBox(width: 10),
-            Expanded(child: _cnicButton('CNIC back', back, (file) => setState(() => back = file))),
-          ]),
+          const SizedBox(height: 12),
+          _yesNo('Would you like to apply for the blue verified tick?', applyTick, (value) => applyTick = value),
+          if (applyTick == 'yes') ...[
+            // Both sides of the CNIC, always together.
+            Row(children: [
+              Expanded(child: _cnicButton('CNIC front', front, (file) => setState(() => front = file))),
+              const SizedBox(width: 10),
+              Expanded(child: _cnicButton('CNIC back', back, (file) => setState(() => back = file))),
+            ]),
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+              value: verifyConsent,
+              onChanged: (checked) => setState(() => verifyConsent = checked ?? false),
+              title: Tx(tr('I authorise Al Zaujain Marriage Bureau to verify the information and documents I have submitted.'), style: const TextStyle(fontSize: 12.5, height: 1.5)),
+            ),
+          ],
         ]),
-      ),
+      );
+
+  /// A yes/no question as two large buttons.
+  Widget _yesNo(String question, String value, ValueChanged<String> onChanged, {String? hint}) {
+    Widget choice(String key, String label) => Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Semantics(
+              selected: value == key,
+              button: true,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () => setState(() => onChanged(key)),
+                child: Container(
+                  height: 48,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(color: value == key ? AppColors.navy : Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: value == key ? AppColors.navy : AppColors.line, width: 2)),
+                  child: Text(tr(label), style: TextStyle(fontWeight: FontWeight.w700, color: value == key ? Colors.white : AppColors.navy)),
+                ),
+              ),
+            ),
+          ),
+        );
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Tx(tr(question), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 8),
+        Row(children: [choice('yes', 'Yes'), choice('no', 'No')]),
+        if (hint != null) Padding(padding: const EdgeInsets.only(top: 4), child: Tx(tr(hint), style: const TextStyle(fontSize: 12, color: AppColors.muted))),
+      ]),
+    );
+  }
+
+  Widget _documents() {
+    final kept = widget.photos.where((photo) => !removed.contains((photo['id'] as num).toInt())).toList();
+    final remaining = maxPhotos - kept.length - photos.length;
+    final photosOn = wantPhotos == 'yes';
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      _yesNo('Would you like to upload your profile photographs?', wantPhotos, (value) => wantPhotos = value, hint: 'You can add up to 6 photos. You can also add them later.'),
+      if (photosOn) ..._photoSection(kept, remaining),
+      _verification(),
+      if (!widget.editing)
       if (!widget.editing)
         CheckboxListTile(
           contentPadding: EdgeInsets.zero,

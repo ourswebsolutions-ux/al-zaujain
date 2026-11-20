@@ -5,11 +5,14 @@ import { inputClass, labelClass } from '@/components/ui/Form';
 import { useT } from '@/components/i18n/LanguageProvider';
 import { SearchSelect } from '@/components/ui/SearchSelect';
 import { MARRIAGE_LOCATIONS, NATIONALITIES } from '@/lib/profile-schema.js';
+import { allowedOptions } from '@/lib/form-conditions.js';
 
 const URDU_SCRIPT = /[\u0600-\u06FF]/;
 
-export function FieldControl({ field, value, onChange, error, countries = [], cities = [], castes = [] }) {
+export function FieldControl({ field, value, onChange, error, countries = [], cities = [], castes = [], values = {} }) {
   const t = useT();
+  // Some options are offered to some people only (for example "Married" to men).
+  const fieldOptions = allowedOptions(field, values, { countries });
   const common = { id: field.name, name: field.name, value: value ?? '', 'aria-invalid': !!error, onChange: (event) => onChange(field.name, event.target.value), className: inputClass };
   // Searchable lists: the id stays on the typing box, so the field label still points at it.
   const searchable = { id: field.name, name: field.name, value: value ?? '', onChange: (next) => onChange(field.name, next), invalid: !!error, className: 'mt-2', inputClassName: inputClass };
@@ -19,7 +22,7 @@ export function FieldControl({ field, value, onChange, error, countries = [], ci
     case 'select':
       // Choose from the list or type your own; only gender and height must be one of the list.
       if (!field.strict && !field.numeric) {
-        const options = field.options.map((option) => {
+        const options = fieldOptions.map((option) => {
           const [optionValue, label] = Array.isArray(option) ? option : [option, option];
           return { value: optionValue, label: t(label) };
         });
@@ -28,7 +31,7 @@ export function FieldControl({ field, value, onChange, error, countries = [], ci
       return (
         <select {...common}>
           <option value="">{t('Select…')}</option>
-          {field.options.map((option) => {
+          {fieldOptions.map((option) => {
             const [optionValue, label] = Array.isArray(option) ? option : [option, option];
             return <option key={optionValue} value={optionValue}>{t(label)}</option>;
           })}
@@ -72,7 +75,7 @@ export function FieldRow({ field, value, onChange, error, countries, cities, cas
           {[[field, value, error, first], [second, values[field.pair], errors[field.pair], last]].map(([item, itemValue, itemError, caption]) => (
             <div key={item.name}>
               <label htmlFor={item.name} className="mt-1 block text-[10.5px] font-medium text-muted">{t(caption)}</label>
-              <FieldControl field={{ ...item, pair: undefined }} value={itemValue} onChange={onChange} error={itemError} countries={countries} cities={cities} castes={castes} />
+              <FieldControl field={{ ...item, pair: undefined }} value={itemValue} onChange={onChange} error={itemError} countries={countries} cities={cities} castes={castes} values={values} />
               {itemError && <p role="alert" className="mt-1 text-[11px] font-medium text-[#a33a2c]">{t(itemError)}</p>}
             </div>
           ))}
@@ -87,7 +90,7 @@ export function FieldRow({ field, value, onChange, error, countries, cities, cas
         {t(field.label)}{field.required && <span className="text-[#a33a2c]"> *</span>}
         {field.private && <FaLock aria-label={t('Private')} className="ms-1.5 inline-block text-[9px] text-muted" />}
       </label>
-      <FieldControl field={field} value={value} onChange={onChange} error={error} countries={countries} cities={cities} castes={castes} />
+      <FieldControl field={field} value={value} onChange={onChange} error={error} countries={countries} cities={cities} castes={castes} values={values} />
       {field.hint && <p className="mt-1 text-[11px] text-muted">{t(field.hint)}</p>}
       {error && <p role="alert" className="mt-1 text-[11px] font-medium text-[#a33a2c]">{t(error)}</p>}
     </div>

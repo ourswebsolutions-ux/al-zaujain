@@ -246,7 +246,23 @@ model Profile {
   date_of_birth      DateTime @db.Date
   height_cm          Int?
   marital_status     String   @db.VarChar(80)
-  children_details   String?  @db.VarChar(60)
+  children_details   String?  @db.VarChar(200)
+  // Conditional questions (lib/form-conditions.js): asked only when they apply.
+  has_children              String? @db.VarChar(10)
+  children_count            Int?
+  children_living           String? @db.VarChar(80)
+  existing_wives            Int?
+  second_marriage_intent    String? @db.VarChar(80)
+  existing_family_situation String? @db.Text
+  previous_marriage_duration String? @db.VarChar(80)
+  divorce_details           String? @db.Text
+  widowed_details           String? @db.Text
+  previous_spouse_details   String? @db.Text
+  current_studies           String? @db.VarChar(150)
+  owns_property             String? @db.VarChar(10)
+  property_details          String? @db.Text
+  siblings_details          String? @db.Text
+  has_cultural_prefs        String? @db.VarChar(10)
   // Set only when a female candidate explicitly says she is willing to be a second wife.
   second_wife        String?  @db.VarChar(10)
   mother_tongue      String?  @db.VarChar(80)

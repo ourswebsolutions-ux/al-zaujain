@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/api.dart';
 import '../core/app_state.dart';
+import '../core/form_conditions.dart';
 import '../widgets/common.dart';
 import '../widgets/pickers.dart';
 import 'profile_form_screen.dart';
@@ -51,18 +52,24 @@ class _PreferencesFormState extends State<_PreferencesForm> {
     return ((section['fields'] as List?) ?? []).cast<Map>().map((field) => field.cast<String, dynamic>()).toList();
   }
 
+  Countries get countries => ((app.config['countries'] as List?) ?? []).cast<Map>();
+  // The same rules as the profile form: questions that do not apply are hidden and sent blank.
+  Set<String> get visible => visibleFieldNames(fields, values, countries);
+
   void _set(String name, String value) => setState(() { values[name] = value; errors.remove(name); });
 
   @override
   Widget build(BuildContext context) {
     return Panel(
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        for (final field in fields) _field(field),
+        for (final field in fields.where((field) => visible.contains('${field['name']}'))) _field(field),
         if (message != null) ...[Notice(message!, ok: ok), const SizedBox(height: 12)],
         AppButton(busy ? 'Saving…' : 'Save partner requirements', busy: busy, expand: true, onPressed: () async {
           setState(() { busy = true; message = null; });
           try {
-            final result = await app.api.post('preferences', {'code': widget.code, 'values': values});
+            final shown = visible;
+            final sent = {for (final field in fields) '${field['name']}': shown.contains('${field['name']}') ? values['${field['name']}'] ?? '' : ''};
+            final result = await app.api.post('preferences', {'code': widget.code, 'values': sent});
             ok = true;
             message = '${result['message']}';
             errors = {};
@@ -86,7 +93,7 @@ class _PreferencesFormState extends State<_PreferencesForm> {
     final error = errors[name];
     switch (field['type']) {
       case 'select':
-        return PickerField(label: label, options: optionsFrom(field['options']), value: values[name], error: error, anyLabel: 'Not specified', onChanged: (value) => _set(name, value));
+        return PickerField(label: label, options: optionsFrom(allowedOptions(field, values, countries)), value: values[name], error: error, anyLabel: 'Not specified', onChanged: (value) => _set(name, value));
       case 'country-name':
         return PickerField(label: label, options: ((app.config['countries'] as List?) ?? []).cast<Map>().map((country) => Option('${country['name']}', tr('${country['name']}'))).toList(), value: values[name], error: error, anyLabel: 'Not specified', allowCustom: true, onChanged: (value) => _set(name, value));
       default:

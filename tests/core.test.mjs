@@ -101,11 +101,11 @@ describe('privacy of public output', () => {
 describe('biodata layout', () => {
   it('follows the traditional format and keeps the demand separate', async () => {
     const demand = 'لڑکی تعلیم یافتہ ہو۔ باقی تفصیلات پرسنل۔';
-    const id = await approved({ headline_ur: 'عبیدالرحمٰن', marital_status: 'Divorced', children_details: 'No kids', monthly_income: '80K', caste: 'Arain', city: 'Patoki', residence_area: 'Village', home_ownership: 'Own', father_status: 'Alive', mother_status: 'Alive', brothers: 1, sisters: 5, partner_demand: demand, pref_age_max: 21 });
+    const id = await approved({ headline_ur: 'عبیدالرحمٰن', marital_status: 'Divorced', has_children: 'No', monthly_income: '80K', caste: 'Arain', city: 'Patoki', residence_area: 'Village', home_ownership: 'Own', father_status: 'Alive', mother_status: 'Alive', brothers: 1, sisters: 5, partner_demand: demand, pref_age_max: 21 });
     const data = biodata(await getProfile(id), 'AZ-14');
     const value = (rows, label) => rows.find((row) => row.label === label)?.value;
     assert.equal(data.headline, 'عبیدالرحمٰن');
-    assert.equal(value(data.candidate, 'Marital status'), 'Divorced (No kids)');
+    assert.equal(value(data.candidate, 'Marital status'), 'Divorced (No children)');
     assert.equal(value(data.candidate, 'Income'), '80K');
     assert.equal(value(data.candidate, 'Maslak'), 'Sunni');
     assert.equal(value(data.residence, 'City'), 'Patoki (Village)');
