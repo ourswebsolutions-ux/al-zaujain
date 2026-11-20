@@ -16,12 +16,13 @@ const NAV = [
   { href: '/packages', label: 'Packages' },
   { href: '/#why-choose', label: 'Why Al Zaujain' },
   { href: '/#registration', label: 'Registration' },
+  { href: '/consultants', label: 'Marriage consultants' },
   { href: '/#android-app', label: 'Android app' },
   { href: '/#questions', label: 'FAQs' },
   { href: '/#contact', label: 'Contact us' },
 ];
 
-const navLink = "relative whitespace-nowrap py-2 text-xs font-medium capitalize leading-[18px] no-underline transition-colors duration-200 after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:origin-left rtl:after:origin-right after:scale-x-0 after:bg-gold after:transition-transform after:duration-200 after:content-[''] hover:text-[#9b712b] hover:after:scale-x-100 focus-visible:text-[#9b712b] focus-visible:after:scale-x-100";
+const navLink = "relative whitespace-nowrap py-2 text-xs font-medium max-[1440px]:text-[11.5px] max-[1380px]:text-[11px] capitalize leading-[18px] no-underline transition-colors duration-200 after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:origin-left rtl:after:origin-right after:scale-x-0 after:bg-gold after:transition-transform after:duration-200 after:content-[''] hover:text-[#9b712b] hover:after:scale-x-100 focus-visible:text-[#9b712b] focus-visible:after:scale-x-100";
 
 export function Header({ phone, phoneIntl, user, unread = 0, categories = [], announcements = [] }) {
   const t = useT();
@@ -47,7 +48,7 @@ export function Header({ phone, phoneIntl, user, unread = 0, categories = [], an
 
       <div className="relative z-20 flex items-center justify-between gap-5 border-b border-[#e9e9e5] bg-white px-[4.5%] py-5 max-m:gap-2 max-m:px-4 max-m:py-3">
         <Brand className="min-w-0" />
-        <nav aria-label={t('Main navigation')} className="flex gap-[11px] max-[1440px]:gap-[8px] max-n:hidden">
+        <nav aria-label={t('Main navigation')} className="flex gap-[11px] max-[1440px]:gap-[8px] max-[1380px]:gap-[6px] max-n:hidden">
           {NAV.map((item) => item.menu ? (
             <div key={item.href} className="group relative flex items-center">
               <Link href={item.href} className={navLink}>{t(item.label)}</Link>
