@@ -14,7 +14,7 @@ export async function Contact({ settings }) {
         <div className="relative z-20 w-[62%] bg-[linear-gradient(var(--to-end),#062b4e_68%,transparent)] p-[38px] max-b:w-[68%] max-m:w-full max-m:bg-[linear-gradient(0deg,#062b4e,transparent)] max-m:p-[27px]">
           <SectionTag className="text-[9px]! leading-[13.5px]! text-champagne!">{t('A RISHTA BEGINS WITH UNDERSTANDING')}</SectionTag>
           <h2 className="mb-5 text-[35px] font-bold leading-[43.75px] tracking-[-1.2px] max-m:text-[31px] max-m:leading-[38.75px] max-m:tracking-[-0.8px]">{t('For your family’s')}<br />{t('beautiful tomorrow.')}</h2>
-          <Urdu as="h3" className="mb-[17px] text-start text-[19px] font-bold leading-[27.55px] text-champagne max-m:text-xl max-m:leading-11">آپ کے خاندان کے خوبصورت کل کے لیے</Urdu>
+          <Urdu heading as="h3" className="mb-[17px] text-start text-[19px] font-bold leading-[27.55px] text-champagne max-m:text-xl max-m:leading-11">آپ کے خاندان کے خوبصورت کل کے لیے</Urdu>
           <p className="text-xs leading-[22.8px] text-[#c6d3dd]">{t('Let’s talk about the person, the values, and the future you have in mind.')}</p>
         </div>
         <Image src="/images/pakistani-couple.png" alt={t('Wedding couple in Pakistani traditional clothing')} width={634} height={340} sizes="50vw" className="absolute inset-y-0 end-0 h-full w-1/2 object-cover object-[77%_50%] max-m:inset-y-auto max-m:start-0 max-m:h-[340px] max-m:w-full max-m:object-[72%_50%] max-m:opacity-25" />

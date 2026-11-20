@@ -157,7 +157,7 @@ class _PackagesScreenState extends State<PackagesScreen> {
     Widget heading(String title, String ur, String text, [String? textUr]) => Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 22),
           child: Column(children: [
-            Text('❝ ${tr(title)} ❞', textAlign: TextAlign.center, style: TextStyle(fontFamily: headFont, fontSize: 22, fontWeight: FontWeight.w700, color: const Color(0xFF111111))),
+            Text('❝ ${tr(title)} ❞', textAlign: TextAlign.center, style: TextStyle(fontFamily: titleFont, fontSize: 22, fontWeight: FontWeight.w700, color: const Color(0xFF111111))),
             if (urdu && ur.isNotEmpty) ...[const SizedBox(height: 10), Text('❞ $ur ❝', textAlign: TextAlign.center, textDirection: TextDirection.rtl, style: urduStyle.copyWith(fontSize: 20, color: const Color(0xFF111111)))],
             if (text.isNotEmpty) ...[const SizedBox(height: 8), Text(tr(text), textAlign: TextAlign.center, style: TextStyle(fontFamily: headFont, fontSize: 14.5, fontWeight: FontWeight.w600, color: const Color(0xFF9B712B), height: 1.5))],
             if (urdu && textUr != null) ...[const SizedBox(height: 6), Text(textUr, textAlign: TextAlign.center, textDirection: TextDirection.rtl, style: urduStyle.copyWith(fontSize: 15, color: const Color(0xFF9B712B), height: 2.1))],
@@ -196,7 +196,7 @@ class _PackagesScreenState extends State<PackagesScreen> {
             SiteLabel(tr('Welcome to {company}', {'company': 'Al Zaujain Marriage Bureau'})),
             const SizedBox(height: 6),
             GradientText(tr('Rishta Packages'), size: 34),
-            if (urdu) Text('رشتہ پیکجز', textDirection: TextDirection.rtl, style: urduStyle.copyWith(fontSize: 26)),
+            if (urdu) Text('رشتہ پیکجز', textDirection: TextDirection.rtl, style: urduHeadingStyle.copyWith(fontSize: 26)),
             const SizedBox(height: 8),
             const Ornament(),
             const SizedBox(height: 18),
@@ -207,7 +207,7 @@ class _PackagesScreenState extends State<PackagesScreen> {
             ])
               Padding(padding: const EdgeInsets.only(bottom: 10), child: Text(tr(line), style: const TextStyle(fontSize: 15, height: 1.7, color: Color(0xFF2F3B4A)))),
             const SizedBox(height: 14),
-            Text(tr('Which Type of Rishta Service Do You Need?'), textAlign: TextAlign.center, style: TextStyle(fontFamily: headFont, fontSize: 19, fontWeight: FontWeight.w700, color: const Color(0xFF111111))),
+            Text(tr('Which Type of Rishta Service Do You Need?'), textAlign: TextAlign.center, style: TextStyle(fontFamily: titleFont, fontSize: 19, fontWeight: FontWeight.w700, color: const Color(0xFF111111))),
             if (urdu) Text('آپ کو کس قسم کی رشتہ سروس کی ضرورت ہے؟', textAlign: TextAlign.center, textDirection: TextDirection.rtl, style: urduStyle.copyWith(fontSize: 17, color: const Color(0xFF333333))),
             const SizedBox(height: 16),
             if (local.isNotEmpty || foreign.isNotEmpty) ...[

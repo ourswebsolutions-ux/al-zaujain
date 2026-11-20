@@ -26,7 +26,7 @@ function SectionHeading({ letter, title, ur }) {
   return (
     <div className="mb-4 flex items-center gap-3 border-b border-[#eee6d8] pb-2.5">
       <span aria-hidden="true" className="grid size-7 shrink-0 place-items-center rounded-full border border-gold font-nunito text-[12px] font-extrabold text-[#9b712b]">{letter}</span>
-      <h2 className="font-quicksand text-[17px] font-bold capitalize text-navy">{title}</h2>
+      <h2 className="urdu-body font-quicksand text-[17px] font-bold capitalize text-navy">{title}</h2>
       {ur && <Urdu keep as="span" className="ml-auto whitespace-nowrap text-[14px] leading-8 text-[#9b712b]">{ur}</Urdu>}
     </div>
   );
@@ -165,7 +165,7 @@ export function ExportPart({ part, index, total, data, subtitle, photo, phone })
       </div>
       <div className="flex items-center gap-3 px-6 pb-2 pt-4">
         <span aria-hidden="true" className="grid size-7 shrink-0 place-items-center rounded-full border border-gold font-nunito text-[12px] font-extrabold text-[#9b712b]">{index}</span>
-        <h2 className="font-quicksand text-[17px] font-bold capitalize text-navy">{t(part.title)}</h2>
+        <h2 className="urdu-body font-quicksand text-[17px] font-bold capitalize text-navy">{t(part.title)}</h2>
         <Urdu keep as="span" className="ml-auto whitespace-nowrap text-[13px] leading-8 text-[#9b712b]">{part.ur}</Urdu>
       </div>
       <div className="mx-6 border-b border-[#eee6d8]" />

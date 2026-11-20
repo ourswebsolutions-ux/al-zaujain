@@ -53,7 +53,7 @@ void main() {
       'partner': {'demand': 'Educated partner.', 'rows': [{'label': 'Age', 'value': '25 – 32'}]},
       'contact': [],
     });
-    expect(text.split('\n').first, 'AL ZAUJAIN | International Marriage Consultancy');
+    expect(text.split('\n').first, 'AL ZAUJAIN | Marriage Bureau Multan Pakistan');
     expect(text, contains('Profile AZ-07'));
     expect(text, contains('CANDIDATE INFORMATION\nName: Sana (AZ-07)\nAge: 27'));
     expect(text, contains('RESIDENCE\nCity: Multan'));

@@ -343,7 +343,7 @@ export function ProfileWizard({ countries, castes = [], initial = {}, mode = 'cr
           <section key={item.key} className="rounded-[20px] border border-line bg-white p-[30px] shadow-[0_12px_35px_#03223f08] max-m:p-5">
             <div className="mb-6 flex items-center justify-between gap-4 border-b border-[#eee6d8] pb-4">
               <h2 className="font-quicksand text-xl font-bold text-navy">{t(item.title)}</h2>
-              <Urdu className="text-lg leading-10 text-[#9b712b]">{item.ur}</Urdu>
+              <Urdu heading className="text-lg leading-10 text-[#9b712b]">{item.ur}</Urdu>
             </div>
             {item.fields.length > 0 ? (
               <div className="grid grid-cols-2 gap-5 max-m:grid-cols-1">
@@ -386,7 +386,7 @@ export function ProfileWizard({ countries, castes = [], initial = {}, mode = 'cr
           <motion.div key={section.key} initial={{ opacity: 0, x: direction * 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: direction * -24 }} transition={{ duration: 0.22 }}>
             <div className="mb-6 flex items-center justify-between gap-4 border-b border-[#eee6d8] pb-4">
               <h2 className="font-quicksand text-2xl font-bold text-navy max-m:text-xl">{t(section.title)}</h2>
-              <Urdu className="text-lg leading-10 text-[#9b712b]">{section.ur}</Urdu>
+              <Urdu heading className="text-lg leading-10 text-[#9b712b]">{section.ur}</Urdu>
             </div>
 
             <div className={`grid grid-cols-2 gap-5 max-m:grid-cols-1 ${section.fields.length === 0 ? 'hidden' : ''}`}>

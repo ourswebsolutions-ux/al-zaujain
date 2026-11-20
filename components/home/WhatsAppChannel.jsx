@@ -18,7 +18,7 @@ export async function WhatsAppChannel({ compact = false }) {
           <p className="mb-1 text-[10px] font-bold uppercase tracking-[1.6px] text-champagne">{t('Official channel')}</p>
           <h2 className={`font-extrabold leading-tight ${compact ? 'text-xl' : 'text-[30px] max-m:text-[22px]'}`}>{t('Join Our Official WhatsApp Channel')}</h2>
           <p className="mt-2 max-w-[620px] text-sm leading-6 text-[#d7e0e8]">{t('Get the latest matrimonial proposals, announcements and advice from Al Zaujain straight on WhatsApp.')}</p>
-          {!compact && <Urdu className="mt-1 text-[17px] leading-10 text-champagne">تازہ ترین رشتے سب سے پہلے واٹس ایپ پر حاصل کریں</Urdu>}
+          {!compact && <Urdu heading className="mt-1 text-[17px] leading-10 text-champagne">تازہ ترین رشتے سب سے پہلے واٹس ایپ پر حاصل کریں</Urdu>}
         </div>
         <a href={WHATSAPP_CHANNEL} target="_blank" rel="noopener noreferrer" className="inline-flex shrink-0 items-center gap-2.5 rounded-xl bg-whatsapp px-6 py-3.5 text-[13px] font-extrabold text-white no-underline transition hover:-translate-y-0.5 hover:bg-[#0f6f37] hover:text-white">
           <FaWhatsapp aria-hidden="true" className="text-lg" /> {t('Join Channel')} <FaArrowUpRightFromSquare aria-hidden="true" className="text-[10px]" />

@@ -47,7 +47,7 @@ export async function AdvancedSearch({ countries, cities, castes, nationalities 
         <SectionTag>{t('FIND YOUR MATCH')}</SectionTag>
         <div className="flex items-center justify-between gap-6 max-m:gap-2.5">
           <h2 id="search-title" className="my-3 text-[40px] font-extrabold leading-[1.15] max-b:text-[30px] max-[700px]:text-[clamp(20px,5vw,26px)]">{t('Search matrimonial proposals')}</h2>
-          <Urdu className="text-[17px] leading-[42.5px] text-[#9b712b] max-[700px]:text-[clamp(11px,2.8vw,16px)]">اپنا رشتہ تلاش کریں</Urdu>
+          <Urdu heading className="text-[17px] leading-[42.5px] text-[#9b712b] max-[700px]:text-[clamp(11px,2.8vw,16px)]">اپنا رشتہ تلاش کریں</Urdu>
         </div>
         <p className="text-base leading-7 text-muted max-m:text-sm">{t('Combine as many filters as you like. Only profiles matching all of them are shown.')}</p>
       </Reveal>

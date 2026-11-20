@@ -43,7 +43,7 @@ export async function Registration({ settings }) {
           <Image src="/images/logo.png" alt={t('Al Zaujain logo')} width={48} height={48} className="size-12 rounded-full bg-white" />
           <div>
             <strong className="block text-[22px] font-bold leading-[33px] max-m:text-xl max-m:leading-[30px]">{t('Al Zaujain')}</strong>
-            <span className="block text-[10px] leading-[15px] text-muted max-m:text-[9px] max-m:leading-[13.5px]">{t('International Marriage Consultancy · Multan, Pakistan')}</span>
+            <span className="block text-[10px] leading-[15px] text-muted max-m:text-[9px] max-m:leading-[13.5px]">{t('Marriage Bureau Multan Pakistan')}</span>
           </div>
         </div>
         <dl className="mb-[18px]">

@@ -34,16 +34,18 @@ class Tx extends StatelessWidget {
   }
 }
 
-/// An Urdu calligraphy line in the website's Nastaliq style.
+/// An Urdu heading line in Gulzar, like the website's Urdu headings. `body: true` uses the Urdu text
+/// font (Noto Nastaliq Urdu) instead, as marriage profiles do.
 class UrduLine extends StatelessWidget {
-  const UrduLine(this.text, {super.key, this.size = 17, this.color = AppColors.deepGold, this.align});
+  const UrduLine(this.text, {super.key, this.size = 17, this.color = AppColors.deepGold, this.align, this.body = false});
   final String text;
   final double size;
   final Color color;
   final TextAlign? align;
+  final bool body;
 
   @override
-  Widget build(BuildContext context) => Text(text, textDirection: TextDirection.rtl, textAlign: align ?? (Directionality.of(context) == TextDirection.rtl ? TextAlign.right : TextAlign.left), style: urduStyle.copyWith(fontSize: size, color: color));
+  Widget build(BuildContext context) => Text(text, textDirection: TextDirection.rtl, textAlign: align ?? (Directionality.of(context) == TextDirection.rtl ? TextAlign.right : TextAlign.left), style: (body ? urduStyle : urduHeadingStyle).copyWith(fontSize: size, color: color));
 }
 
 class SectionTag extends StatelessWidget {
@@ -55,8 +57,11 @@ class SectionTag extends StatelessWidget {
   Widget build(BuildContext context) => Text(tr(text), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: app.t.isUrdu ? 0 : 1.4, color: color));
 }
 
-/// The website's heading font: Poppins, or Noto Nastaliq Urdu in Urdu.
+/// The website's heading font for buttons, labels and names: Poppins, or Noto Nastaliq Urdu in Urdu.
 String get headFont => app.t.isUrdu ? 'NotoNastaliqUrdu' : 'Poppins';
+
+/// The font of main headings: Poppins, or Gulzar in Urdu.
+String get titleFont => app.t.isUrdu ? urduHeadingFont : 'Poppins';
 
 /// "marital status" → "Marital Status", as the website shows labels and profile details.
 /// Emails, links and numbers are left exactly as they are.

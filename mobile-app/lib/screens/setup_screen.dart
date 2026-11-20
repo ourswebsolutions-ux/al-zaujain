@@ -52,7 +52,7 @@ class _SetupScreenState extends State<SetupScreen> {
                 Container(padding: const EdgeInsets.all(6), decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle), child: Image.asset('assets/images/logo.png', width: 92, height: 92)),
                 const SizedBox(height: 14),
                 Text(tr('AL ZAUJAIN'), style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700, letterSpacing: 1.5)),
-                Text(tr('INTERNATIONAL MARRIAGE CONSULTANCY'), textAlign: TextAlign.center, style: const TextStyle(color: AppColors.champagne, fontSize: 10, letterSpacing: 1.4)),
+                Text(app.t.isUrdu ? tr('Marriage Bureau Multan Pakistan') : 'MARRIAGE BUREAU MULTAN PAKISTAN', textAlign: TextAlign.center, style: const TextStyle(color: AppColors.champagne, fontSize: 10, letterSpacing: 1.4)),
                 const UrduLine('رشتوں کا نیا سفر، اب آپ کے موبائل پر', size: 18, color: AppColors.champagne, align: TextAlign.center),
                 const SizedBox(height: 18),
                 Container(

@@ -1,10 +1,10 @@
 {
-  "file": "al-zaujain-v1.0.20.apk",
-  "version": "1.0.20",
-  "build": 21,
-  "size": 44074318,
-  "sha256": "c6fa9f1460e7ff4c5dbd21da9bcfddbd26ae72cb6a20bd6b7fd251e43ecd4360",
+  "file": "al-zaujain-v1.0.21.apk",
+  "version": "1.0.21",
+  "build": 22,
+  "size": 44471493,
+  "sha256": "ba166a5df477a10315256ad214a89c6555f30e3e35e49744dddaf70ca0472108",
   "minAndroid": "7.0",
   "site": "https://alzaujain.com",
-  "date": "2026-11-20T16:27:13.504Z"
+  "date": "2026-11-20T20:07:13.813Z"
 }

@@ -360,7 +360,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
         child: ListView(padding: const EdgeInsets.fromLTRB(22, 40, 22, 30), children: [
           Center(child: Image.asset('assets/images/logo.png', width: 88, height: 88)),
           const SizedBox(height: 14),
-          Text(tr('Confirm your email'), textAlign: TextAlign.center, style: TextStyle(fontFamily: headFont, fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.navy)),
+          Text(tr('Confirm your email'), textAlign: TextAlign.center, style: TextStyle(fontFamily: titleFont, fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.navy)),
           const SizedBox(height: 8),
           Text(tr('We sent a 6-digit code to {email}. Enter it below to confirm your email address.', {'email': email}), textAlign: TextAlign.center, style: const TextStyle(fontSize: 14, height: 1.5, color: AppColors.muted)),
           const SizedBox(height: 24),

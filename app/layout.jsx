@@ -1,4 +1,4 @@
-import { Inter, Noto_Naskh_Arabic, Noto_Nastaliq_Urdu, Poppins } from 'next/font/google';
+import { Gulzar, Inter, Noto_Naskh_Arabic, Noto_Nastaliq_Urdu, Poppins } from 'next/font/google';
 import { Providers } from '@/components/ui/Providers';
 import { currentUser } from '@/lib/auth.js';
 import { unlockCost, unlockedCodes } from '@/lib/credits.js';
@@ -7,9 +7,11 @@ import { getRestrictions, viewerIsPaid } from '@/lib/restrictions.js';
 import './globals.css';
 
 const poppins = Poppins({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'], variable: '--font-poppins', display: 'swap' });
-// Headings, navigation, buttons and labels: Poppins. Body text: Inter. Urdu: Noto Nastaliq Urdu.
+// Headings, navigation, buttons and labels: Poppins. Body text: Inter. Urdu text and marriage profiles:
+// Noto Nastaliq Urdu. Urdu main headings: Gulzar.
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-inter', display: 'swap' });
 const naskh = Noto_Naskh_Arabic({ subsets: ['arabic'], weight: ['400', '500', '600', '700'], variable: '--font-naskh', display: 'swap' });
+const gulzar = Gulzar({ subsets: ['arabic'], weight: '400', variable: '--font-gulzar', display: 'swap' });
 const nastaliq = Noto_Nastaliq_Urdu({ subsets: ['arabic'], weight: ['400', '500', '600', '700'], variable: '--font-nastaliq', display: 'swap' });
 
 const siteUrl = process.env.SITE_URL || 'http://localhost:3000';
@@ -37,7 +39,7 @@ export default async function RootLayout({ children }) {
   const member = user?.role === 'user';
   const [restrictions, paid, cost, unlocked] = await Promise.all([getRestrictions(), viewerIsPaid(user), unlockCost(), member ? unlockedCodes(user.id) : new Set()]);
   return (
-    <html lang={lang} dir={lang === 'ur' ? 'rtl' : 'ltr'} className={`scroll-smooth ${poppins.variable} ${inter.variable} ${naskh.variable} ${nastaliq.variable} ${FONT_SETS[lang]}`}>
+    <html lang={lang} dir={lang === 'ur' ? 'rtl' : 'ltr'} className={`scroll-smooth ${poppins.variable} ${inter.variable} ${naskh.variable} ${nastaliq.variable} ${gulzar.variable} ${FONT_SETS[lang]}`}>
       <body id="top" className="bg-paper font-sans leading-6 text-ink antialiased [&_svg]:w-auto">
         <Providers lang={lang} photoLocked={restrictions.photo && !paid} signedIn={!!user} member={member} unlockCost={cost} unlocked={[...unlocked]}>{children}</Providers>
       </body>

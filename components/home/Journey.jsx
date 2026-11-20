@@ -21,7 +21,7 @@ export async function Journey() {
           <p className="mb-4 text-[13px] leading-[24.7px] text-muted max-m:text-xs max-m:leading-[22.8px]">{t('Three thoughtful steps, with your family by your side.')}</p>
         </div>
         <div lang="ur" dir="rtl" className="border-e-[3px] border-gold pe-7 text-end max-m:pe-[18px] ur:invisible">
-          <h3 className="mb-2.5 mt-2 font-urdu text-[26px] font-bold leading-[54.6px] max-m:text-[23px] max-m:leading-[48.3px]">پہلی بات سے،<br />دو خاندانوں کے ساتھ تک</h3>
+          <h3 className="mb-2.5 mt-2 font-urdu-heading text-[26px] font-bold leading-[54.6px] max-m:text-[23px] max-m:leading-[48.3px]">پہلی بات سے،<br />دو خاندانوں کے ساتھ تک</h3>
         </div>
       </Reveal>
 
@@ -31,7 +31,7 @@ export async function Journey() {
             <span className="relative mb-6 grid size-[54px] place-items-center rounded-full border-[7px] border-white bg-navy text-[13px] leading-[19.5px] text-champagne max-m:absolute max-m:start-0 max-m:top-0">0{index + 1}</span>
             <step.icon aria-hidden="true" className="absolute end-1.5 top-[11px] text-[25px] text-[#bd9343] max-m:hidden" />
             <h3 className="mb-1.5 text-lg font-bold leading-[26.1px] max-b:leading-[23.2px] max-m:mb-2.5 max-m:text-[17px] max-m:leading-[24.65px]">{t(step.title)}</h3>
-            <Urdu as="h4" className="mb-5 text-start text-[19px] leading-[41.8px] text-[#997127] max-b:leading-[35.2px] max-m:mb-4 max-m:text-[17px] max-m:leading-[37.4px]">{step.ur}</Urdu>
+            <Urdu heading as="h4" className="mb-5 text-start text-[19px] leading-[41.8px] text-[#997127] max-b:leading-[35.2px] max-m:mb-4 max-m:text-[17px] max-m:leading-[37.4px]">{step.ur}</Urdu>
             <p className="mb-4 text-xs leading-[22.8px] text-muted">{t(step.text)}</p>
           </Reveal>
         ))}

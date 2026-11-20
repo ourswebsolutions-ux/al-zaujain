@@ -17,7 +17,7 @@ import 'common.dart';
 
 /// The same plain-text biodata as the website's "Copy profile" (lib/profile-schema.js biodataToText).
 String biodataText(Json data) {
-  final lines = <String>['AL ZAUJAIN | ${tr('International Marriage Consultancy')}', '${tr('Profile')} ${data['code']}', ''];
+  final lines = <String>['AL ZAUJAIN | ${tr('Marriage Bureau Multan Pakistan')}', '${tr('Profile')} ${data['code']}', ''];
   if (data['headline'] != null && '${data['headline']}'.isNotEmpty) lines.addAll(['${data['headline']}', '']);
   void block(String title, List<Json> rows) {
     if (rows.isEmpty) return;
@@ -299,7 +299,7 @@ class _ProfileIntro extends StatelessWidget {
             Row(children: [Flexible(child: Tx(titleCase('${data['name']}'), style: TextStyle(fontFamily: headFont, fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.navy))), if (data['verified'] == true) const Padding(padding: EdgeInsetsDirectional.only(start: 8), child: VerifiedBadge(size: 19))]),
             const SizedBox(height: 4),
             Tx(titleCase(subtitle.where((part) => part.isNotEmpty).map(tr).join(' · ')), style: const TextStyle(fontSize: 13, color: AppColors.muted)),
-            if (!app.t.isUrdu) Text('رشتے محبت کے، فیصلے اپنوں کے', textDirection: TextDirection.rtl, style: urduStyle.copyWith(fontSize: 14, color: const Color(0xFF9B712B))),
+            if (!app.t.isUrdu) Text('رشتے محبت کے، فیصلے اپنوں کے', textDirection: TextDirection.rtl, style: urduHeadingStyle.copyWith(fontSize: 14, color: const Color(0xFF9B712B))),
           ]),
         ),
       ]),

@@ -25,6 +25,12 @@
   }
 }
 
+/* Urdu main headings are in Gulzar, over any heading font class; the rest of the Urdu text (and
+   marriage profiles, whose headings carry font-urdu or urdu-body) stays in Noto Nastaliq Urdu. Unlayered on purpose. */
+:where(.lang-ur) :is(h1, h2):not(.font-urdu, .urdu-body) {
+  font-family: var(--font-urdu-heading);
+}
+
 /* "Towards the end of the line": right in English, left in Urdu. Used by gradients that follow the layout. */
 :root { --to-end: 90deg; color-scheme: only light; }
 [dir='rtl'] { --to-end: 270deg; }
@@ -51,6 +57,7 @@
   --font-quicksand: var(--ui-quicksand), sans-serif;
   --font-display: var(--display-font), serif;
   --font-urdu: var(--font-nastaliq), serif;
+  --font-urdu-heading: var(--font-gulzar), var(--font-nastaliq), var(--font-poppins), serif;
 
   --ease-luxe: cubic-bezier(0.22, 1, 0.36, 1);
 

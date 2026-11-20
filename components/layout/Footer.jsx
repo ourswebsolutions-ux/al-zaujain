@@ -24,7 +24,7 @@ export async function Footer({ settings }) {
       <div className="mx-auto w-full max-w-[1296px]">
         <div className="mb-10 text-center max-sm:mb-8">
           <p className="bg-[linear-gradient(135deg,#062b4e_30%,#c99432_100%)] bg-clip-text text-[30px] font-semibold leading-snug text-transparent [-webkit-text-fill-color:transparent] max-sm:text-[21px]">{t('Rishtay built on love, decisions made with family.')}</p>
-          <Urdu keep as="p" className="mt-1 text-[20px] leading-[2] text-[#a17a33] max-sm:text-[17px]">رشتے محبت کے، فیصلے اپنوں کے</Urdu>
+          <Urdu heading keep as="p" className="mt-1 text-[20px] leading-[2] text-[#a17a33] max-sm:text-[17px]">رشتے محبت کے، فیصلے اپنوں کے</Urdu>
         </div>
 
         <div className="grid grid-cols-[1.3fr_.8fr_.8fr_1.2fr] gap-10 max-b:grid-cols-2 max-sm:grid-cols-1 max-sm:gap-8">
@@ -33,7 +33,7 @@ export async function Footer({ settings }) {
               <Image src="/images/logo.png" alt="" width={64} height={64} className="size-16 rounded-full bg-white" />
               <span className="block text-[22px] font-bold leading-tight tracking-[0.5px] text-navy">
                 AL ZAUJAIN
-                <small className="mt-1 block text-[10px] font-semibold tracking-[0.3px] text-[#876623]">{t('International Marriage Consultancy')}</small>
+                <small className="mt-1 block text-[10px] font-semibold tracking-[0.3px] text-[#876623]">{t('Marriage Bureau Multan Pakistan')}</small>
               </span>
             </Link>
             <p className="mb-5 max-w-[380px] text-[15px] leading-[1.75]">{t(settings.footer_about)}</p>

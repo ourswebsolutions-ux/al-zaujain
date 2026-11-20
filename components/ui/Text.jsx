@@ -7,8 +7,9 @@ export function SectionTag({ children, className = '' }) {
 }
 
 // A decorative Urdu line beside English text. Urdu mode hides it, because the main text is then Urdu.
-export function Urdu({ as: Tag = 'p', className = '', keep, children }) {
-  return <Tag lang="ur" dir="rtl" className={`font-urdu ${keep ? '' : 'ur:hidden'} ${className}`}>{children}</Tag>;
+// `heading` sets it in the Urdu heading font (Gulzar); other Urdu text uses Noto Nastaliq Urdu.
+export function Urdu({ as: Tag = 'p', className = '', keep, heading, children }) {
+  return <Tag lang="ur" dir="rtl" className={`${heading ? 'font-urdu-heading' : 'font-urdu'} ${keep ? '' : 'ur:hidden'} ${className}`}>{children}</Tag>;
 }
 
 // The two heading scales used by the reference: Quicksand sections and Nunito sections.

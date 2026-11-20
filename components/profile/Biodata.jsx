@@ -8,7 +8,7 @@ function SectionHeading({ letter, title, ur }) {
   return (
     <div className="mb-5 flex items-center gap-3 border-b border-[#eee6d8] pb-3">
       <span aria-hidden="true" className="grid size-8 shrink-0 place-items-center rounded-full border border-gold font-nunito text-[13px] font-extrabold text-[#9b712b]">{letter}</span>
-      <h2 className="min-w-0 font-quicksand text-[19px] font-bold text-navy max-m:text-[16px]">{title}</h2>
+      <h2 className="urdu-body min-w-0 font-quicksand text-[19px] font-bold text-navy max-m:text-[16px]">{title}</h2>
       {ur && <Urdu as="span" className="ms-auto shrink-0 whitespace-nowrap text-base leading-9 text-[#9b712b] max-m:text-xs">{ur}</Urdu>}
     </div>
   );
@@ -40,7 +40,7 @@ export async function BiodataHeader({ data }) {
         <Image src="/images/logo.png" alt="" width={56} height={56} className="size-14 rounded-full bg-white max-m:size-11" />
         <div className="min-w-0">
           <p className="text-lg font-bold tracking-[1px] max-m:text-[15px]">{t('AL ZAUJAIN')}</p>
-          <p className="text-[10px] font-medium tracking-[1.4px] text-champagne max-m:text-[7px] max-m:tracking-[.3px]">{t('INTERNATIONAL MARRIAGE CONSULTANCY')}</p>
+          <p className="text-[10px] font-medium uppercase tracking-[1.4px] text-champagne max-m:text-[7px] max-m:tracking-[.3px]">{t('Marriage Bureau Multan Pakistan')}</p>
         </div>
         <div className="ms-auto shrink-0 text-end">
           <p className="text-[9px] tracking-[2px] text-champagne">{t('PROFILE ID')}</p>
@@ -111,7 +111,7 @@ export async function PartnerSection({ data }) {
 
 export function NameLine({ data }) {
   return (
-    <h1 className="text-[28px] font-semibold leading-tight text-navy">
+    <h1 className="urdu-body text-[28px] font-semibold leading-tight text-navy">
       {data.name}
       {data.verified && <VerifiedBadge className="ms-2 text-[21px]" />}
     </h1>

@@ -529,7 +529,7 @@ class SiteFooter extends StatelessWidget {
           const SizedBox(width: 12),
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             const Text('AL ZAUJAIN', style: TextStyle(fontFamily: 'Poppins', fontSize: 21, fontWeight: FontWeight.w700, color: AppColors.navy)),
-            Text(tr('International Marriage Consultancy'), style: const TextStyle(fontFamily: 'Poppins', fontSize: 10, fontWeight: FontWeight.w600, color: Color(0xFF876623))),
+            Text(tr('Marriage Bureau Multan Pakistan'), style: const TextStyle(fontFamily: 'Poppins', fontSize: 10, fontWeight: FontWeight.w600, color: Color(0xFF876623))),
           ]),
         ]),
         const SizedBox(height: 14),
@@ -594,7 +594,7 @@ class _ChannelDialog extends StatelessWidget {
             const SizedBox(height: 12),
             Text(titleCase(tr('Official WhatsApp Channel')), style: const TextStyle(color: Colors.white70, fontSize: 12.5, fontWeight: FontWeight.w600)),
             const SizedBox(height: 4),
-            Text(tr('Join Al Zaujain on WhatsApp'), textAlign: TextAlign.center, style: TextStyle(fontFamily: headFont, color: Colors.white, fontSize: 21, fontWeight: FontWeight.w700)),
+            Text(tr('Join Al Zaujain on WhatsApp'), textAlign: TextAlign.center, style: TextStyle(fontFamily: titleFont, color: Colors.white, fontSize: 21, fontWeight: FontWeight.w700)),
           ]),
         ),
         Padding(

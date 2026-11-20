@@ -82,7 +82,7 @@ class _StartState extends State<_Start> {
               Container(padding: const EdgeInsets.all(6), decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle), child: Image.asset('assets/images/logo.png', width: 96, height: 96)),
               const SizedBox(height: 18),
               Text(tr('AL ZAUJAIN'), style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700, letterSpacing: 1.5)),
-              Text(tr('INTERNATIONAL MARRIAGE CONSULTANCY'), style: const TextStyle(color: AppColors.champagne, fontSize: 10, letterSpacing: 1.4)),
+              Text(app.t.isUrdu ? tr('Marriage Bureau Multan Pakistan') : 'MARRIAGE BUREAU MULTAN PAKISTAN', textAlign: TextAlign.center, style: const TextStyle(color: AppColors.champagne, fontSize: 10, letterSpacing: 1.4)),
               const SizedBox(height: 30),
               if (loading || error == null)
                 const CircularProgressIndicator(color: AppColors.goldSoft)

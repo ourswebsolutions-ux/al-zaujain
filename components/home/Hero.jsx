@@ -23,7 +23,7 @@ async function HeroCopyBlock({ settings }) {
         {t(settings.hero_sub1)}<br />{t(settings.hero_sub2)}
       </Reveal>
       <Reveal y={12}>
-        <Urdu className="mb-5 text-start text-[23px] leading-[51.75px] text-champagne max-m:text-[22px] max-m:leading-[49.5px]">{settings.hero_urdu}</Urdu>
+        <Urdu heading className="mb-5 text-start text-[23px] leading-[51.75px] text-champagne max-m:text-[22px] max-m:leading-[49.5px]">{settings.hero_urdu}</Urdu>
       </Reveal>
       <Reveal y={12}>
         <ButtonLink tone="gold" href="/#contact" className="px-[21px] py-[14px]">{t('Speak to our team')} <Arrow /></ButtonLink>

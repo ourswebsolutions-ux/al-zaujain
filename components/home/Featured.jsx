@@ -13,7 +13,7 @@ export async function Featured({ profiles }) {
         <SectionTag>{t('A GLIMPSE OF YOUR NEXT CHAPTER')}</SectionTag>
         <div className="flex items-center justify-between gap-6 max-m:gap-2.5">
           <h2 className="my-[14px] text-[46px] font-extrabold leading-[55.2px] max-b:text-[30px] max-b:leading-9 max-[700px]:text-[clamp(16px,4vw,26px)] max-[700px]:leading-[1.2]">{t('Featured proposals')}</h2>
-          <Urdu className="text-[17px] leading-[42.5px] text-[#9b712b] max-[700px]:text-[clamp(10px,2.7vw,16px)] max-[700px]:leading-[2.5]">ایک بامعنی رشتے کی طرف پہلا قدم</Urdu>
+          <Urdu heading className="text-[17px] leading-[42.5px] text-[#9b712b] max-[700px]:text-[clamp(10px,2.7vw,16px)] max-[700px]:leading-[2.5]">ایک بامعنی رشتے کی طرف پہلا قدم</Urdu>
         </div>
         <p className="mb-4 text-base leading-[28.8px]">{t('Pakistan and overseas proposals, with the details that matter: education, work, family, and shared expectations.')}</p>
       </Reveal>

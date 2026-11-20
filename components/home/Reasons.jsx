@@ -16,7 +16,7 @@ export async function Reasons() {
       <Reveal as="header" x={-16} className="mb-9">
         <SectionTag>{t('WHY AL ZAUJAIN')}</SectionTag>
         <h2 className={headingNunito}>{t('A personal approach.')}<br />{t('A family decision.')}</h2>
-        <Urdu className="mb-4 text-2xl leading-[60px] text-[#9b712b] max-m:text-xl max-m:leading-[50px]">آپ کی ترجیحات، آپ کے خاندان کا فیصلہ</Urdu>
+        <Urdu heading className="mb-4 text-2xl leading-[60px] text-[#9b712b] max-m:text-xl max-m:leading-[50px]">آپ کی ترجیحات، آپ کے خاندان کا فیصلہ</Urdu>
         <p className="mb-4 text-base leading-[28.8px]">{t('Premium matchmaking for Pakistan and overseas families, built on understanding what matters to you.')}</p>
       </Reveal>
       <div className="grid grid-cols-3 gap-6 max-t:grid-cols-1">

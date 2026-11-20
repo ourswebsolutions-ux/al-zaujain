@@ -96,7 +96,7 @@ class _Crest extends StatelessWidget {
         ),
       ),
       Text(
-        app.t.isUrdu ? tr('Pakistani Marriage Bureau') : 'PAKISTANI MARRIAGE BUREAU',
+        app.t.isUrdu ? tr('Marriage Bureau Multan Pakistan') : 'MARRIAGE BUREAU MULTAN PAKISTAN',
         style: const TextStyle(fontFamily: _caps, fontSize: 11, color: AppColors.champagne, letterSpacing: 2.2, fontVariations: [FontVariation('wght', 600)]),
       ),
     ]);
@@ -367,10 +367,10 @@ class HomeDrawer extends StatelessWidget {
           child: Row(children: [
             Image.asset('assets/images/logo.png', width: 48, height: 48),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('AL ZAUJAIN', style: TextStyle(fontFamily: _caps, color: Colors.white, fontSize: 20, letterSpacing: 1.5)),
-                Text('PAKISTANI MARRIAGE BUREAU', style: TextStyle(fontFamily: _caps, color: AppColors.champagne, fontSize: 8.5, letterSpacing: 1.2)),
+                const Text('AL ZAUJAIN', style: TextStyle(fontFamily: _caps, color: Colors.white, fontSize: 20, letterSpacing: 1.5)),
+                Text(app.t.isUrdu ? tr('Marriage Bureau Multan Pakistan') : 'MARRIAGE BUREAU MULTAN PAKISTAN', style: const TextStyle(fontFamily: _caps, color: AppColors.champagne, fontSize: 8.5, letterSpacing: 1.2)),
               ]),
             ),
           ]),

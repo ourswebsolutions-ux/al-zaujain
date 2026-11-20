@@ -33,7 +33,7 @@ export async function AppSection({ whatsapp }) {
           <FaAndroid aria-hidden="true" className="text-[23px]" /> {t(release ? 'ANDROID APP · NOW AVAILABLE' : 'ANDROID APP · COMING SOON')}
         </span>
         <h2 className={headingNunito}>{t('Your next chapter.')}<br />{t('A little closer.')}</h2>
-        <Urdu className="mb-4 text-2xl leading-[60px] text-[#9b712b] max-m:text-xl max-m:leading-[50px]">رشتوں کا نیا سفر، اب آپ کے موبائل پر</Urdu>
+        <Urdu heading className="mb-4 text-2xl leading-[60px] text-[#9b712b] max-m:text-xl max-m:leading-[50px]">رشتوں کا نیا سفر، اب آپ کے موبائل پر</Urdu>
         <p className="mb-4 text-base leading-[28.8px]">
           {t(release
             ? 'Browse proposals, manage your profile, receive your matches and chat, all from your phone. The app uses the same account as this website.'

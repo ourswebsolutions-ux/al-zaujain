@@ -26,7 +26,7 @@ class GradientText extends StatelessWidget {
   Widget build(BuildContext context) => ShaderMask(
         blendMode: BlendMode.srcIn,
         shaderCallback: (bounds) => _gradient.createShader(Offset.zero & bounds.size),
-        child: Text(text, textAlign: align, style: TextStyle(fontFamily: headFont, fontSize: size, fontWeight: weight, height: app.t.isUrdu ? 1.9 : 1.2, letterSpacing: app.t.isUrdu ? 0 : 0.5)),
+        child: Text(text, textAlign: align, style: TextStyle(fontFamily: titleFont, fontSize: size, fontWeight: weight, height: app.t.isUrdu ? 1.9 : 1.2, letterSpacing: app.t.isUrdu ? 0 : 0.5)),
       );
 }
 
@@ -69,7 +69,7 @@ class SectionHeading extends StatelessWidget {
         GradientText(titleCase(tr(title)), size: size)
       else
         Wrap(alignment: WrapAlignment.center, crossAxisAlignment: WrapCrossAlignment.end, spacing: 8, children: [
-          Text(titleCase(tr(title)), style: TextStyle(fontFamily: headFont, fontSize: size, fontWeight: FontWeight.w700, color: AppColors.navy, height: app.t.isUrdu ? 1.9 : 1.2)),
+          Text(titleCase(tr(title)), style: TextStyle(fontFamily: titleFont, fontSize: size, fontWeight: FontWeight.w700, color: AppColors.navy, height: app.t.isUrdu ? 1.9 : 1.2)),
           GradientText(tr(highlight!), size: size),
         ]),
       const SizedBox(height: 14),

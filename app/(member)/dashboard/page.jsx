@@ -38,7 +38,7 @@ async function Hero({ user, primary, welcome }) {
       <div className="absolute -end-4 -top-36 size-72 rounded-full border border-gold-soft/10" aria-hidden="true" />
       <div className="relative flex flex-wrap items-center justify-between gap-6">
         <div className="min-w-0 max-w-[620px]">
-          <Urdu className="text-start text-[15px] leading-9 text-champagne">السلام علیکم</Urdu>
+          <Urdu heading className="text-start text-[15px] leading-9 text-champagne">السلام علیکم</Urdu>
           <h1 className="text-[28px] font-semibold leading-tight tracking-[-0.5px] max-m:text-[23px]">{t(welcome ? 'Welcome, {name}' : 'Welcome back, {name}', { name: firstName(user.name) })}</h1>
           <p className="mt-2 text-[13px] leading-[22px] text-[#c7d3dd]">
             {t(welcome ? 'Your account is ready. Create your matrimonial biodata to start receiving proposals.' : primary ? REVIEW[primary.status] : 'Create your matrimonial biodata to start receiving proposals.')}

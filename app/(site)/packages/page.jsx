@@ -35,7 +35,7 @@ function Heading({ as: Tag = 'h2', title, urdu, quotes = false, className = '' }
     <div className={`text-center ${className}`}>
       <Tag className={`font-semibold leading-snug text-[#1a1a1a] ${Tag === 'h1' ? 'text-[40px] max-sm:text-[30px]' : 'text-[32px] max-sm:text-[24px]'}`}>
         {quotes ? <>❝&nbsp;{title}&nbsp;❞</> : title}
-        {urdu && <span lang="ur" dir="rtl" className="mt-2 block font-urdu text-[30px] font-medium leading-[2] max-sm:text-[20px]">{quotes ? <>❞ {urdu} ❝</> : urdu}</span>}
+        {urdu && <span lang="ur" dir="rtl" className="mt-2 block font-urdu-heading text-[30px] font-medium leading-[2] max-sm:text-[20px]">{quotes ? <>❞ {urdu} ❝</> : urdu}</span>}
       </Tag>
       <Ornament className="mt-3" />
     </div>
@@ -82,9 +82,9 @@ export default async function PackagesPage() {
         {/* Introduction */}
         <section className="mb-5 pt-10 text-center">
           <span className="mt-4 block text-[17px] uppercase tracking-[3px] text-[#666] max-sm:text-[13px]">{t('Welcome to {company}', { company: 'Al Zaujain Marriage Bureau' })}</span>
-          <h1 className="mx-auto max-w-[900px] bg-[linear-gradient(135deg,#062b4e_30%,#d4af37_100%)] bg-clip-text text-[50px] font-bold capitalize leading-[1.2] text-transparent [-webkit-text-fill-color:transparent] max-sm:text-[34px]">
+          <h1 className="mx-auto max-w-[900px] bg-[linear-gradient(135deg,#062b4e_30%,#d4af37_100%)] bg-clip-text text-[50px] font-bold capitalize leading-[1.2] text-transparent [-webkit-text-fill-color:transparent] max-sm:text-[34px] ur:leading-[1.9]">
             {t('Rishta Packages')}
-            <span lang="ur" dir="rtl" className="block font-urdu text-[46px] font-medium leading-[1.9] max-sm:text-[32px]">رشتہ پیکجز</span>
+            <span lang="ur" dir="rtl" className="block font-urdu-heading ur:hidden text-[46px] font-medium leading-[1.9] max-sm:text-[32px]">رشتہ پیکجز</span>
           </h1>
           <div aria-hidden="true" className="mt-5 flex items-center justify-center">
             <span className="h-px w-[50px] bg-[#d4af37]" /><span className="mx-2.5 size-2 rounded-full bg-navy" /><span className="h-px w-[50px] bg-[#d4af37]" />
@@ -154,7 +154,7 @@ export default async function PackagesPage() {
             <div className={`${box} p-5 max-sm:p-3`}>
               <h2 className="text-center text-[32px] font-semibold leading-snug text-[#1a1a1a] max-sm:text-[22px]">
                 {t('Self Matching Packages Comparison')}
-                <span lang="ur" dir="rtl" className="block font-urdu text-[24px] font-medium leading-[2] max-sm:text-[18px]">ویب اور ایپ پر مبنی پیکیجز کا موازنہ</span>
+                <span lang="ur" dir="rtl" className="block font-urdu-heading text-[24px] font-medium leading-[2] max-sm:text-[18px]">ویب اور ایپ پر مبنی پیکیجز کا موازنہ</span>
               </h2>
               <Ornament className="mb-6 mt-3" />
               <div className="overflow-x-auto">

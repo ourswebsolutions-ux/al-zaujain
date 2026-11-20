@@ -28,14 +28,17 @@ class AppColors {
   static const sandLine = Color(0xFFDDCFB1);
 }
 
-// As on the website: headings, buttons and labels in Poppins, body text in Inter, and Urdu in
-// Noto Nastaliq Urdu (Latin letters inside Urdu text fall back to Inter and Poppins).
+// As on the website: headings, buttons and labels in Poppins, body text in Inter. Urdu text is in
+// Noto Nastaliq Urdu and Urdu main headings in Gulzar (Latin letters inside Urdu text fall back to
+// Inter and Poppins).
 const _fallback = ['NotoNastaliqUrdu', 'NotoNaskhArabic'];
 const headingFont = 'Poppins';
+const urduHeadingFont = 'Gulzar';
 
 ThemeData buildTheme({bool urdu = false}) {
   final body = urdu ? 'NotoNastaliqUrdu' : 'Inter';
   final heading = urdu ? 'NotoNastaliqUrdu' : headingFont;
+  final title = urdu ? urduHeadingFont : headingFont;
   final fallback = urdu ? const ['Inter', 'Poppins'] : _fallback;
   final base = ThemeData(
     useMaterial3: true,
@@ -50,15 +53,15 @@ ThemeData buildTheme({bool urdu = false}) {
       foregroundColor: Colors.white,
       elevation: 0,
       centerTitle: false,
-      titleTextStyle: TextStyle(fontFamily: heading, fontFamilyFallback: fallback, fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
+      titleTextStyle: TextStyle(fontFamily: title, fontFamilyFallback: fallback, fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
     ),
     textTheme: base.textTheme.apply(bodyColor: AppColors.navy, displayColor: AppColors.navy, fontFamily: body).copyWith(
-      displayLarge: base.textTheme.displayLarge?.copyWith(fontFamily: heading, color: AppColors.navy),
-      displayMedium: base.textTheme.displayMedium?.copyWith(fontFamily: heading, color: AppColors.navy),
-      displaySmall: base.textTheme.displaySmall?.copyWith(fontFamily: heading, color: AppColors.navy),
-      headlineLarge: base.textTheme.headlineLarge?.copyWith(fontFamily: heading, color: AppColors.navy),
-      headlineMedium: base.textTheme.headlineMedium?.copyWith(fontFamily: heading, color: AppColors.navy),
-      headlineSmall: base.textTheme.headlineSmall?.copyWith(fontFamily: heading, color: AppColors.navy),
+      displayLarge: base.textTheme.displayLarge?.copyWith(fontFamily: title, color: AppColors.navy),
+      displayMedium: base.textTheme.displayMedium?.copyWith(fontFamily: title, color: AppColors.navy),
+      displaySmall: base.textTheme.displaySmall?.copyWith(fontFamily: title, color: AppColors.navy),
+      headlineLarge: base.textTheme.headlineLarge?.copyWith(fontFamily: title, color: AppColors.navy),
+      headlineMedium: base.textTheme.headlineMedium?.copyWith(fontFamily: title, color: AppColors.navy),
+      headlineSmall: base.textTheme.headlineSmall?.copyWith(fontFamily: title, color: AppColors.navy),
       titleLarge: base.textTheme.titleLarge?.copyWith(fontFamily: heading, color: AppColors.navy),
       titleMedium: base.textTheme.titleMedium?.copyWith(fontFamily: heading, color: AppColors.navy),
       labelLarge: base.textTheme.labelLarge?.copyWith(fontFamily: heading),
@@ -89,5 +92,8 @@ ThemeData buildTheme({bool urdu = false}) {
   );
 }
 
-/// Urdu calligraphy lines, like the website's Urdu component.
+/// Urdu text, like the website's Urdu component (Noto Nastaliq Urdu).
 const urduStyle = TextStyle(fontFamily: 'NotoNastaliqUrdu', height: 2.1, color: AppColors.deepGold);
+
+/// Urdu headings and calligraphy lines (Gulzar), like the website's Urdu headings.
+const urduHeadingStyle = TextStyle(fontFamily: urduHeadingFont, fontFamilyFallback: ['NotoNastaliqUrdu'], height: 1.9, color: AppColors.deepGold);
