@@ -303,10 +303,7 @@ class SiteProfileCard extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 22, 12, 4),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [
-              Flexible(child: Text(titleCase('${card['name']}'), maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: headFont, fontSize: 23, fontWeight: FontWeight.w800, color: AppColors.navy))),
-              if (card['verified'] == true) const Padding(padding: EdgeInsetsDirectional.only(start: 6), child: VerifiedBadge(size: 17)),
-            ]),
+            NameLine(titleCase('${card['name']}'), verified: card['verified'] == true, badgeSize: 19, style: TextStyle(fontFamily: headFont, fontSize: 23, fontWeight: FontWeight.w800, color: AppColors.navy)),
             const SizedBox(height: 4),
             Row(children: [
               const Icon(Icons.location_on_rounded, size: 15, color: Color(0xFFB18433)),

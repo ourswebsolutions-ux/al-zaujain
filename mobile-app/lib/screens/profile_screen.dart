@@ -431,10 +431,7 @@ class _HeroState extends State<_Hero> {
         ),
         if (widget.locked) Center(child: TextButton.icon(onPressed: () => showUnlockSheet(context), icon: const Icon(Icons.lock_open_rounded, size: 16), label: Text(tr('Unlock Full Profile Photograph')))),
         const SizedBox(height: 14),
-        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Flexible(child: Tx(titleCase('${widget.biodata['name']}'), textAlign: TextAlign.center, style: TextStyle(fontFamily: headFont, fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.navy))),
-          if (widget.biodata['verified'] == true) const Padding(padding: EdgeInsetsDirectional.only(start: 8), child: VerifiedBadge(size: 21)),
-        ]),
+        Center(child: NameLine(titleCase('${widget.biodata['name']}'), verified: widget.biodata['verified'] == true, badgeSize: 21, maxLines: null, textAlign: TextAlign.center, style: TextStyle(fontFamily: headFont, fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.navy))),
         if (place.isNotEmpty) Text(titleCase(tr(place)), textAlign: TextAlign.center, style: const TextStyle(fontSize: 13.5, color: AppColors.muted)),
       ]),
     );

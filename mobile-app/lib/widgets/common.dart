@@ -335,6 +335,32 @@ class TypeBadge extends StatelessWidget {
   }
 }
 
+/// A name with the blue tick right after its last word, even when the name wraps onto two lines.
+class NameLine extends StatelessWidget {
+  const NameLine(this.name, {super.key, required this.style, this.verified = false, this.badgeSize = 17, this.maxLines = 2, this.textAlign});
+  final String name;
+  final TextStyle style;
+  final bool verified;
+  final double badgeSize;
+  final int? maxLines;
+  final TextAlign? textAlign;
+
+  @override
+  Widget build(BuildContext context) {
+    final rtl = _rtlStart.hasMatch(name);
+    return Text.rich(
+      TextSpan(text: name, children: [
+        if (verified) WidgetSpan(alignment: PlaceholderAlignment.middle, child: Padding(padding: EdgeInsetsDirectional.only(start: badgeSize * 0.35), child: VerifiedBadge(size: badgeSize))),
+      ]),
+      style: style,
+      maxLines: maxLines,
+      overflow: maxLines == null ? null : TextOverflow.ellipsis,
+      textDirection: rtl ? TextDirection.rtl : null,
+      textAlign: textAlign ?? (rtl ? TextAlign.right : null),
+    );
+  }
+}
+
 class VerifiedBadge extends StatelessWidget {
   const VerifiedBadge({super.key, this.size = 18});
   final double size;

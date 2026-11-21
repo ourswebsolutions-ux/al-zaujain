@@ -296,7 +296,7 @@ class _ProfileIntro extends StatelessWidget {
         const SizedBox(width: 20),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [Flexible(child: Tx(titleCase('${data['name']}'), style: TextStyle(fontFamily: headFont, fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.navy))), if (data['verified'] == true) const Padding(padding: EdgeInsetsDirectional.only(start: 8), child: VerifiedBadge(size: 19))]),
+            NameLine(titleCase('${data['name']}'), verified: data['verified'] == true, badgeSize: 19, maxLines: null, style: TextStyle(fontFamily: headFont, fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.navy)),
             const SizedBox(height: 4),
             Tx(titleCase(subtitle.where((part) => part.isNotEmpty).map(tr).join(' · ')), style: const TextStyle(fontSize: 13, color: AppColors.muted)),
             if (!app.t.isUrdu) Text('رشتے محبت کے، فیصلے اپنوں کے', textDirection: TextDirection.rtl, style: urduHeadingStyle.copyWith(fontSize: 14, color: const Color(0xFF9B712B))),

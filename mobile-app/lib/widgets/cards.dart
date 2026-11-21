@@ -306,10 +306,7 @@ class ProposalCard extends StatelessWidget {
       final details = Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
         if (label != null)
           Container(margin: const EdgeInsets.only(bottom: 6), padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3), decoration: BoxDecoration(color: AppColors.goldBg, borderRadius: BorderRadius.circular(20)), child: Text(label.toUpperCase(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.goldText))),
-        Row(children: [
-          Flexible(child: Text('${card['name']}', maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: compact ? 17 : 21, fontWeight: FontWeight.w800, color: AppColors.navy))),
-          if (card['verified'] == true) const Padding(padding: EdgeInsetsDirectional.only(start: 5), child: VerifiedBadge(size: 17)),
-        ]),
+        NameLine('${card['name']}', verified: card['verified'] == true, style: TextStyle(fontSize: compact ? 17 : 21, fontWeight: FontWeight.w800, color: AppColors.navy)),
         Text(code, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.muted, letterSpacing: 0.5)),
         const SizedBox(height: 6),
         _Fact(Icons.cake_rounded, '${tr('{count} Years', {'count': card['age'] ?? ''})}${card['maritalStatus'] == null || compact ? '' : ' · ${tr('${card['maritalStatus']}')}'}'),
@@ -504,10 +501,7 @@ class HomeProfileCard extends StatelessWidget {
               ),
             ]),
             const SizedBox(height: 10),
-            Row(children: [
-              Flexible(child: Text('${card['name']}', maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Playfair', fontSize: 17, color: AppColors.navy, fontVariations: [FontVariation('wght', 600)]))),
-              if (card['verified'] == true) const Padding(padding: EdgeInsetsDirectional.only(start: 4), child: VerifiedBadge(size: 15)),
-            ]),
+            NameLine('${card['name']}', verified: card['verified'] == true, badgeSize: 15, style: const TextStyle(fontFamily: 'Playfair', fontSize: 17, color: AppColors.navy, fontVariations: [FontVariation('wght', 600)])),
             const SizedBox(height: 2),
             Text(
               [if (card['age'] != null) '${card['age']}', if (card['city'] != null) tr('${card['city']}')].join('  •  '),

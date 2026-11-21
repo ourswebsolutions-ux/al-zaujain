@@ -56,9 +56,9 @@ export function HomeProfileCard({ profile, matchScore = null }) {
         </Link>
         <div className="min-w-0 py-2 pe-1">
           {matchScore ? <span className="mb-1.5 inline-block rounded-full bg-[#fcf4e1] px-2.5 py-0.5 text-[11.5px] font-bold capitalize text-[#806126]">{t('{score}% match', { score: matchScore })}</span> : null}
-          <h3 className="mb-1.5 flex min-w-0 items-center gap-1.5 pe-12 text-[20px] font-semibold leading-tight text-navy max-sm:text-[18px]">
-            <Link href={href} className="line-clamp-2 min-w-0 capitalize text-inherit no-underline hover:text-[#a17a33]">{profile.name}</Link>
-            {profile.verified && <VerifiedBadge className="shrink-0 text-[15px]" />}
+          <h3 className="mb-1.5 line-clamp-2 min-w-0 pe-12 text-[20px] font-semibold leading-tight text-navy max-sm:text-[18px]">
+            <Link href={href} className="capitalize text-inherit no-underline hover:text-[#a17a33]">{profile.name}</Link>
+            {profile.verified && <VerifiedBadge className="ms-1.5 align-[-1px] text-[15px]" />}
           </h3>
           <ul className="grid gap-0.5 text-[15px] font-medium capitalize text-[#343434] max-sm:text-[14px]">
             <li className="flex min-w-0 items-center gap-2.5"><FaUser aria-hidden="true" className="w-3.5 shrink-0 text-[#c8c8c8]" /><span className="truncate">{t('{count} Years', { count: profile.age })}</span></li>
