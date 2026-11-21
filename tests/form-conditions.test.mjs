@@ -81,10 +81,8 @@ describe('gender and marital status: every combination', () => {
     for (const name of ['marital_status', 'second_wife', 'has_children', ...MARRIED_MAN_FIELDS, ...PREVIOUS_MARRIAGE_FIELDS]) assert.equal(shown.has(name), false, name);
   });
 
-  it('requires the married-man questions only when they apply', () => {
-    const errors = check({ gender: 'male', marital_status: MARRIED }).errors;
-    assert.ok(errors.existing_wives);
-    assert.ok(errors.second_marriage_intent);
+  it('the married-man questions are optional', () => {
+    assert.equal(check({ gender: 'male', marital_status: MARRIED }).ok, true);
     assert.equal(check({ gender: 'male', marital_status: MARRIED, existing_wives: 1, second_marriage_intent: 'Yes', has_children: 'No' }).ok, true);
     assert.equal(check({ gender: 'male', marital_status: 'Never married' }).ok, true);
   });
@@ -98,9 +96,9 @@ describe('children', () => {
     for (const name of CHILD_FIELDS) assert.equal(yes.has(name), true);
   });
 
-  it('requires the answer and the number only when shown', () => {
-    assert.ok(check({ marital_status: 'Widowed' }).errors.has_children);
-    assert.ok(check({ marital_status: 'Widowed', has_children: 'Yes' }).errors.children_count);
+  it('the children questions are optional', () => {
+    assert.equal(check({ marital_status: 'Widowed' }).ok, true);
+    assert.equal(check({ marital_status: 'Widowed', has_children: 'Yes' }).ok, true);
     assert.equal(check({ marital_status: 'Widowed', has_children: 'Yes', children_count: 2 }).ok, true);
     assert.equal(check({ marital_status: 'Widowed', has_children: 'No' }).ok, true);
   });
@@ -131,7 +129,7 @@ describe('education and employment', () => {
     const shown = shownFor('Student');
     assert.ok(shown.has('current_studies'));
     for (const name of ['occupation', 'job_title', 'organization', 'monthly_income', 'business_details']) assert.ok(!shown.has(name), name);
-    assert.ok(check({ employment_status: 'Student', occupation: '' }).errors.current_studies);
+    assert.equal(check({ employment_status: 'Student', occupation: '' }).ok, true, 'current studies is optional');
     assert.equal(check({ employment_status: 'Student', occupation: '', current_studies: 'BS CS' }).ok, true, 'occupation is not required for students');
   });
   it('not working: no employment details', () => {
@@ -235,5 +233,15 @@ describe('saved profiles', () => {
   it('withoutHidden can blank answers for a form', () => {
     const values = withoutHidden(ALL_FIELDS, sampleProfile({ marital_status: 'Never married', has_children: 'Yes' }), context, '');
     assert.equal(values.has_children, '');
+  });
+});
+
+describe('optional questions', () => {
+  it('only name, gender, date of birth and marital status are required', () => {
+    const minimal = validateProfile({ full_name: 'Ayesha Khan', gender: 'female', date_of_birth: '1998-04-10', marital_status: 'Never married' }, { context });
+    assert.equal(minimal.ok, true, JSON.stringify(minimal.errors));
+    const empty = validateProfile({}, { context });
+    assert.deepEqual(Object.keys(empty.errors).sort(), ['date_of_birth', 'full_name', 'gender']);
+    assert.deepEqual(ALL_FIELDS.filter((item) => item.required).map((item) => item.name), ['full_name', 'gender', 'date_of_birth', 'marital_status']);
   });
 });

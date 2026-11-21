@@ -247,7 +247,20 @@ class SiteProfileCard extends StatelessWidget {
             ? (Icons.lock_rounded, AppColors.gold, AppColors.dark)
             : (Icons.lock_open_rounded, const Color(0xFF1F8A3A), Colors.white);
     final place = [card['city'], card['country']].where((part) => part != null && '$part'.isNotEmpty).map((part) => tr('$part')).join(', ');
-    final rows = [('Education', card['education']), ('Profession', card['profession']), ('Marital Status', card['maritalStatus'])];
+    // The key facts in the bureau's order, two to a line.
+    final rows = <(String, Object?)>[
+      ('Age', card['age'] == null ? null : tr('{count} Years', {'count': card['age']})),
+      ('Education', card['education']),
+      ('Profession', card['profession']),
+      ('Marital Status', card['maritalStatus']),
+      ('Caste', card['caste']),
+      ('Height', card['height']),
+    ];
+    Widget fact((String, Object?) row) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(titleCase(tr(row.$1)), style: TextStyle(fontFamily: headFont, fontSize: 12.5, fontWeight: FontWeight.w600, color: const Color(0xFF8A6A2C))),
+          const SizedBox(height: 2),
+          Text(row.$2 == null || '${row.$2}'.isEmpty ? '—' : titleCase(tr('${row.$2}')), maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.navy, height: 1.3)),
+        ]);
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), border: Border.all(color: const Color(0xFFDDD1B8)), boxShadow: const [BoxShadow(color: Color(0x0803223F), blurRadius: 22, offset: Offset(0, 6))]),
@@ -292,7 +305,6 @@ class SiteProfileCard extends StatelessWidget {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
               Flexible(child: Text(titleCase('${card['name']}'), maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: headFont, fontSize: 23, fontWeight: FontWeight.w800, color: AppColors.navy))),
-              if (card['age'] != null) Text(' · ${card['age']}', style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: AppColors.muted)),
               if (card['verified'] == true) const Padding(padding: EdgeInsetsDirectional.only(start: 6), child: VerifiedBadge(size: 17)),
             ]),
             const SizedBox(height: 4),
@@ -302,13 +314,13 @@ class SiteProfileCard extends StatelessWidget {
               Expanded(child: Text(place.isEmpty ? '—' : titleCase(place), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14, color: AppColors.muted))),
             ]),
             const Padding(padding: EdgeInsets.symmetric(vertical: 16), child: Divider(height: 1, color: Color(0xFFEFE7D6))),
-            for (final (label, value) in rows)
+            for (var i = 0; i < rows.length; i += 2)
               Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(titleCase(tr(label)), style: TextStyle(fontFamily: headFont, fontSize: 12.5, fontWeight: FontWeight.w600, color: const Color(0xFF8A6A2C))),
-                  const SizedBox(height: 2),
-                  Text(value == null || '$value'.isEmpty ? '—' : titleCase(tr('$value')), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.navy, height: 1.3)),
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Expanded(child: fact(rows[i])),
+                  const SizedBox(width: 16),
+                  Expanded(child: i + 1 < rows.length ? fact(rows[i + 1]) : const SizedBox()),
                 ]),
               ),
           ]),

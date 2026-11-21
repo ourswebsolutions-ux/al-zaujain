@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { FaArrowRight, FaBriefcase, FaCakeCandles, FaCrown, FaGraduationCap, FaLocationDot, FaLock, FaLockOpen, FaRing } from 'react-icons/fa6';
+import { FaArrowRight, FaBriefcase, FaCakeCandles, FaCrown, FaGraduationCap, FaLocationDot, FaLock, FaLockOpen, FaRing, FaUsers } from 'react-icons/fa6';
 import { SaveButton } from './SaveButton';
 import { PhotoLock, useUnlock } from '@/components/payments/UnlockProvider';
 import { useT } from '@/components/i18n/LanguageProvider';
@@ -83,14 +83,21 @@ export function ProposalCard({ profile, tag, matchScore, saved }) {
           {label && <span className="mb-1.5 inline-block rounded-full bg-[#fcf4e1] px-2.5 py-0.5 text-[11.5px] font-bold capitalize text-[#806126]">{label}</span>}
           <h3 className="flex min-w-0 items-center gap-1.5 pe-12 text-[21px] font-extrabold leading-tight text-[#062b4e] max-sm:pe-0 max-sm:text-[23px] sm:pe-0">
             <Link href={href} className="line-clamp-2 min-w-0 capitalize text-inherit no-underline">{profile.name}</Link>
-            {profile.age && <span className="shrink-0 text-[19px] font-semibold text-muted sm:hidden">· {profile.age}</span>}
             {profile.verified && <VerifiedBadge className="shrink-0 text-[17px]" />}
           </h3>
           <p className="text-[11px] font-bold tracking-[.6px] text-muted max-sm:hidden">{profile.code}</p>
           <p className="mt-1 flex items-center gap-1.5 text-[14px] capitalize text-muted sm:hidden"><FaLocationDot aria-hidden="true" className="text-[#b18433]" /> {[t(profile.city), t(profile.country)].filter(Boolean).join(', ') || '—'}</p>
-          <dl className="mt-4 grid gap-2.5 border-t border-[#efe7d6] pt-4 sm:hidden">
-            {[['Education', profile.education], ['Profession', profile.profession], ['Marital status', profile.maritalStatus]].map(([label, value]) => (
-              <div key={label}>
+          {/* Phones: the key facts in two columns, in the bureau's order. */}
+          <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-[#efe7d6] pt-4 sm:hidden">
+            {[
+              ['Age', profile.age ? t('{count} Years', { count: profile.age }) : null],
+              ['Education', profile.education],
+              ['Profession', profile.profession],
+              ['Marital status', profile.maritalStatus],
+              ['Caste', profile.caste],
+              ['Height', profile.height],
+            ].map(([label, value]) => (
+              <div key={label} className="min-w-0">
                 <dt className="text-[12.5px] font-semibold capitalize text-[#8a6a2c]">{t(label)}</dt>
                 <dd className="mt-0.5 break-words text-[15px] font-semibold capitalize leading-snug text-navy">{value ? t(value) : '—'}</dd>
               </div>
@@ -100,6 +107,7 @@ export function ProposalCard({ profile, tag, matchScore, saved }) {
             <Row icon={FaCakeCandles}>{t('{count} Years', { count: profile.age })}{profile.maritalStatus ? ` · ${t(profile.maritalStatus)}` : ''}</Row>
             <Row icon={FaBriefcase}>{t(profile.profession) || '—'}</Row>
             {profile.education && <Row icon={FaGraduationCap}>{t(profile.education)}</Row>}
+            {(profile.caste || profile.height) && <Row icon={FaUsers}>{[profile.caste && t(profile.caste), profile.height].filter(Boolean).join(' · ')}</Row>}
             <Row icon={FaLocationDot}>{[t(profile.city), t(profile.country)].filter(Boolean).join(', ') || '—'}</Row>
           </ul>
         </div>

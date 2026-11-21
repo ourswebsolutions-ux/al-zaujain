@@ -315,6 +315,7 @@ class ProposalCard extends StatelessWidget {
         _Fact(Icons.cake_rounded, '${tr('{count} Years', {'count': card['age'] ?? ''})}${card['maritalStatus'] == null || compact ? '' : ' · ${tr('${card['maritalStatus']}')}'}'),
         _Fact(Icons.work_rounded, card['profession'] == null ? '—' : tr('${card['profession']}')),
         if (!compact && card['education'] != null) _Fact(Icons.school_rounded, tr('${card['education']}')),
+        if (!compact && (card['caste'] != null || card['height'] != null)) _Fact(Icons.people_alt_rounded, [if (card['caste'] != null) tr('${card['caste']}'), if (card['height'] != null) '${card['height']}'].join(' · ')),
         _Fact(Icons.location_on_rounded, placeOf(card).isEmpty ? '—' : placeOf(card)),
       ]);
       final buttons = Row(children: [

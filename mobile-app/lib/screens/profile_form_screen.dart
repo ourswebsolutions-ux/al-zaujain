@@ -150,6 +150,11 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
   }
 
   Json get section => sections[step];
+  // Each section's own colour from the website's form ("#1f5f99"), so the steps read as separate parts.
+  Color _accent(Object? item) {
+    final hex = '${(item as Map?)?['color'] ?? ''}'.replaceFirst('#', '');
+    return hex.length == 6 ? Color(int.parse('FF$hex', radix: 16)) : AppColors.navy;
+  }
   // The questions of this step that apply (the second half of a pair is counted with the first).
   List<Map> get _stepQuestions => ((section['fields'] as List?) ?? []).cast<Map>().where((field) => field['type'] != 'derived' && field['paired'] != true && _shows(field)).toList();
   bool get last => step == sections.length - 1;
@@ -298,28 +303,43 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
             for (var i = 0; i < sections.length; i++)
               Expanded(
                 child: GestureDetector(
-                  onTap: i < step ? () => _goTo(i) : null,
-                  child: Container(height: 6, margin: const EdgeInsets.symmetric(horizontal: 2), decoration: BoxDecoration(color: i <= step ? AppColors.gold : const Color(0xFFE6DDCC), borderRadius: BorderRadius.circular(6))),
+                  onTap: i == step ? null : () => _goTo(i),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Container(
+                      height: i == step ? 9 : 6,
+                      margin: const EdgeInsets.symmetric(horizontal: 2),
+                      decoration: BoxDecoration(color: i == step ? _accent(sections[i]) : i < step ? _accent(sections[i]).withValues(alpha: 0.6) : const Color(0xFFE6DDCC), borderRadius: BorderRadius.circular(6)),
+                    ),
+                  ),
                 ),
               ),
           ]),
           const SizedBox(height: 8),
           Row(children: [
-            Expanded(child: Text(tr('STEP {step} OF {total}', {'step': step + 1, 'total': sections.length}), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1, color: AppColors.bronze))),
+            Expanded(child: Text(tr('STEP {step} OF {total}', {'step': step + 1, 'total': sections.length}), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1, color: _accent(section)))),
             if (_stepQuestions.isNotEmpty) Text(tr('{answered} of {total} questions answered', {'answered': _stepQuestions.where((field) => (values['${field['name']}'] ?? '').trim().isNotEmpty).length, 'total': _stepQuestions.length}), style: const TextStyle(fontSize: 11, color: AppColors.muted)),
           ]),
           const SizedBox(height: 12),
           Panel(
             padding: const EdgeInsets.all(18),
             child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              Container(
-                padding: const EdgeInsets.only(bottom: 10),
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.softLine))),
-                child: Row(children: [
-                  Expanded(child: Tx(tr('${section['title']}'), style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700))),
-                  UrduLine('${section['ur']}', size: 14),
-                ]),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsetsDirectional.fromSTEB(14, 10, 12, 10),
+                    decoration: BoxDecoration(
+                      color: Color.lerp(_accent(section), Colors.white, 0.91),
+                      border: BorderDirectional(start: BorderSide(color: _accent(section), width: 4)),
+                    ),
+                    child: Row(children: [
+                      Expanded(child: Tx(tr('${section['title']}'), style: TextStyle(fontSize: 19, fontWeight: FontWeight.w700, color: _accent(section)))),
+                      UrduLine('${section['ur']}', size: 14),
+                    ]),
+                  ),
+                ),
               ),
               for (final field in ((section['fields'] as List?) ?? []).cast<Map>().where(_shows)) _field(field.cast<String, dynamic>()),
               if (last) _documents(),
@@ -333,6 +353,14 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                       : AppButton('Continue', trailing: Icons.arrow_forward_rounded, busy: busy, expand: true, onPressed: _next),
                 ),
               ]),
+              // Every question is optional, so a family can leave a whole section for later.
+              if (!last)
+                Center(
+                  child: TextButton(
+                    onPressed: busy ? null : () => _goTo(step + 1),
+                    child: Text(tr('Skip this section'), style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: AppColors.muted, decoration: TextDecoration.underline)),
+                  ),
+                ),
             ]),
           ),
         ]),

@@ -100,6 +100,7 @@ export function ProfileWizard({ countries, castes = [], initial = {}, mode = 'cr
   }, [draftKey, values]);
 
   const section = SECTIONS[step];
+  const accent = (item) => ({ '--accent': item.color ?? '#062b4e' });
   const last = step === SECTIONS.length - 1;
   const age = useMemo(() => ageFromDob(values.date_of_birth), [values.date_of_birth]);
 
@@ -340,9 +341,9 @@ export function ProfileWizard({ countries, castes = [], initial = {}, mode = 'cr
       <div ref={top} className="grid scroll-mt-5 gap-6">
         <AdminProfileSettings mode={mode} type={accessType} onType={setAccessType} publish={publish} onPublish={setPublish} extra={extraInfo} onExtra={setExtraInfo} duplicates={duplicates} confirm={confirmDuplicate} onConfirm={setConfirmDuplicate} />
         {SECTIONS.map((item) => (
-          <section key={item.key} className="rounded-[20px] border border-line bg-white p-[30px] shadow-[0_12px_35px_#03223f08] max-m:p-5">
-            <div className="mb-6 flex items-center justify-between gap-4 border-b border-[#eee6d8] pb-4">
-              <h2 className="font-quicksand text-xl font-bold text-navy">{t(item.title)}</h2>
+          <section key={item.key} style={accent(item)} className="rounded-[20px] border border-line bg-white p-[30px] shadow-[0_12px_35px_#03223f08] max-m:p-5">
+            <div className="-mx-[30px] -mt-[30px] mb-6 flex items-center justify-between gap-4 rounded-t-[19px] border-t-[5px] border-[var(--accent)] bg-[color-mix(in_srgb,var(--accent)_9%,white)] px-[30px] py-4 max-m:-mx-5 max-m:-mt-5 max-m:px-5">
+              <h2 className="font-quicksand text-xl font-bold text-[var(--accent)]">{t(item.title)}</h2>
               <Urdu heading className="text-lg leading-10 text-[#9b712b]">{item.ur}</Urdu>
             </div>
             {item.fields.length > 0 ? (
@@ -369,23 +370,23 @@ export function ProfileWizard({ countries, castes = [], initial = {}, mode = 'cr
               type="button"
               aria-label={t(item.title)}
               aria-current={index === step ? 'step' : undefined}
-              disabled={index > step}
               onClick={() => goTo(index)}
-              className={`block h-1.5 w-full rounded-full transition-colors duration-300 enabled:cursor-pointer ${index <= step ? 'bg-gold' : 'bg-[#e6ddcc]'}`}
+              style={accent(item)}
+              className={`block w-full cursor-pointer rounded-full transition-all duration-300 ${index === step ? 'h-2.5 bg-[var(--accent)]' : index < step ? 'h-1.5 bg-[var(--accent)] opacity-60' : 'h-1.5 bg-[#e6ddcc] hover:bg-[color-mix(in_srgb,var(--accent)_40%,white)]'}`}
             />
           </li>
         ))}
       </ol>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-[11px] font-semibold tracking-[1px] text-bronze">{t('STEP {step} OF {total}', { step: step + 1, total: SECTIONS.length })}</p>
+        <p style={accent(section)} className="text-[11px] font-semibold tracking-[1px] text-[var(--accent)]">{t('STEP {step} OF {total}', { step: step + 1, total: SECTIONS.length })}</p>
         {stepFields.length > 0 && <p className="text-[11px] font-medium text-muted">{t('{answered} of {total} questions answered', { answered: stepAnswered, total: stepFields.length })}</p>}
       </div>
 
-      <div className="rounded-[20px] border border-line bg-white p-[35px] shadow-[0_12px_35px_#03223f08] max-m:p-6">
+      <div style={accent(section)} className="rounded-[20px] border border-line bg-white p-[35px] shadow-[0_12px_35px_#03223f08] transition-[border-color] duration-300 max-m:p-6">
         <AnimatePresence mode="wait" initial={false} custom={direction}>
           <motion.div key={section.key} initial={{ opacity: 0, x: direction * 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: direction * -24 }} transition={{ duration: 0.22 }}>
-            <div className="mb-6 flex items-center justify-between gap-4 border-b border-[#eee6d8] pb-4">
-              <h2 className="font-quicksand text-2xl font-bold text-navy max-m:text-xl">{t(section.title)}</h2>
+            <div className="-mx-[35px] -mt-[35px] mb-6 flex flex-wrap items-center justify-between gap-x-4 rounded-t-[19px] border-t-[5px] border-[var(--accent)] bg-[color-mix(in_srgb,var(--accent)_9%,white)] px-[35px] py-5 max-m:-mx-6 max-m:-mt-6 max-m:px-6 max-m:py-4">
+              <h2 className="font-quicksand text-2xl font-bold text-[var(--accent)] max-m:text-xl">{t(section.title)}</h2>
               <Urdu heading className="text-lg leading-10 text-[#9b712b]">{section.ur}</Urdu>
             </div>
 
@@ -413,7 +414,11 @@ export function ProfileWizard({ countries, castes = [], initial = {}, mode = 'cr
               {busy ? 'Saving…' : mode === 'create' ? 'Submit profile' : 'Save changes'} <FaCheck aria-hidden="true" />
             </Button>
           ) : (
-            <Button type="button" onClick={next} className="cursor-pointer">{t('Continue')} <FaArrowRight aria-hidden="true" className="rtl:-scale-x-100" /></Button>
+            <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-2">
+              {/* Every question is optional, so a family can leave a whole section for later. */}
+              <button type="button" onClick={() => { setErrors({}); setMessage(''); goTo(step + 1); }} className="cursor-pointer text-[13px] font-semibold text-muted underline-offset-4 hover:text-navy hover:underline">{t('Skip this section')}</button>
+              <Button type="button" onClick={next} className="cursor-pointer">{t('Continue')} <FaArrowRight aria-hidden="true" className="rtl:-scale-x-100" /></Button>
+            </div>
           )}
         </div>
       </div>
